@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== BMLT WordPress Plugin ===
 Contributors: magblogapi
 Tags: narcotics anonymous, meeting list, meeting finder, maps
 Requires at least: 2.1
