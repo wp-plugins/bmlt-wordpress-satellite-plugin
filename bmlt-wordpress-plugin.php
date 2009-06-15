@@ -5,7 +5,7 @@
 	\brief	This is a simple, 1-file WordPress plugin of a BMLT satellite client.
 	
 Plugin Name: BMLT Satellite Server
-Plugin URI: http://magshare.magnaws.com/comdef/
+Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
