@@ -15,14 +15,15 @@ It is very easy to install and use. It has an administration panel that lets to 
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
 
 == Screenshots ==
 
-1. A map search result
+1. Search for text
+2. Search by map
+3. Advanced search
+4. A map search result
+5. A list search result
+6. The administration screen
