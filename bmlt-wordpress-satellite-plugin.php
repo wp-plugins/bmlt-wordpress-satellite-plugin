@@ -2,7 +2,7 @@
 /**
 	\file	bmlt_plugin.php
 	
-	\brief	This is a simple, 1-file WordPress plugin of a BMLT satellite client.
+	\brief	This is a simple WordPress plugin of a BMLT satellite client.
 	
 Plugin Name: BMLT Satellite Server
 Plugin URI: http://magshare.org/bmlt
@@ -10,7 +10,7 @@ Description: This is a WordPress plugin implementation of the Basic Meeting List
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
 Version: 1.0.0
-Install: Drop this directory (or file) into the "wp-content/plugins/" directory and activate it.
+Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
 
