@@ -1,9 +1,9 @@
 === BMLT WordPress Plugin ===
 Contributors: magblogapi
-Tags: narcotics anonymous, meeting list, meeting finder, maps
+Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.0
 Tested up to: 2.8
-Stable tag: 1.0RC3
+Stable tag: 1.0RC4
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
