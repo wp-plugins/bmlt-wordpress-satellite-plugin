@@ -141,7 +141,7 @@ class BMLTPlugin
 			{
 			$root_server = $root_server_root."client_interface/xhtml/index.php";
 			
-			echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n";
+			echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
 			echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
 			echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
 			}
@@ -603,7 +603,7 @@ if ( class_exists ( "BMLTPlugin" ) )
 			}
 		}
 	
-	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'content_filter' ) );
+	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'content_filter'), 10  );
 	add_filter ( 'wp_head', array ( &$BMLTPluginOp, 'head' ) );
 	add_action ( 'init', array ( &$BMLTPluginOp, 'init' ) );
 	}
