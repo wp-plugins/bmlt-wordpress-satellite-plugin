@@ -1,22 +1,3 @@
-/***********************************************************************/
-/** \file	styles.css
-
-	\brief	This contains the styles for the plugin.
-	
-	NOTE: This is a high-specificity override of the default theme. It
-	is designed to enforce the BMLT styles in the context of a strong theme.
-	You may want to edit this file to match your theme.
-
-Plugin Name: BMLT Satellite Server
-Plugin URI: http://magshare.org/bmlt
-Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
-This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
-If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.0.0
-Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
-You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
-*/
-
 table#bmlt_container .no_js
 {
 	text-align:center;
@@ -33,63 +14,183 @@ table#bmlt_container.bmlt_container_table
 	margin-right:auto;
 }
 
-/**
-	This is the header for the basic search form.
-	It is displayed above both the string and map searches.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_form_header_div
+table#bmlt_container .c_comdef_search_specification_map_vis_a,
+table#bmlt_container .c_comdef_search_specification_map_invis_a
 {
-	padding-top: 8px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table .bmlt_search_spec_table
-{
-	margin-left:auto;
-	margin-right: auto;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:visited,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:visited
-{
-	outline: none;
-	display: block;
-	width:49.8%;
-	text-align:center;
-	float:left;
+	text-align: center;
+	font-size: medium;
 	font-weight:bold;
-	font-size:large;
-	line-height:2em;
 }
 
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:visited
+table#bmlt_container div
 {
-	background-color: #555;
-	color: #99f;
-	border-top:1px solid #eee;
-	border-bottom: 1px solid black;
-	text-decoration: underline;
+	text-align:center;
 }
 
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:hover,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:active
+table#bmlt_container fieldset div
+{
+	text-align:left;
+}
+
+table#bmlt_container div.c_comdef_search_results_map_container_div
+{
+	width: 100%;
+	position: relative;
+	height: 700px;
+}
+
+table#bmlt_container input.c_comdef_search_specification_search_string_text
+{
+	width: 30em;
+}
+
+table#bmlt_container tr.c_comdef_search_results_header_row a,
+table#bmlt_container tr.c_comdef_search_results_header_row a:visited,
+table#bmlt_container div.bmlt_menu_div a,
+table#bmlt_container div.bmlt_menu_div a:visited,
+table#bmlt_container div.c_comdef_search_results_single_header_div h1 a,
+table#bmlt_container div.c_comdef_search_results_single_header_div h1 a:visited,
+table#bmlt_container div.close_div a,
+table#bmlt_container div.close_div a:visited,
+table#bmlt_container div.marker_main_info_window_inner_div a,
+table#bmlt_container div.marker_main_info_window_inner_div a:visited
+{
+	display:block;
+	background-color: #555;
+	outline: none;
+	color: #99f;
+	text-decoration: underline;
+	font-weight:bold;
+}
+
+table#bmlt_container div.comdef_style_result_nav_header a,
+table#bmlt_container div.comdef_style_result_nav_header a:visited
 {
 	outline: none;
-	background-color: #999;
-	color: #933;
+	color: #99f;
+	text-decoration: underline;
+	font-weight:bold;
+}
+
+table#bmlt_container div.comdef_style_result_nav_header a:hover,
+table#bmlt_container div.comdef_style_result_nav_header a:active
+{
+	outline: none;
+	color: #f96;
 	text-decoration: none;
 }
 
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:visited,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:hover,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:active
+table#bmlt_container div.filter_message_div_list_container div,
+table#bmlt_container div.filter_message_div
+{
+	text-align: left;
+}
+
+table#bmlt_container tr.c_comdef_search_results_header_row a:hover,
+table#bmlt_container tr.c_comdef_search_results_header_row a:active,
+table#bmlt_container div.bmlt_menu_div a:hover,
+table#bmlt_container div.bmlt_menu_div a:active,
+table#bmlt_container div.c_comdef_search_results_single_header_div h1 a:hover,
+table#bmlt_container div.c_comdef_search_results_single_header_div h1 a:active,
+table#bmlt_container div.close_div a:hover,
+table#bmlt_container div.close_div a:active,
+table#bmlt_container div.marker_main_info_window_inner_div a:hover,
+table#bmlt_container div.marker_main_info_window_inner_div a:active
+{
+	outline: none;
+	color: #f96;
+	text-decoration: none;
+}
+
+table#bmlt_container div.bmlt_menu_div
+{
+	text-align: center;
+}
+
+table#bmlt_container div.bmlt_menu_div a,
+table#bmlt_container div.bmlt_menu_div a:visited
+{
+	line-height: 1.75em;
+}
+
+table#bmlt_container div.c_comdef_search_results_map_container_div
+{
+	width: 100%;
+	position: relative;
+	height: 700px;
+}
+
+table#bmlt_container div.bmlt_menu_div,
+table#bmlt_container div.bmlt_menu_div a,
+table#bmlt_container div.bmlt_menu_div a:visited,
+table#bmlt_container div.c_comdef_search_results_single_div,
+table#bmlt_container div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div,
+table#bmlt_container div.c_comdef_search_results_single_div div.c_comdef_single_container,
+table#bmlt_container div.c_comdef_search_results_single_div div.c_comdef_single_container div.c_comdef_single_data_div
+{
+	margin:0;
+	margin-left:0;
+	margin-right:0;
+	width:auto;
+	border:none;
+}
+
+table#bmlt_container div.c_comdef_search_results_single_div div.c_comdef_single_container div.embedded_map_div
+{
+	margin-left:0;
+	margin-right:0;
+	width:auto;
+}
+
+table#bmlt_container div.c_comdef_search_results_single_div h1
+{
+	font-size: xx-large;
+	line-height: normal;
+}
+
+table#bmlt_container div.c_comdef_search_results_single_close_box_div a,
+table#bmlt_container div.c_comdef_search_results_single_close_box_div a:visited
+{
+	color: white;
+}
+
+table#bmlt_container div.c_comdef_search_results_single_close_box_div a:hover,
+table#bmlt_container div.c_comdef_search_results_single_close_box_div a:active
+{
+	color: red;
+}
+
+/**
+	This is the links inside the marker info window.
+*/
+table#bmlt_container .marker_info_window_div .marker_more_info_a,
+table#bmlt_container .marker_info_window_div .marker_more_info_a:visited
+{
+	padding: 4px;
+	margin-top: 4px;
+	text-align: center;
+	display:block;
+	background-color: #555;
+	outline: none;
+	color: #99f;
+	text-decoration: underline;
+}
+
+/**
+	and hovered.
+*/
+table#bmlt_container .marker_info_window_div .marker_more_info_a:hover,
+table#bmlt_container .marker_info_window_div .marker_more_info_a:active
+{
+	outline: none;
+	color: #f96;
+	text-decoration: none;
+}
+
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected,
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:visited,
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:hover,
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected:active
 {
 	outline: none;
 	border-top: 1px solid black;
@@ -101,119 +202,33 @@ table#bmlt_container.bmlt_container_table div.c_comdef_search_specification_form
 	text-decoration:none;
 }
 
-/**
-	This is a div that contains the map search.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_check_div
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab,
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:visited
 {
-	margin: 4px;
+	background-color: #555;
+	color: #99f;
+	border-top:1px solid #eee;
+	border-bottom: 1px solid black;
+	text-decoration: underline;
 }
 
-/**
-	This is the text input.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_search_string_text
-{
-	width: 400px;
-}
-
-/**
-	This is the label for the output format select.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_check_div label
-{
-	margin-right: 4px;
-}
-
-/**
-	This is the line with the string search entry.
-*/
-table#bmlt_container.bmlt_container_table .search_string_line
-{
-	margin-bottom: 8px;
-	text-align: center;
-}
-
-/**
-	This is the label for the search string.
-*/
-table#bmlt_container.bmlt_container_table .search_string_line label
-{
-	font-weight: bold;
-	padding-right: 4px;
-}
-
-/**
-	This is the search string "go" button.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_search_string_submit
-{
-	margin-left: 8px;
-}
-
-/**
-	We center the text in both divs.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_container_div,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_container_div,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_one_line
-{
-	clear:both;
-	text-align: center;
-	padding-top: 8px;
-}
-
-/**
-	This is the overall container for the form.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_form_container_div
-{
-	margin-left: auto;
-	margin-right: auto;
-	padding: 4px;
-	border: 2px solid #555;
-	background-color: #eee;
-	width: 640px;
-}
-
-/**
-	This is the div in which the map is displayed.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_div
-{
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 8px;
-	width: 100%;
-	height: 500px;
-	border: 1px solid black;
-}
-
-/**
-	These are all the various links.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:visited,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:visited,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:hover,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:hover
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:hover,
+table#bmlt_container div.c_comdef_search_specification_form_header_div a.bmlt_spec_tab:active
 {
 	outline: none;
-	background-position: left center;
-	background-repeat: no-repeat;
+	background-color: #999;
+	color: #933;
+	text-decoration: none;
 }
 
 /**
 	This is what the links in the map (not string) look like.
 	This is just the disclosure link.
 */
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:visited,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:visited
+table#bmlt_container .c_comdef_search_specification_map_vis_a,
+table#bmlt_container .c_comdef_search_specification_map_vis_a:visited,
+table#bmlt_container .c_comdef_search_specification_map_invis_a,
+table#bmlt_container .c_comdef_search_specification_map_invis_a:visited
 {
 	display: block;
 	height: 16px;
@@ -225,705 +240,20 @@ table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_inv
 /**
 	This is what the disclosure link looks like hovered.
 */
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:hover,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:hover
+table#bmlt_container .c_comdef_search_specification_map_vis_a:active,
+table#bmlt_container .c_comdef_search_specification_map_vis_a:hover,
+table#bmlt_container .c_comdef_search_specification_map_invis_a:active,
+table#bmlt_container .c_comdef_search_specification_map_invis_a:hover
 {
 	color: #c03;
 	text-decoration: none;
 }
 
 /**
-	The disclosure link has a triangle to show disclosure state.
-	This is what it looks like when the map is shown.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:visited
-{
-	background-image: url(images/DisclosureTriangle_vis.gif);
-}
-
-/**
-	and hovered.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_vis_a:hover
-{
-	background-image: url(images/DisclosureTriangle_vis_mouseover.gif);
-}
-
-/**
-	This is what it looks like when the map is hidden, and the string search is shown.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:visited
-{
-	background-image: url(images/DisclosureTriangle_invis.gif);
-}
-
-/**
-	and hovered.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_specification_map_invis_a:hover
-{
-	background-image: url(images/DisclosureTriangle_invis_mouseover.gif);
-}
-
-/**
-	This is the div containing the "This is an address" checkbox.
-*/
-table#bmlt_container.bmlt_container_table .search_check_div
-{
-	padding-top: 4px;
-}
-
-/**
-	This is the label for that checkbox.
-*/
-table#bmlt_container.bmlt_container_table .search_check_div label
-{
-	padding-left: 4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table .one_line_advanced_spec_fieldset
-{
-	padding: 4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table .one_line_advanced_spec_fieldset legend
-{
-	text-align: left;
-	padding-left: 4px;
-	padding-right: 4px;
-	font-weight: bold;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table .bmlt_search_one_weekday_div,
-table#bmlt_container.bmlt_container_table .bmlt_search_one_format_div
-{
-	float:left;
-	text-align: left;
-	padding-right:4px;
-	padding-bottom:4px;
-	padding-top:4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table table#bmlt_container.bmlt_container_table .bmlt_search_one_format_div
-{
-	width: 4em;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .bmlt_search_one_weekday_div
-{
-	width: 9em;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .bmlt_search_one_service_body_dl
-{
-	text-align: left;
-	padding-right:4px;
-	padding-bottom:4px;
-	padding-top:4px;
-	margin-left:24px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .bmlt_search_one_weekday_div label,
-table#bmlt_container.bmlt_container_table .bmlt_search_one_service_body_dl label,
-table#bmlt_container.bmlt_container_table .bmlt_search_one_format_div label
-{
-	text-align: left;
-	font-weight:bold;
-	padding-left:4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .bmlt_search_one_service_body_dl label,
-table#bmlt_container.bmlt_container_table .bmlt_search_one_format_div label
-{
-	cursor: help;
-}
-
-/**
-	This is the main container <div> element.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_div
-{
-	font-family: Verdana, Arial, Sans-Serif;
-	font-size: small;
-	height: 100%;
-	width: 100%;
-}
-
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_data_div
-{
-	text-align: center;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_div a,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_div a:visited
-{
-	outline: none;
-	color: #33f;
-	text-decoration: underline;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_div a:active,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_div a:hover
-{
-	outline: none;
-	color: #933;
-	text-decoration: none;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div
-{
-	width: 600px;
-	height: 100%;
-	margin-left: auto;
-	margin-right: auto;
-	padding:2px;
-	border: 1px solid #efefef;
-	text-align: left;
-	background-color: #555;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h1,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h2,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h3,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h4
-{
-	background-color: #555;
-	color: white;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div,
-{
-	padding:2px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h1
-{
-	padding-top: 0.25em;
-	padding-bottom: 8px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_single_container
-{
-	background-color: white;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h1,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h2,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h3,
-table#bmlt_container.bmlt_container_table div.c_comdef_search_results_single_div div.c_comdef_search_results_single_header_div h4
-{
-	text-align: center;
-	margin-top: 0;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_data_div
-{
-	clear: both;
-	float: none;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_formats_dl
-{
-	clear: both;
-	float: none;
-	margin: 0;
-	padding: 0;
-	margin: 0;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .format_key_span,
-table#bmlt_container.bmlt_container_table .format_name_span
-{
-	padding-left: 4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .format_term_dt
-{
-	margin-top: 1px;
-	height: 1.5em;
-	font-weight: bold;
-	background-color: #555;
-	color: white;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .format_desc_dd
-{
-	background-color: #eee;
-	padding: 8px;
-	margin: 0;
-	margin-left: 0em;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_map_link_div
-{
-	margin: 8px;
-	text-align: left;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .value_prompt
-{
-	display: block;
-	clear: both;
-	float: left;
-	width: 10em;
-	font-weight: bold;
-	text-align: right;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .value_value
-{
-	display: block;
-	float: left;
-	padding-left: 6px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_formats_div
-{
-	margin: 0;
-	padding: 0;
-	margin-top: 8px;
-	text-align: left;
-}
-
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_formats_div_no_spec
-{
-	border: 2px solid #555;
-	margin-left: -2px;
-	margin-right: -2px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_formats_div .label_div
-{
-	font-weight: bold;
-	text-align: center;
-	color: white;
-	background-color: #555;
-	width: 100%;
-	font-size: large;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .embedded_map_div
-{
-	clear: both;
-	float: none;
-	margin: 0;
-	margin-top: 8px;
-	margin-right:auto;
-	margin-left: auto;
-	width: 572px;
-	height: 572px;
-	border: 1px solid #555;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_static_map_img,
-table#bmlt_container.bmlt_container_table .main_map_div
-{
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .clear_both
-{
-	float: none;
-	clear: both;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div,
-table#bmlt_container.bmlt_container_table .close_div
-{
-	background-color: #555;
-	text-align:center;
-	font-weight: bold;
-	padding: 4px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div
-{
-	border-bottom: 1px solid #efefef;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div_noclose
-{
-	border-bottom: none;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table a.single_header_link,
-table#bmlt_container.bmlt_container_table a.single_header_link:visited,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div a:visited,
-table#bmlt_container.bmlt_container_table .close_div a,
-table#bmlt_container.bmlt_container_table .close_div a:visited
-{
-	display:inline;
-	outline: none;
-	color: #99f;
-	text-decoration: underline;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table a.single_header_link:hover,
-table#bmlt_container.bmlt_container_table a.single_header_link:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_edit_div a:hover,
-table#bmlt_container.bmlt_container_table .close_div a:active,
-table#bmlt_container.bmlt_container_table .close_div a:hover
-{
-	outline: none;
-	color: #f96;
-	text-decoration: none;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_close_box_div
-{
-	position: absolute;
-	height: 16px;
-	width: 16px;
-	top: 2px;
-	right: 2px;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_close_box_div a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_close_box_div a:visited
-{
-	display:block;
-	line-height: 16px;
-	height: 16px;
-	width: 16px;
-	color: white;
-	background-color: red;
-	text-align: center;
-	font-weight: bold;
-	font-size: 12px;
-	font-family: Helvetica, Arial, San Serif;
-	text-decoration: underline;
-}
-
-/**
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_close_box_div a:hover,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_close_box_div a:active
-{
-	color: red;
-	background-color: white;
-	text-decoration: none;
-}
-
-/**
-	This describes the Big Map, which is a <div> that fills the entire container.
-	The Z-index is so that it will be under the single meeting <div>.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_map_container_div
-{
-	margin: 0;
-	padding: 0;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	bottom: 0px;
-	right: 0px;
-	height: 100%;
-	width: 100%;
-}
-
-/**
-	The map itself is actually placed into a <div> contained within the full-page <div>.
-	This adds a bit of flexibility.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_map_div
-{
-	margin: 0;
-	padding: 0;
-	height: 100%;
-	width: 100%;
-	top: 0px;
-	left: 0px;
-}
-
-/** These classes describe the popup window HTML when you click on a meeting marker. */
-
-/** This is for the special window in the main marker. */
-table#bmlt_container.bmlt_container_table .marker_main_info_window_div
-{
-	clear: both;
-	float: none;
-	margin: 12px;
-	padding: 8px;
-	text-align:center;
-	background-color: #555;
-	color: white;
-}
-
-/** This is the label for the radius selection popup. */
-table#bmlt_container.bmlt_container_table .marker_main_info_window_div label
-{
-	font-weight: bold;
-}
-
-/** This is the radius selection popup. */
-table#bmlt_container.bmlt_container_table .marker_main_info_window_div select
-{
-	margin-left: 4px;
-	color: black;
-}
-
-/** This is the surrounding <div>. */
-table#bmlt_container.bmlt_container_table .marker_info_window_div
-{
-	clear: both;
-	float: none;
-	margin: 12px;
-	border: 2px solid #555;
-	background-color:white;
-	line-height:normal;
-	font-size:small;
-}
-
-/** This is one line of text. */
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line
-{
-	clear: left;
-	vertical-align: top;
-}
-
-/** This is the text span, describing the value. */
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line .marker_prompt
-{
-	display: block;
-	width: 150px;
-	text-align: right;
-	font-weight: bold;
-	float: left;
-}
-
-/** This is the text span, denoting the value. */
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line .marker_value
-{
-	text-align:left;
-	display: block;
-	width: 245px;
-	margin-left: 4px;
-	white-space: normal;
-	float: left;
-}
-
-/**
-	The name has a gap under it.
-*/
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line_name
-{
-	margin-bottom: 4px;
-}
-
-/**
-	The prompt for this value is hidden in the default implementation.
-*/
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line_name .marker_prompt
-{
-	display: none;
-}
-
-/**
-	This is what the info looks like inside the marker info window.
-*/
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_line_name .marker_value
-{
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	background-color: #555;
-	color: white;
-	text-align: center;
-	font-weight: bold;
-	font-size: large;
-}
-
-/**
-	This is the links inside the marker info window.
-*/
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_more_info_a,
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_more_info_a:visited
-{
-	padding: 4px;
-	margin-top: 4px;
-	text-align: center;
-	display:block;
-	background-color: #555;
-	outline: none;
-	color: #99f;
-	text-decoration: underline;
-}
-
-/**
-	and hovered.
-*/
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_more_info_a:hover,
-table#bmlt_container.bmlt_container_table .marker_info_window_div .marker_more_info_a:active
-{
-	outline: none;
-	color: #f96;
-	text-decoration: none;
-}
-
-/**
 	This is the way that links in the header area look "at rest."
 */
-table#bmlt_container.bmlt_container_table .marker_main_info_window_inner_div a,
-table#bmlt_container.bmlt_container_table .marker_main_info_window_inner_div a:visited
-{
-	display: block;
-	font-weight: bold;
-	margin-top: 4px;
-	border-top: 1px solid white;
-	padding: 4px;
-	outline: none;
-	color: #99f;
-	text-decoration: underline;
-}
-
-/**
-	This is how the links look when they are being rolled over.
-*/
-table#bmlt_container.bmlt_container_table .marker_main_info_window_inner_div a:hover,
-table#bmlt_container.bmlt_container_table .marker_main_info_window_inner_div a:active
-{
-	outline: none;
-	color: #f96;
-	text-decoration: none;
-}
-
-/**
-	If there is a message about a filtered search, it is displayed in one of these.
-*/
-table#bmlt_container.bmlt_container_table div.marker_main_info_window_inner_div .filter_message_div
-{
-	text-align: left;
-	padding-bottom: 4px;
-}
-
-/**
-	This is the style to be applied to the header area of the search results.
-*/
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header,
-table#bmlt_container.bmlt_container_table .filter_message_div_list_container
-{
-	margin: 0;
-	padding: 4px;
-	border:none;
-	outline: none;
-	line-height: 1.25em;
-	font-weight: bold;
-	background-color: #555;
-	color: white;
-}
-
-/**
-	This is the style to be applied to the header area of the search results.
-*/
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header
-{
-	text-align: center;
-}
-
-table#bmlt_container.bmlt_container_table .filter_message_div_list
-{
-	width: 50em;
-	margin-left:auto;
-	margin-right:auto;
-	text-align: left;
-}
-
-/**
-	This is the way that links in the header area look "at rest."
-*/
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header a.c_comdef_map_link_header_a,
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header a.c_comdef_map_link_header_a:visited,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header a,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header a:visited
+table#bmlt_container .comdef_style_result_count_header a.c_comdef_map_link_header_a,
+table#bmlt_container .comdef_style_result_count_header a.c_comdef_map_link_header_a:visited
 {
 	outline: none;
 	color: #99f;
@@ -933,206 +263,19 @@ table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header a:visi
 /**
 	This is how the links look when they are being rolled over.
 */
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header a.c_comdef_map_link_header_a:hover,
-table#bmlt_container.bmlt_container_table .comdef_style_result_count_header a.c_comdef_map_link_header_a:active,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header a:hover,
-table#bmlt_container.bmlt_container_table .comdef_style_result_nav_header a:active
+table#bmlt_container .comdef_style_result_count_header a.c_comdef_map_link_header_a:hover,
+table#bmlt_container .comdef_style_result_count_header a.c_comdef_map_link_header_a:active
 {
 	outline: none;
 	color: #f96;
 	text-decoration: none;
-}
-
-/**
-	The list results are displayed within a <table>.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table
-{
-	clear: both;
-	float: none;
-	width: 100%;
-	text-align: left;
-}
-
-/**
-	The <thead> of the <table> contains the column headers and sort links.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead
-{
-	background-color: #555;
-	color: white;
-	font-weight: bold;
-	text-align: center;
-}
-
-/**
-	The <tbody> of the <table> contains the meeting data itself.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody
-{
-	background-color: white;
-}
-
-/**
-	This covers every <td> in the <table>
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table td
-{
-	vertical-align: top;
-	margin: 0;
-	border: none;
-	padding: 0;
-	padding-left: 4px;
-	padding-right: 4px;
-}
-
-/**
-	We alternate rows the odd-numbered rows (including the first one) get
-	this class assigned to their <td> elements.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_alt1 td
-{
-	background-color: #9fc;
-}
-
-/**
-	The even-numbered rows get this class assigned.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_alt2 td
-{
-	background-color: white;
-}
-
-/**
-	The formats display has a bunch of <span> elements with this class.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_format
-{
-	margin: 0;
-	margin-left: 2px;
-	margin-right: 2px;
-}
-
-/**
-	This is the <abbr> tag that surrounds each format.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_format abbr
-{
-	cursor: help;
-}
-
-/**
-	The column headers that can be clicked have this class on the <a> elements that
-	are selected. They have an extra 16 pixels to the right, for the arrow.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_asc,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_desc
-{
-	padding-right: 16px;
-	background-position: bottom right;
-	background-repeat: no-repeat;
-}
-
-/**
-	The selected column has a sort direction indicator. This is what is assigned to
-	the ascending order link. It has a triangle, facing up, displayed to the right.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_asc,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_asc:visited
-{
-	background-image: url(images/asc_arrow.gif);
-}
-
-/**
-	The selected column has a sort direction indicator. This is what is assigned to
-	the ascending order link. It has a triangle, facing down, displayed to the right.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_desc,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_desc:visited
-{
-	background-image: url(images/desc_arrow.gif);
-}
-
-/**
-	The ascending one switches the blue triangle for a red one.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_asc:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_asc:hover
-{
-	background-image: url(images/asc_arrow_mouseover.gif);
-}
-
-/**
-	The descending one switches the blue triangle for a red one.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_desc:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_dir_a_desc:hover
-{
-	background-image: url(images/desc_arrow_mouseover.gif);
-}
-
-/**
-	The <thead> column headers are separated from the main <tbody> by this much.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead td
-{
-	padding-bottom: 4px;
-}
-
-/**
-	The links in the header have this color "at rest."
-*/
-table#bmlt_container.bmlt_container_table span.c_comdef_meeting_search_unselected_page a,
-table#bmlt_container.bmlt_container_table span.c_comdef_meeting_search_unselected_page a:visited,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead a:visited
-{
-	outline: none;
-	color: #99f;
-	text-decoration: underline;
-}
-
-/**
-	Rollover changes the color to a salmon red, and removes the underline.
-*/
-table#bmlt_container.bmlt_container_table span.c_comdef_meeting_search_unselected_page a:active,
-table#bmlt_container.bmlt_container_table span.c_comdef_meeting_search_unselected_page a:hover,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table thead a:hover
-{
-	outline: none;
-	color: #f96;
-	text-decoration: none;
-}
-
-/**
-	This is the style for the "page" indicators in the <thead>.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_meeting_search_unselected_page,
-table#bmlt_container.bmlt_container_table .c_comdef_meeting_search_selected_page
-{
-	margin: 0;
-	border:none;
-	outline: none;
-	padding: 2px;
-	padding-left: 6px;
-	padding-right: 6px;
-}
-
-/**
-	The selected page is simply displayed as white (no link).
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_meeting_search_selected_page
-{
-	background-color: #555;
-	color: white;
 }
 
 /**
 	Links in the meeting text look like this "at rest."
 */
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:visited
+table#bmlt_container .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a,
+table#bmlt_container .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:visited
 {
 	outline: none;
 	border: none;
@@ -1147,93 +290,11 @@ table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody .
 /**
 	When moused over, they look like this.
 */
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:active,
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:hover
+table#bmlt_container .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:active,
+table#bmlt_container .c_comdef_search_results_table tbody .c_comdef_search_results_meeting_list_a:hover
 {
 	outline: none;
 	background-color: #555;
 	color: white;
 	text-decoration: none;
-}
-
-/**
-	The neighborhood <span> element needs a little space on the left.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_neighborhood
-{
-	padding-left: 0.2em;
-}
-
-/**
-	This is the style for the surrounding <div> of a single meeting detail display if
-	the browser can handle AJAX, and the single meeting details will be displayed over
-	the list, as opposed to going to a separate page (which is done for non-AJAX browsers).
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_ajax_div
-{
-	position: absolute;
-	z-index: 6001;
-	width: 600px;
-	left: 50%;
-	margin-left: -300px;
-	text-align: center;
-}
-
-/**
-	We display a "throbber" for when the AJAX call is being made. This is the <div>
-	element that contains the throbber image.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_ajax_throbber_div
-{
-	position: absolute;
-	z-index: 2000;
-	background-color: #555;
-	width: 100px;
-	height: 100px;
-}
-
-/**
-	This is the animated GIF image that we display.
-*/
-table#bmlt_container.bmlt_container_table .c_comdef_search_results_single_ajax_throbber_div img
-{
-	width: 80px;;
-	height: 80px;
-	margin: 10px;
-}
-
-/**
-	This is the div with the delete and submit buttons in it.
-*/
-table#bmlt_container.bmlt_container_table .edit_meeting_buttons_div
-{
-	clear: both;
-	margin-top: 4px;
-	border-top: 1px solid #555;
-	padding-top: 4px;
-}
-
-/**
-	This is the link for the GPS download link.
-*/
-table#bmlt_container.bmlt_container_table a.c_comdef_search_results_poi_a,
-table#bmlt_container.bmlt_container_table a.c_comdef_search_results_poi_a:visited
-{
-	display: block;
-	width: 100%;
-	height: 18px;
-	background-image: url(images/globe.gif);
-	background-repeat: no-repeat;
-	background-position: center center;
-	outline: none;
-}
-
-/**
-	This is the rollover for the GPS download link.
-*/
-table#bmlt_container.bmlt_container_table a.c_comdef_search_results_poi_a:hover,
-table#bmlt_container.bmlt_container_table a.c_comdef_search_results_poi_a:active
-{
-	background-image: url(images/globe_mouseover.gif);
-	outline: none;
 }
