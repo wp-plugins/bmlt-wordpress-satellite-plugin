@@ -32,6 +32,7 @@ class BMLTPlugin
 	var $default_language = 'en';										///< This is the default language for the server.
 	var $default_support_old_browsers = true;							///< If this is false, then only JavaScript-enabled browsers can use this (reduces the load time of pages). Default is true.
 	var $default_initial_view = '';										///< This is the initial view when the search first appears. Default is whatever the root server decides.
+	var	$default_new_search = null;										///< If this is set to something, then a new search uses the exact URI.
 	
 	/// These items affect the options page in the dashboard. You can change these to alter the displayed strings.
 	var $options_title = 'Basic Meeting List Toolbox Options';			///< This is the title that is displayed over the options.
@@ -46,6 +47,8 @@ class BMLTPlugin
 	var $no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a>.</noscript>';
 	var $initial_view = array ( 'values' => array ( '', 'map', 'text' ), 'prompts' => array ( 'Root Server Decides', 'Map', 'Text' ) );
 	var $initial_view_prompt = 'Initial Search Type:';
+	var $new_search_label = 'Specific URL For a New Search:';
+	var $new_search_suffix = ' (Leave blank for automatic)';
 	
 	/// This is returned in an exception if the cURL call fails.
 	static $static_uri_failed = 'Call to remote server failed';
@@ -171,6 +174,10 @@ class BMLTPlugin
 				
 				if ( $pid && !isset ( $this->my_http_vars['search_form'] ) )
 					{
+					if ( $options['bmlt_new_search_url'] )
+						{
+						$plink = $options['bmlt_new_search_url'];
+						}
 					$menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.htmlspecialchars($this->menu_new_search_text).'</a></div>';
 					}
 				
@@ -214,7 +221,8 @@ class BMLTPlugin
 								'map_zoom' => $this->default_map_zoom,
 								'bmlt_language' => $this->default_language,
 								'support_old_browsers' => $this->default_support_old_browsers,
-								'bmlt_initial_view' => $this->default_initial_view
+								'bmlt_initial_view' => $this->default_initial_view,
+								'bmlt_new_search_url' => $this->default_new_search
 								);
 
 		$old_BMLTOptions = get_option ( $this->adminOptionsName );
@@ -265,6 +273,15 @@ class BMLTPlugin
 				{
 				$BMLTOptions['bmlt_language'] = $this->my_http_vars['bmlt_language'];
 				}
+			if ( isset($this->my_http_vars['bmlt_new_search_url']) )
+				{
+				$BMLTOptions['bmlt_new_search_url'] = $this->my_http_vars['bmlt_new_search_url'];
+				}
+			else
+				{
+				$BMLTOptions['bmlt_new_search_url'] = null;
+				}
+			
 			if ( isset($this->my_http_vars['support_old_browsers']) )
 				{
 				$BMLTOptions['support_old_browsers'] = $this->my_http_vars['support_old_browsers'];
@@ -393,6 +410,10 @@ class BMLTPlugin
 						<div class="bmlt_options_line" style="clear:left">
 							<label class="bmlt_options_label" for="bmlt_gmaps_api_key" style="font-weight:bold;text-align:right;display:block;float:left;width:300px"><?php _e ( $this->gkey_label, "BMLTPlugin" ) ?></label>
 							<input style="margin-left:4px;width: 50em;font-size:small" class="bmlt_options_text" name="gmaps_api_key" id="bmlt_gmaps_api_key" type="text" value="<?php echo $BMLTOptions['gmaps_api_key'] ?>" />
+						</div>
+						<div class="bmlt_options_line" style="clear:left">
+							<label class="bmlt_options_label" for="bmlt_new_search_url" style="font-weight:bold;text-align:right;display:block;float:left;width:300px"><?php _e ( $this->new_search_label, "BMLTPlugin" ) ?></label>
+							<input style="margin-left:4px;width: 50em;font-size:small" class="bmlt_options_text" name="bmlt_new_search_url" id="bmlt_new_search_url" type="text" value="<?php echo $BMLTOptions['bmlt_new_search_url'] ?>" /><?php _e ( $this->new_search_suffix, "BMLTPlugin" ) ?>
 						</div>
 						<div class="bmlt_options_line" style="clear:left">
 							<?php echo '<input style="float:left;margin-right:4px;margin-left:300px" class="bmlt_options_text" name="support_old_browsers" id="bmlt_support_old_browsers_check" type="checkbox" value="1"'.($BMLTOptions['support_old_browsers'] ? ' checked="checked"' : '').' />'; ?>
