@@ -16,8 +16,8 @@ It is very easy to install and use. It has an administration panel that lets you
 == Installation ==
 
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
 
 == Screenshots ==
 
