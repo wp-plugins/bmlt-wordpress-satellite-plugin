@@ -142,11 +142,20 @@ class BMLTPlugin
 		
 		if ( $root_server_root )
 			{
-			$root_server = $root_server_root."client_interface/xhtml/index.php";
-			
-			echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-			echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
-			echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+			global $wp_query;
+			$page_obj_id = $wp_query->get_queried_object_id();
+			if ( $page_obj_id )
+				{
+				$page_obj = get_page ( $page_obj_id );
+				if ( $page_obj && preg_match ( "/<!-- ?BMLT ?-->/", $page_obj->post_content ) )
+					{
+					$root_server = $root_server_root."client_interface/xhtml/index.php";
+					
+					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
+					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+					echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
+					}
+				}
 			}
 		}
 
