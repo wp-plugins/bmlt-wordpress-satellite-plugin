@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.0.0
+Version: 1.0.1
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -527,6 +527,7 @@ class BMLTPlugin
 		\throws an exception if the call fails.
 	*/
 	static function call_curl ( $in_uri,				///< A string. The URI to call.
+								$in_post = true,		///< If false, the transaction is a GET, not a POST. Default is true.
 								&$http_status = null	///< Optional reference to a string. Returns the HTTP call status.
 								)
 		{
@@ -544,6 +545,21 @@ class BMLTPlugin
 			{
 			// Create a new cURL resource.
 			$resource = curl_init();
+			
+			// If we will be POSTing this transaction, we split up the URI.
+			if ( $in_post )
+				{
+				$spli = explode ( '?', $in_uri, 1 );
+				
+				if ( is_array ( $spli ) && count ( $spli ) )
+					{
+					$in_uri = $spli[0];
+					$in_params = $spli[1];
+				
+					curl_setopt ( $resource, CURLOPT_POST, true );
+					curl_setopt ( $resource, CURLOPT_POSTFIELDS, $in_params );
+					}
+				}
 			
 			// Set url to call.
 			curl_setopt ( $resource, CURLOPT_URL, $in_uri );
@@ -600,7 +616,7 @@ class BMLTPlugin
 		
 		return $ret;
 	}
-	};
+};
 
 if ( class_exists ( "BMLTPlugin" ) )
 	{
