@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.0
 Tested up to: 2.8
-Stable tag: 1.0.1
+Stable tag: 1.0
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -16,11 +16,16 @@ It is very easy to install and use. It has an administration panel that lets you
 == Installation ==
 
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
+1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
 
 == Screenshots ==
 
 1. Search by map
 2. A map search result
 3. The administration screen
+
+== Changelog ==
+
+1.0.1 -June 25, 2009
+	Made the inter-server communications use POST, which makes it a bit more robust.
