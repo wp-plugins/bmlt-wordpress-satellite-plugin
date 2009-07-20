@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.0.1
+Version: 1.0.2
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -549,7 +549,7 @@ class BMLTPlugin
 			// If we will be POSTing this transaction, we split up the URI.
 			if ( $in_post )
 				{
-				$spli = explode ( '?', $in_uri, 1 );
+				$spli = explode ( "?", $in_uri );
 				
 				if ( is_array ( $spli ) && count ( $spli ) )
 					{

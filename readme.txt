@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.0
 Tested up to: 2.8
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -26,6 +26,9 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
+
+1.0.2 -July 20, 2009
+	PHP 5.2.10 seems to be expecting a slightly different interpretation of explode(), so it is now simpler.
 
 1.0.1 -June 25, 2009
 	Made the inter-server communications use POST, which makes it a bit more robust.
