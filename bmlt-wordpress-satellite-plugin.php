@@ -9,10 +9,12 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.0.2
+Version: 1.2.3
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
+ini_set('display_errors', 1);
+ini_set('error_reporting', E_ERROR);
 
 /**
 	\class BMLTPlugin
@@ -20,6 +22,7 @@ You need to specify "<!--BMLT-->" in the code section of a page (Will not work i
 	\brief This is the class that implements and encapsulates the plugin functionality. A single instance of this is created, and manages the plugin.
 */
 
+require_once ( dirname ( __FILE__ ).'/xml_utils.inc' );
 class BMLTPlugin
 	{
 	var $adminOptionsName = "BMLTAdminOptions";							///< The name, in the database, for the options for this plugin.
@@ -49,6 +52,7 @@ class BMLTPlugin
 	var $initial_view_prompt = 'Initial Search Type:';
 	var $new_search_label = 'Specific URL For a New Search:';
 	var $new_search_suffix = ' (Leave blank for automatic)';
+	var $service_body_checkboxes_label = 'If you want the Advanced Search Tab to have one or more Service bodies checked, then select them here:';
 	
 	/// This is returned in an exception if the cURL call fails.
 	static $static_uri_failed = 'Call to remote server failed';
@@ -192,8 +196,20 @@ class BMLTPlugin
 				
 				if ( isset ( $this->my_http_vars['search_form'] ) )
 					{
+					$pre_checked_param = null;
+					$pre_checked = $options['bmlt_service_body_filters'];
+					
+					if ( is_array ( $pre_checked ) && count ( $pre_checked ) )
+						{
+						foreach ( $pre_checked as $id )
+							{
+							$pre_checked_param .= "&preset_service_bodies[]=$id";
+							}
+						}
+					
 					$map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
-					$the_new_content = self::call_curl ( "$root_server?switcher=GetSimpleSearchForm".$this->my_params.$map_center );
+					$uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center$pre_checked_param";
+					$the_new_content = self::call_curl ( $uri );
 					}
 				elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
 					{
@@ -231,7 +247,8 @@ class BMLTPlugin
 								'bmlt_language' => $this->default_language,
 								'support_old_browsers' => $this->default_support_old_browsers,
 								'bmlt_initial_view' => $this->default_initial_view,
-								'bmlt_new_search_url' => $this->default_new_search
+								'bmlt_new_search_url' => $this->default_new_search,
+								'bmlt_service_body_filters' => $this->bmlt_service_body_filters
 								);
 
 		$old_BMLTOptions = get_option ( $this->adminOptionsName );
@@ -289,6 +306,15 @@ class BMLTPlugin
 			else
 				{
 				$BMLTOptions['bmlt_new_search_url'] = null;
+				}
+			
+			if ( is_array($this->my_http_vars['bmlt_service_body_filters']) )
+				{
+				$BMLTOptions['bmlt_service_body_filters'] = $this->my_http_vars['bmlt_service_body_filters'];
+				}
+			else
+				{
+				$BMLTOptions['bmlt_service_body_filters'] = array();
 				}
 			
 			if ( isset($this->my_http_vars['support_old_browsers']) )
@@ -428,6 +454,7 @@ class BMLTPlugin
 							<?php echo '<input style="float:left;margin-right:4px;margin-left:300px" class="bmlt_options_text" name="support_old_browsers" id="bmlt_support_old_browsers_check" type="checkbox" value="1"'.($BMLTOptions['support_old_browsers'] ? ' checked="checked"' : '').' />'; ?>
 							<label class="bmlt_options_label" for="bmlt_support_old_browsers_check" style="font-weight:bold;text-align:left;display:block"><?php _e ( $this->support_old_browsers_prompt, "BMLTPlugin" ) ?></label>
 						</div>
+						<?php echo $this->create_sb_checkboxes() ?>
 						<?php echo $lang_popup ?>
 						<div class="bmlt_options_line" style="margin-left:300px;margin-top:12px;clear:left;text-align:center;">
 							<h3><?php _e ( $this->bmlt_map_label, "BMLTPlugin" ) ?></h3>
@@ -518,6 +545,104 @@ class BMLTPlugin
  		</div><?php
 		}
 	
+	/**
+		\brief This creates an indented list of Service Body checkboxes, and returns them as XHTML.
+		If any of the Service Bodies were selected to be "pre-checked," they are checked.
+		This function calls the server, to get the available Service bodies to be displayed.
+		
+		\returns a string, containing the XHTML. NULL if the operation fails.
+	*/
+	function create_sb_checkboxes ()
+		{
+		$ret = null;
+		
+		try
+			{
+			$options = $this->getAdminOptions ( );
+			$root_server = $options['root_server']."client_interface/xhtml/index.php";
+			$uri = "$root_server?switcher=GetServiceBodiesXML".$this->my_params;
+			$xml_data = self::call_curl ( $uri );
+			$xml_array = xml2ary ( $xml_data );
+			
+			if ( !is_array ( $options['bmlt_service_body_filters'] ) || !count ( $options['bmlt_service_body_filters'] ) )
+				{
+				$options['bmlt_service_body_filters'] = array();
+				}
+			
+			// Try to create a SimpleXML object.
+	
+			$ret = '<div class="bmlt_options_line" style="clear:left">';
+				$ret .= '<div style="text-align:center;font-weight:bold">'.htmlspecialchars ( $this->service_body_checkboxes_label ).'</div>';
+				$ret .= '<dl style="margin-left:300px">';
+				
+					foreach ( $xml_array['sb']['_c'] as &$sb_type )
+						{
+						foreach ( $sb_type as &$elem )
+							{
+							$ret .= self::create_sb_checkboxes_for_one_sb ( $elem, $options );
+							}
+						}
+				
+				$ret .= '</dl>';
+			$ret .= '</div>';
+			}
+		catch ( Exception $e )
+			{
+			// We die quietly, so as not to wake the kids.
+// Just for debug.
+// echo ( 'AAAUGH!<pre>'.htmlspecialchars ( print_r ( $e, true ) ).'</pre>' );
+			} 
+		
+		return $ret;
+		}
+	
+	/**
+		\brief This creates a single Service Body checkboxe, and returns them as XHTML.
+		If the Service Body is selected to be "pre-checked," it is checked.
+		
+		\returns a string, containing the XHTML. NULL if the operation fails.
+	*/
+	static function create_sb_checkboxes_for_one_sb (	&$in_sb_element,	///< This is an array, containing the decoded XML reply from the server.
+														&$in_options		///< These are our options.
+														)
+		{
+		$ret = null;
+		
+		// First, we get the attributes, which are the name and the ID of this Service Body
+		if ( isset ( $in_sb_element['_a'] ) )
+			{
+			$id = intval ( $in_sb_element['_a']['id'] );
+			$name = htmlspecialchars ( $in_sb_element['_a']['name'] );
+			}
+		
+		if ( isset ( $id ) && isset ( $name ) )
+			{
+			$ret = '<dt id="bmlt_sb_option_checkbox_dt_'.$id.'" class="bmlt_sb_option_checkbox_dt">';
+			$ret .= '<input name="bmlt_service_body_filters[]" value="'.$id.'" type="checkbox" id="bmlt_sb_option_checkbox_'.$id.'" class="bmlt_sb_option_checkbox"';
+			if ( in_array ( $id, $in_options['bmlt_service_body_filters'] ) )
+				{
+				$ret .= ' checked="checked"';
+				}
+			
+			$ret .= '/>';
+			$ret .= '<label for="bmlt_sb_option_checkbox_'.$id.'" style="padding-left:4px;font-weight:bold">'.$name.'</label>';
+			if ( is_array ( $in_sb_element['_c']['sb']['_c'] ) && count ( $in_sb_element['_c']['sb']['_c'] ) )
+				{
+				$ret .= '<dd class="bmlt_sb_option_checkbox_dd"><dl style="margin-left:2em">';
+					foreach ( $in_sb_element['_c']['sb']['_c'] as &$sb_type )
+						{
+						foreach ( $sb_type as &$elem )
+							{
+							$ret .= self::create_sb_checkboxes_for_one_sb ( $elem, $in_options );
+							}
+						}
+				$ret .= '</dl></dd>';
+				}
+			$ret .= '</dt>';
+			}
+		return $ret;
+		}
+		
 	/**
 		\brief This is a function that returns the results of an HTTP call to a URI.
 		It is a lot more secure than file_get_contents, but does the same thing.
