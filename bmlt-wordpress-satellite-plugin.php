@@ -26,7 +26,7 @@ require_once ( dirname ( __FILE__ ).'/xml_utils.inc' );
 class BMLTPlugin
 	{
 	var $adminOptionsName = "BMLTAdminOptions";							///< The name, in the database, for the options for this plugin.
-	var	$default_rootserver = 'http://bmlt.magnaws.com/';				///< This is the default root BMLT server URI.
+	var	$default_rootserver = 'http://bmlt.magshare.net/stable/main_server/';	///< This is the default root BMLT server URI.
 	var $default_gkey = 'ABQIAAAABCC8PsaKPPEsC3k649kYPRSz44RiWJ5-5P3kVwShr4yWZ40gchTIeC9GanTylZSXXJOwTtGbQEsZKA';	///< This is the default Google Maps API key (localhost).
 	var $default_bmlt_fullscreen = false;								///< This is the default value for the "Map Search Is Full Screen."
 	var $default_map_center_latitude = 29.764377375163125;				///< This is the default basic search map center latitude
