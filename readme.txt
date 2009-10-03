@@ -26,6 +26,9 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
+1.2.5 -October 3, 2009
+	Fixed a slight warning issue with the way that the options are initialized.
+	
 1.2.3 -September 24, 2009
 	Added the ability to "pre-check" Service bodies in the Advanced Search tab. This function requires that the root server also be version 1.2.3.
 	
