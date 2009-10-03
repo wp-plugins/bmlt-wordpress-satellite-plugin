@@ -9,12 +9,12 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.2.4
+Version: 1.2.5
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
-ini_set('display_errors', 1);
-ini_set('error_reporting', E_ERROR);
+//ini_set('display_errors', 1);
+//ini_set('error_reporting', E_ALL);
 
 /**
 	\class BMLTPlugin
@@ -26,7 +26,7 @@ require_once ( dirname ( __FILE__ ).'/xml_utils.inc' );
 class BMLTPlugin
 	{
 	var $adminOptionsName = "BMLTAdminOptions";							///< The name, in the database, for the options for this plugin.
-	var	$default_rootserver = 'http://bmlt.magshare.net/stable/main_server/';	///< This is the default root BMLT server URI.
+	var	$default_rootserver = 'http://bmlt.magnaws.com/';				///< This is the default root BMLT server URI.
 	var $default_gkey = 'ABQIAAAABCC8PsaKPPEsC3k649kYPRSz44RiWJ5-5P3kVwShr4yWZ40gchTIeC9GanTylZSXXJOwTtGbQEsZKA';	///< This is the default Google Maps API key (localhost).
 	var $default_bmlt_fullscreen = false;								///< This is the default value for the "Map Search Is Full Screen."
 	var $default_map_center_latitude = 29.764377375163125;				///< This is the default basic search map center latitude
@@ -36,6 +36,7 @@ class BMLTPlugin
 	var $default_support_old_browsers = true;							///< If this is false, then only JavaScript-enabled browsers can use this (reduces the load time of pages). Default is true.
 	var $default_initial_view = '';										///< This is the initial view when the search first appears. Default is whatever the root server decides.
 	var	$default_new_search = null;										///< If this is set to something, then a new search uses the exact URI.
+	var	$default_sb_array = array();									///< This may be a list of "pre-checked" Service bodies.
 	
 	/// These items affect the options page in the dashboard. You can change these to alter the displayed strings.
 	var $options_title = 'Basic Meeting List Toolbox Options';			///< This is the title that is displayed over the options.
@@ -131,7 +132,6 @@ class BMLTPlugin
 		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
 			{
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-	
 			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params, false ) );
 			}
 		}
@@ -248,7 +248,7 @@ class BMLTPlugin
 								'support_old_browsers' => $this->default_support_old_browsers,
 								'bmlt_initial_view' => $this->default_initial_view,
 								'bmlt_new_search_url' => $this->default_new_search,
-								'bmlt_service_body_filters' => $this->bmlt_service_body_filters
+								'bmlt_service_body_filters' => $this->default_sb_array
 								);
 
 		$old_BMLTOptions = get_option ( $this->adminOptionsName );
