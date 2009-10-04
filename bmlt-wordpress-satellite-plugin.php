@@ -49,7 +49,7 @@ class BMLTPlugin
 	var $language_menu_prompt = 'Select a Language:';
 	var $support_old_browsers_prompt = 'Support Non-JavaScript Browsers';
 	var $no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a>.</noscript>';
-	var $initial_view = array ( 'values' => array ( '', 'map', 'text' ), 'prompts' => array ( 'Root Server Decides', 'Map', 'Text' ) );
+	var $initial_view = array ( 'values' => array ( '', 'map', 'text', 'advanced' ), 'prompts' => array ( 'Root Server Decides', 'Map', 'Text', 'Advanced' ) );
 	var $initial_view_prompt = 'Initial Search Type:';
 	var $new_search_label = 'Specific URL For a New Search:';
 	var $new_search_suffix = ' (Leave blank for automatic)';
