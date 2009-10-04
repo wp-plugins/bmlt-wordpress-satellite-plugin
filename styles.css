@@ -32,13 +32,6 @@ table#bmlt_container fieldset div
 	text-align:left;
 }
 
-table#bmlt_container div.c_comdef_search_results_map_container_div
-{
-	width: 100%;
-	position: relative;
-	height: 700px;
-}
-
 table#bmlt_container input.c_comdef_search_specification_search_string_text
 {
 	width: 30em;
