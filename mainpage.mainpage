@@ -12,7 +12,7 @@
 	\version 1.2.5
 	
 	<h1>INSTALLATION</h1>
-	You should <a href="">get this plugin from the WordPress Plugin Repository</a>.
+	You should <a href="http://wordpress.org/extend/plugins/bmlt-wordpress-satellite-plugin/">get this plugin from the WordPress Plugin Repository</a>.
 	From there, you can do an auto-install, or download the plugin to manually install.
 	The plugin goes into the <code>wp-content/plugins</code> directory.
 	
