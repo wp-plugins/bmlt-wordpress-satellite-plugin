@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.0
 Tested up to: 2.8.5
-Stable tag: 1.2.15
+Stable tag: 1.2.16
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -26,6 +26,10 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
+1.2.16 -November 4, 2009
+	Fixed a bug, in which advanced search criteria were ignored when printing PDFs:
+		https://sourceforge.net/tracker/index.php?func=detail&aid=2892019&group_id=228122&atid=1073410
+	
 1.2.15 -November 3, 2009
 	Added support for direct PDF printing (Requires 1.2.15 root server).
 	
