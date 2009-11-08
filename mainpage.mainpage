@@ -1,0 +1,22 @@
+/***********************************************************************/
+/** \mainpage
+	<div style="height:24px"></div>
+	<div style="height:80px;background-color: #0013d2;background-image:url(../images/DocHeader.gif);background-position:center top;background-repeat:no-repeat"></div>
+	
+	<h2>INTRODUCTION</h2>
+	
+	This is the WordPress Plugin for the BMLT. It is designed to be extremely
+	easy to install and use.
+	
+	\license This code is completely open and free. You may access it by <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/">visiting the BMLT Project Site</a>. It should never be sold.
+	\version 1.2.17 (Read the changelog in the readme.txt file).
+	
+	<h1>INSTALLATION</h1>
+	You should <a href="http://wordpress.org/extend/plugins/bmlt-wordpress-satellite-plugin/">get this plugin from the WordPress Plugin Repository</a>.
+	From there, you can do an auto-install, or download the plugin to manually install.
+	The plugin goes into the <code>wp-content/plugins</code> directory.
+	
+	The plugin works by replacing inline HTML &lt;!--BMLT--&gt; with the BMLT.
+	Just write a page or post, and add that HTML to it. At that point, you will
+	get a BMLT instance.
+*/
