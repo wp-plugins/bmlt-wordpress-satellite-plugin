@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.2.16
+Version: 1.2.17
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -587,13 +587,20 @@ class BMLTPlugin
 				$ret .= '<div style="text-align:center;font-weight:bold">'.htmlspecialchars ( $this->service_body_checkboxes_label ).'</div>';
 				$ret .= '<dl style="margin-left:300px">';
 				
-					foreach ( $xml_array['sb']['_c'] as &$sb_type )
+				foreach ( $xml_array['sb']['_c'] as &$sb_type )
+					{
+					if ( !is_array ( $sb_type['_a'] ) )
 						{
 						foreach ( $sb_type as &$elem )
 							{
 							$ret .= self::create_sb_checkboxes_for_one_sb ( $elem, $options );
 							}
 						}
+					else
+						{
+						$ret .= self::create_sb_checkboxes_for_one_sb ( $sb_type, $options );
+						}
+					}
 				
 				$ret .= '</dl>';
 			$ret .= '</div>';
@@ -643,9 +650,16 @@ class BMLTPlugin
 				$ret .= '<dd class="bmlt_sb_option_checkbox_dd"><dl style="margin-left:2em">';
 					foreach ( $in_sb_element['_c']['sb']['_c'] as &$sb_type )
 						{
-						foreach ( $sb_type as &$elem )
+						if ( !is_array ( $sb_type['_a'] ) )
 							{
-							$ret .= self::create_sb_checkboxes_for_one_sb ( $elem, $in_options );
+							foreach ( $sb_type as &$elem )
+								{
+								$ret .= self::create_sb_checkboxes_for_one_sb ( $elem, $in_options );
+								}
+							}
+						else
+							{
+							$ret .= self::create_sb_checkboxes_for_one_sb ( $sb_type, $in_options );
 							}
 						}
 				$ret .= '</dl></dd>';
