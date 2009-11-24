@@ -73,7 +73,11 @@ It is very easy to install and use. It has an administration panel that lets you
 
 <h2 style="clear:none;margin-top:8px">Initial Search Type</h2>
 
-<p class="first" style="clear:none"><div style="float:right;margin-right:8px;border:1px solid red"><img src="http://bmlt.magshare.net/stable/docs/PluginAdmin/images/InitialSearchType.gif" width="291" height="27" alt="Initial Search Type" style="display:block" /><img src="http://bmlt.magshare.net/stable/docs/PluginAdmin/images/InitialSearchTypeMenu.gif" alt="Initial Search Type Menu" width="273" height="73" style="display:block;margin-left:9px;margin-top:4px" /></div>This is a popup menu that allows you to select how the BMLT Search first appears to visitors to your site.</p>
+<p class="first" style="clear:none">
+
+	<div style="float:right;margin-right:8px;border:1px solid red"><img src="http://bmlt.magshare.net/stable/docs/PluginAdmin/images/InitialSearchType.gif" width="291" height="27" alt="Initial Search Type" style="display:block" /><img src="http://bmlt.magshare.net/stable/docs/PluginAdmin/images/InitialSearchTypeMenu.gif" alt="Initial Search Type Menu" width="273" height="73" style="display:block;margin-left:9px;margin-top:4px" /></div>
+	
+	This is a popup menu that allows you to select how the BMLT Search first appears to visitors to your site.</p>
 
 <p>It has four choices:</p>
 
@@ -125,7 +129,7 @@ It is very easy to install and use. It has an administration panel that lets you
 
 <div style="float:right;clear:right;margin:8px"><img src="http://bmlt.magshare.net/stable/docs/PluginAdmin/images/PreChecked.gif" style="border:1px solid red" width="716" height="364" alt="Support Non-JavaScript Browsers Checkbox" /></div>
 
-<p class="first">The exact content of these checkboxes will vary, depending upon your root server. It is possible to have certain Service Body checkboxes &quot;pre-checked,&quot; when the visitor goes to the Advanced Search tab. This is useful for satellite implementations that serve particular Service Bodies. The main root server may have many, many Service Bodies, and searches may deliver too many results. This helps narrow it down to ones relevant to the visitor, while giving them the option to expand their search to areas outside the Service Body.</p> <p>The example here is for the <a href="http://sasna.org">Suffolk Area Service Site</a>. The Service Bodies that have been checked cover the whole of Long Island, from the Queens border, to the Eastern tip of Montauk.</p>
+<p class="first">The exact content of these checkboxes will vary, depending upon your root server. It is possible to have certain Service Body checkboxes &quot;pre-checked,&quot; when the visitor goes to the Advanced Search tab. This is useful for satellite implementations that serve particular Service Bodies. The main root server may have many, many Service Bodies, and searches may deliver too many results. This helps narrow it down to ones relevant to the visitor, while giving them the option to expand their search to areas outside the Service Body.</p>
 
 <h2 style="clear:right;margin-top:8px">The Map</h2>
 
