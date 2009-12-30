@@ -291,3 +291,11 @@ table#bmlt_container .c_comdef_search_results_table tbody .c_comdef_search_resul
 	color: white;
 	text-decoration: none;
 }
+
+/**
+	Ensures that the formats are displayed left-justified.
+*/
+table#bmlt_container .c_comdef_search_results_formats_div
+{
+	text-align: left;
+}

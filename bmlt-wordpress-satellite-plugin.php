@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.2.18
+Version: 1.2.19
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -37,6 +37,8 @@ class BMLTPlugin
 	var $default_initial_view = '';										///< This is the initial view when the search first appears. Default is whatever the root server decides.
 	var	$default_new_search = null;										///< If this is set to something, then a new search uses the exact URI.
 	var	$default_sb_array = array();									///< This may be a list of "pre-checked" Service bodies.
+	var $default_push_down_more_details = 0;							///< This is a flag that indicates whether or not to "push down" the map or list to make room for the "More Details" window.
+	var $default_additional_css = null;									///< The admin can add arbitrary CSS here.
 	
 	/// These items affect the options page in the dashboard. You can change these to alter the displayed strings.
 	var $options_title = 'Basic Meeting List Toolbox Options';			///< This is the title that is displayed over the options.
@@ -54,6 +56,8 @@ class BMLTPlugin
 	var $new_search_label = 'Specific URL For a New Search:';
 	var $new_search_suffix = ' (Leave blank for automatic)';
 	var $service_body_checkboxes_label = 'If you want the Advanced Search Tab to have one or more Service bodies checked, then select them here:';
+	var $push_down_checkbox_label = '&quot;More Details&quot; Windows &quot;push down&quot; the main list or map, as opposed to popping up over them.';
+	var $more_styles_label = 'Add CSS Styles to the Plugin:';
 	
 	/// This is returned in an exception if the cURL call fails.
 	static $static_uri_failed = 'Call to remote server failed';
@@ -158,6 +162,16 @@ class BMLTPlugin
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
 					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
 					echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
+					$additional_css = trim ( $options['additional_css'] );
+					if ( $options['push_down_more_details'] )
+						{
+						$additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;} table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
+						}
+					
+					if ( $additional_css )
+						{
+						echo '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+						}
 					}
 				}
 			}
@@ -260,7 +274,9 @@ class BMLTPlugin
 								'support_old_browsers' => $this->default_support_old_browsers,
 								'bmlt_initial_view' => $this->default_initial_view,
 								'bmlt_new_search_url' => $this->default_new_search,
-								'bmlt_service_body_filters' => $this->default_sb_array
+								'bmlt_service_body_filters' => $this->default_sb_array,
+								'push_down_more_details' => $this->default_push_down_more_details,
+								'additional_css' => $this->default_additional_css
 								);
 
 		$old_BMLTOptions = get_option ( $this->adminOptionsName );
@@ -287,6 +303,18 @@ class BMLTPlugin
 						
 		if ( isset ( $this->my_http_vars['update_BMLTSettings'] ) )
 			{
+			if ( !isset ( $this->my_http_vars['push_down_more_details'] ) )
+				{
+				$this->my_http_vars['push_down_more_details'] = $this->default_push_down_more_details;
+				}
+			if ( !isset ( $this->my_http_vars['additional_css'] ) )
+				{
+				$this->my_http_vars['additional_css'] = $this->default_additional_css;
+				}
+			
+			$BMLTOptions['push_down_more_details'] = $this->my_http_vars['push_down_more_details'];
+			$BMLTOptions['additional_css'] = $this->my_http_vars['additional_css'];
+
 			if ( isset($this->my_http_vars['root_server']))
 				{
 				$BMLTOptions['root_server'] = $this->my_http_vars['root_server'];
@@ -465,6 +493,14 @@ class BMLTPlugin
 						<div class="bmlt_options_line" style="clear:left">
 							<?php echo '<input style="float:left;margin-right:4px;margin-left:300px" class="bmlt_options_text" name="support_old_browsers" id="bmlt_support_old_browsers_check" type="checkbox" value="1"'.($BMLTOptions['support_old_browsers'] ? ' checked="checked"' : '').' />'; ?>
 							<label class="bmlt_options_label" for="bmlt_support_old_browsers_check" style="font-weight:bold;text-align:left;display:block"><?php _e ( $this->support_old_browsers_prompt, "BMLTPlugin" ) ?></label>
+						</div>
+						<div class="bmlt_options_line" style="clear:left">
+							<?php echo '<input style="float:left;margin-right:4px;margin-left:300px" class="bmlt_options_text" name="push_down_more_details" id="bmlt_push_down_more_details_check" type="checkbox" value="1"'.($BMLTOptions['push_down_more_details'] ? ' checked="checked"' : '').' />'; ?>
+							<label class="bmlt_options_label" for="bmlt_push_down_more_details_check" style="font-weight:bold;text-align:left;display:block"><?php _e ( $this->push_down_checkbox_label, "BMLTPlugin" ) ?></label>
+						</div>
+						<div class="bmlt_options_line" style="clear:left">
+							<label class="bmlt_options_label" for="bmlt_additional_css" style="font-weight:bold;text-align:right;display:block;float:left;width:300px"><?php _e ( $this->more_styles_label, "BMLTPlugin" ) ?></label>
+							<textarea style="font-size:small" cols="100" rows="20" name="additional_css" id="bmlt_additional_css"><?php echo _e ( $BMLTOptions['additional_css'], "BMLTPlugin" ) ?></textarea>
 						</div>
 						<?php echo $this->create_sb_checkboxes() ?>
 						<?php echo $lang_popup ?>
