@@ -26,7 +26,7 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
-- December 30, 2009 -1.2.19 Release
+1.2.19 -December 30, 2009
 	Added the ability to switch on a "push in" method of viewing the "More Details" window.
 	Added the ability for the admin to insert arbitrary CSS styles.
 
