@@ -26,7 +26,7 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
-1.4
+1.4 -February 14, 2010
 	Added support for iPhone
 	Fixed a minor issue with the cURL caller.
 	
