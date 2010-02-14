@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.2.19
+Version: 1.4
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -139,6 +139,18 @@ class BMLTPlugin
 			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params, false ) );
 			}
 		}
+	
+	/**
+		\brief see if we are dealing with a mobile browser that uses a small screen and limited bandwidth.
+		
+		\returns a Boolean. True if the browser is one that should get the special version of our site.
+	*/
+	function _mobileBrowser ( )
+		{
+		$ret = isset ( $this->my_http_vars['simulate_iphone'] ) || eregi ( 'ipod', $_SERVER['HTTP_USER_AGENT'] ) || eregi ( 'iphone', $_SERVER['HTTP_USER_AGENT'] );
+		
+		return $ret;
+		}
 
 	/**
 		\brief This echoes the appropriate head element stuff for this plugin.
@@ -157,6 +169,12 @@ class BMLTPlugin
 				$page_obj = get_page ( $page_obj_id );
 				if ( $page_obj && preg_match ( "/<!-- ?BMLT ?-->/", $page_obj->post_content ) )
 					{
+					// Mobile browsers get redirected to the root server.
+					if ( $this->_mobileBrowser() )
+						{
+						header ( 'Location: '.$root_server_root );
+						}
+			
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
@@ -744,6 +762,13 @@ class BMLTPlugin
 					{
 					$in_uri = $spli[0];
 					$in_params = $spli[1];
+					// Convert query string into an array using parse_str(). parse_str() will decode values along the way.
+					parse_str($in_params, $temp);
+					
+					// Now rebuild the query string using http_build_query(). It will re-encode values along the way.
+					// It will also take original query string params that have no value and appends a "=" to them
+					// thus giving them and empty value.
+					$in_params = http_build_query($temp);
 				
 					curl_setopt ( $resource, CURLOPT_POST, true );
 					curl_setopt ( $resource, CURLOPT_POSTFIELDS, $in_params );
