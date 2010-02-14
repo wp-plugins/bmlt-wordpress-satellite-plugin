@@ -37,11 +37,6 @@ table#bmlt_container input.c_comdef_search_specification_search_string_text
 	width: 30em;
 }
 
-table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div
-{
-	position: relative;
-}
-
 table#bmlt_container tr.c_comdef_search_results_header_row a,
 table#bmlt_container tr.c_comdef_search_results_header_row a:visited,
 table#bmlt_container div.bmlt_menu_div a,
