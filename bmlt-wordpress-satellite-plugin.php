@@ -756,7 +756,7 @@ class BMLTPlugin
 			// If we will be POSTing this transaction, we split up the URI.
 			if ( $in_post )
 				{
-				$spli = explode ( "?", $in_uri );
+				$spli = explode ( "?", $in_uri, 1 );
 				
 				if ( is_array ( $spli ) && count ( $spli ) )
 					{
