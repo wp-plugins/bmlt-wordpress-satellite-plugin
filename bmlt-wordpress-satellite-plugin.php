@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.4.4
+Version: 1.5
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -287,10 +287,21 @@ class BMLTPlugin
 					}
 				
 				$the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
+		
+				$the_content = preg_replace ( "|(\<p[^>]*?>)?\<\!\-\-BMLT\-\-\>(\<\/p[^>]*?>)?|", $the_new_content, $the_content );
+				}
+			
+			$matches = array();
+			while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|', $the_content, $matches ) )
+				{
+				// This stupid thing is because WP is nice enough to mess up the ampersands.
+				$uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+				$the_new_content = self::call_curl ( $uri, true );
+				$the_content = preg_replace('|(\<p[^>]*?>)?\<!\-\-\s?BMLT_SIMPLE.*?\-\-\>(\<\/p[^>]*?>)?|', $the_new_content, $the_content, 1 );
 				}
 			}
 		
-		return preg_replace ( "|(\<p[^>]*?>)?\<\!\-\-BMLT\-\-\>(\<\/p[^>]*?>)?|", $the_new_content, $the_content );
+		return $the_content;
 		}
 	
 	/**
