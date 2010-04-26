@@ -26,7 +26,7 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
-1.5.2 -April 23, 2010
+1.5.2 -April 26, 2010
 	Fixed an old bug that could affect the way the server interaction works (curl).
 		
 1.5.1 -April 23, 2010
