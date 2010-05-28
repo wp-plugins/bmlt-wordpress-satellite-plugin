@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.2
+Version: 1.5.3
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -105,7 +105,7 @@ class BMLTPlugin
 			
 		foreach ( $this->my_http_vars as $key => $value )
 			{
-			if ( $key != 'switcher' )	// We don't propagate switcher.
+			if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )	// We don't propagate switcher.
 				{
 				if ( is_array ( $value ) )
 					{
@@ -135,6 +135,13 @@ class BMLTPlugin
 			{
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
 			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params, false ) );
+			}
+				
+		if ( isset ( $this->my_http_vars['direct_simple'] ) )
+			{
+			$root_server = $options['root_server']."client_interface/simple/index.php";
+			$result = preg_replace ( '|\<a |', '<a rel="external" ', self::call_curl ( "$root_server?direct_simple".$this->my_params, false ) );
+			die ( $result );
 			}
 				
 		if ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
