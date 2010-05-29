@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.3
+Version: 1.5.4
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -140,7 +140,13 @@ class BMLTPlugin
 		if ( isset ( $this->my_http_vars['direct_simple'] ) )
 			{
 			$root_server = $options['root_server']."client_interface/simple/index.php";
-			$result = preg_replace ( '|\<a |', '<a rel="external" ', self::call_curl ( "$root_server?direct_simple".$this->my_params, false ) );
+			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params, false );
+			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+			if ( $this->my_http_vars['single_uri'] )
+				{
+				$result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".__('Follow This Link for Details About This Meeting.')."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+				$result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.__('Follow This Link to be Taken to A Google Maps Location for This Meeting.').'"', $result );
+				}
 			die ( $result );
 			}
 				
@@ -192,6 +198,7 @@ class BMLTPlugin
 		{
 		$options = $this->getAdminOptions ( );
 		$root_server_root = $options['root_server'];
+		$plugin_dir = preg_replace ( '|.*?'.preg_quote ( 'wp-content/plugins/' ).'|', get_option('siteurl').'/wp-content/plugins/', dirname ( __FILE__ ) );
 		
 		if ( $root_server_root )
 			{
@@ -212,7 +219,8 @@ class BMLTPlugin
 					
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
 					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-					echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
+					echo '<link rel="stylesheet" href="'.$plugin_dir.'/styles.css" type="text/css" />';
+					
 					$additional_css = trim ( $options['additional_css'] );
 					if ( $options['push_down_more_details'] )
 						{
@@ -225,6 +233,11 @@ class BMLTPlugin
 						{
 						echo '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
 						}
+					}
+				else	// This is necessary for the simple search feature.
+					{
+					echo "<!-- Added by the BMLT plugin. -->\n";
+					echo '<script src="'.$plugin_dir.'/ajax_threads.js" type="text/javascript"></script>';
 					}
 				}
 			}
@@ -309,6 +322,58 @@ class BMLTPlugin
 			}
 		
 		return $the_content;
+		}
+		
+	/**
+		\brief This is a function that filters the content, and replaces a portion with the "simple"
+		search, if provided by the 'bmlt_simple_searches' custom field.
+		
+		\returns a string, containing the content. Null if the call fails to get any data.
+	*/	
+	function display_simple_searches ( $in_content )
+		{
+		if ( preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $in_content ) )
+			{
+			$text = get_post_meta ( get_the_ID(), 'bmlt_simple_searches', true );
+			$display .= '';
+			if ( $text )
+				{
+				$text_ar = explode ( "\n", $text );
+				if ( is_array ( $text_ar ) && count ( $text_ar ) )
+					{
+					$display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
+					$display .= '<select id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+					$display .= '<option disabled="disabled">'.__('Select A Meeting Search').'</option>';
+					$lines_max = count ( $text_ar );
+					$lines = 0;
+					while ( $lines < $lines_max )
+						{
+						$line['parameters'] = trim($text_ar[$lines++]);
+						$line['prompt'] = trim($text_ar[$lines++]);
+						if ( $line['parameters'] && $line['prompt'] )
+							{
+							$uri = get_bloginfo('home').'/index.php?direct_simple&switcher=GetSearchResults&amp;'.$line['parameters'];
+							$display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
+							}
+						}
+					$display .= '<option disabled="disabled"></option>';
+					$display .= '<option disabled="disabled" value="">'.__('Clear Search Results').'</option>';
+					$display .= '</select></div></form>';
+		
+					$display .= '<script type="text/javascript">';
+					$display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
+					$display .= 'function bmlt_fill_div(in_uri,in_header){if(!in_uri){var option_list=document.getElementById(\'meeting_search_select\').options;document.getElementById(\'simple_search_container\').innerHTML=\'\';document.getElementById(\'meeting_search_select\').selectedIndex=0;option_list[option_list.length-1].disabled=true;}else{document.getElementById(\'simple_search_container\').innerHTML=\'<img class="bmlt_simple_throbber_img" alt="throbber" src="'.get_bloginfo( 'stylesheet_directory' ).'/images/throbber.gif" />\';SimpleAJAXCall(in_uri,bmlt_fill_div_callback,\'get\',in_header);};};';
+					$display .= 'function bmlt_fill_div_callback(in_text,in_header){document.getElementById(\'simple_search_container\').innerHTML=\'<h2 class="bmlt_simple_header">\'+in_header+\'</h2>\'+in_text;};';
+					$display .= '</script>';
+					$display .= '<div id="simple_search_container"></div></div>';
+					$display .= '<div id="noscriptwarning"><noscript><em>'.__('THIS SEARCH WILL NOT WORK UNLESS YOU HAVE JAVASCRIPT ENABLED.').'</em></noscript></div>';
+					}
+				}
+			
+			$in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1 );
+			}
+		
+		return $in_content;
 		}
 	
 	/**
@@ -864,7 +929,7 @@ class BMLTPlugin
 			}
 		
 		return $ret;
-	}
+		}
 };
 
 if ( class_exists ( "BMLTPlugin" ) )
@@ -899,6 +964,7 @@ if ( class_exists ( "BMLTPlugin" ) )
 		}
 	
 	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'content_filter'), 10  );
+	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'display_simple_searches'), 10  );
 	add_filter ( 'wp_head', array ( &$BMLTPluginOp, 'head' ) );
 	add_action ( 'init', array ( &$BMLTPluginOp, 'init' ) );
 	}
