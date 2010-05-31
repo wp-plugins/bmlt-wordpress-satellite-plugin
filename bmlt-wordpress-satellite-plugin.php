@@ -215,6 +215,7 @@ class BMLTPlugin
 						header ( 'Location: '.$root_server_root );
 						}
 
+
 			
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
@@ -343,7 +344,7 @@ class BMLTPlugin
 				if ( is_array ( $text_ar ) && count ( $text_ar ) )
 					{
 					$display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
-					$display .= '<select autocomplete="off" id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+					$display .= '<select id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
 					$display .= '<option disabled="disabled" selected="selected">'.__('Select A Meeting Search').'</option>';
 					$lines_max = count ( $text_ar );
 					$lines = 0;
@@ -353,7 +354,7 @@ class BMLTPlugin
 						$line['prompt'] = trim($text_ar[$lines++]);
 						if ( $line['parameters'] && $line['prompt'] )
 							{
-							$uri = get_bloginfo('home').'/index.php?direct_simple&switcher=GetSearchResults&amp;'.$line['parameters'];
+							$uri = get_bloginfo('home').'/index.php?direct_simple&switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
 							$display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
 							}
 						}
@@ -362,7 +363,7 @@ class BMLTPlugin
 					$display .= '</select></div></form>';
 		
 					$display .= '<script type="text/javascript">';
-					$display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
+					$display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';document.getElementById(\'meeting_search_select\').selectedIndex=0;';
 					$display .= 'function bmlt_fill_div(in_uri,in_header){if(!in_uri){var option_list=document.getElementById(\'meeting_search_select\').options;document.getElementById(\'simple_search_container\').innerHTML=\'\';document.getElementById(\'meeting_search_select\').selectedIndex=0;option_list[option_list.length-1].disabled=true;}else{document.getElementById(\'simple_search_container\').innerHTML=\'<img class="bmlt_simple_throbber_img" alt="throbber" src="'.get_bloginfo( 'stylesheet_directory' ).'/images/throbber.gif" />\';SimpleAJAXCall(in_uri,bmlt_fill_div_callback,\'get\',in_header);};};';
 					$display .= 'function bmlt_fill_div_callback(in_text,in_header){document.getElementById(\'simple_search_container\').innerHTML=\'<h2 class="bmlt_simple_header">\'+in_header+\'</h2>\'+in_text;};';
 					$display .= '</script>';
@@ -546,6 +547,7 @@ class BMLTPlugin
 									$lang_popup .= ' selected="selected"';
 									}
 								
+
 								$lang_popup .= ">$value</option>";
 								}
 							$lang_popup .= '</select>';
