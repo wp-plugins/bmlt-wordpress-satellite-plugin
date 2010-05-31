@@ -369,7 +369,6 @@ class BMLTPlugin
 					$display .= 'function bmlt_fill_div_callback(in_text,in_header){document.getElementById(\'simple_search_container\').innerHTML=\'<h2 class="bmlt_simple_header">\'+in_header+\'</h2>\'+in_text;};';
 					$display .= '</script>';
 					$display .= '<div id="simple_search_container"></div></div>';
-					$display .= '<div id="noscriptwarning"><noscript>'.__('THIS SEARCH WILL NOT WORK UNLESS YOU HAVE JAVASCRIPT ENABLED.').'</noscript></div>';
 					}
 				}
 			
