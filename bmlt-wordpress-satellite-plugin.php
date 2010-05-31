@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.4
+Version: 1.5.5
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -214,12 +214,13 @@ class BMLTPlugin
 						{
 						header ( 'Location: '.$root_server_root );
 						}
+
 			
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
 					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-					echo '<link rel="stylesheet" href="'.$plugin_dir.'/styles.css" type="text/css" />';
+					echo '<link rel="stylesheet" href="'.$plugin_dir.'/style_stripper.php?filename=styles.css" type="text/css" />';
 					
 					$additional_css = trim ( $options['additional_css'] );
 					if ( $options['push_down_more_details'] )
@@ -237,7 +238,7 @@ class BMLTPlugin
 				else	// This is necessary for the simple search feature.
 					{
 					echo "<!-- Added by the BMLT plugin. -->\n";
-					echo '<script src="'.$plugin_dir.'/ajax_threads.js" type="text/javascript"></script>';
+					echo '<script src="'.$plugin_dir.'/js_stripper.php?filename=ajax_threads.js" type="text/javascript"></script>';
 					}
 				}
 			}
@@ -342,8 +343,8 @@ class BMLTPlugin
 				if ( is_array ( $text_ar ) && count ( $text_ar ) )
 					{
 					$display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
-					$display .= '<select id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
-					$display .= '<option disabled="disabled">'.__('Select A Meeting Search').'</option>';
+					$display .= '<select autocomplete="off" id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+					$display .= '<option disabled="disabled" selected="selected">'.__('Select A Meeting Search').'</option>';
 					$lines_max = count ( $text_ar );
 					$lines = 0;
 					while ( $lines < $lines_max )
