@@ -344,6 +344,7 @@ class BMLTPlugin
 				if ( is_array ( $text_ar ) && count ( $text_ar ) )
 					{
 					$display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
+					$display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
 					$display .= '<select id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
 					$display .= '<option disabled="disabled" selected="selected">'.__('Select A Meeting Search').'</option>';
 					$lines_max = count ( $text_ar );
@@ -368,7 +369,7 @@ class BMLTPlugin
 					$display .= 'function bmlt_fill_div_callback(in_text,in_header){document.getElementById(\'simple_search_container\').innerHTML=\'<h2 class="bmlt_simple_header">\'+in_header+\'</h2>\'+in_text;};';
 					$display .= '</script>';
 					$display .= '<div id="simple_search_container"></div></div>';
-					$display .= '<div id="noscriptwarning"><noscript><em>'.__('THIS SEARCH WILL NOT WORK UNLESS YOU HAVE JAVASCRIPT ENABLED.').'</em></noscript></div>';
+					$display .= '<div id="noscriptwarning"><noscript>'.__('THIS SEARCH WILL NOT WORK UNLESS YOU HAVE JAVASCRIPT ENABLED.').'</noscript></div>';
 					}
 				}
 			
