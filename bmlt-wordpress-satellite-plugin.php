@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.5
+Version: 1.5.6
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -210,12 +210,10 @@ class BMLTPlugin
 				if ( $page_obj && preg_match ( "/<!-- ?BMLT ?-->/", $page_obj->post_content ) )
 					{
 					// Mobile browsers get redirected to the root server.
-					if ( $this->_mobileBrowser() )
+					if ( $this->_mobileBrowser() && !$this->my_http_vars['single_meeting_id'] && !$this->my_http_vars['do_search'] )
 						{
 						header ( 'Location: '.$root_server_root );
 						}
-
-
 			
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
@@ -355,7 +353,7 @@ class BMLTPlugin
 						$line['prompt'] = trim($text_ar[$lines++]);
 						if ( $line['parameters'] && $line['prompt'] )
 							{
-							$uri = get_bloginfo('home').'/index.php?direct_simple&switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
+							$uri = get_bloginfo('home').'/index.php?direct_simple&amp;switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
 							$display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
 							}
 						}
