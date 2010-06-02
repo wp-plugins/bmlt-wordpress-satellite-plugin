@@ -355,7 +355,7 @@ class BMLTPlugin
 						$line['prompt'] = trim($text_ar[$lines++]);
 						if ( $line['parameters'] && $line['prompt'] )
 							{
-							$uri = get_bloginfo('home').'/index.php?direct_simple&switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
+							$uri = get_bloginfo('home').'/index.php?direct_simple&amp;switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
 							$display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
 							}
 						}
