@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.6
+Version: 1.5.7
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -218,7 +218,14 @@ class BMLTPlugin
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+					try
+						{
+						echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+						}
+					catch ( Exception $e )
+						{
+						}
+					
 					echo '<link rel="stylesheet" href="'.$plugin_dir.'/style_stripper.php?filename=styles.css" type="text/css" />';
 					
 					$additional_css = trim ( $options['additional_css'] );
@@ -289,7 +296,13 @@ class BMLTPlugin
 					
 					$map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
 					$uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center$pre_checked_param";
-					$the_new_content = self::call_curl ( $uri );
+					try
+						{
+						$the_new_content = self::call_curl ( $uri );
+						}
+					catch ( Exception $e )
+						{
+						}
 					}
 				elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
 					{
@@ -684,6 +697,7 @@ class BMLTPlugin
 				/** \brief	
 				*/
 				c_geocoder_browser_set_center.prototype.Zoomend = function ( in_old_zoom, in_new_zoom )
+
 				{
 					document.getElementById('bmlt_map_zoom').value = in_new_zoom;
 				};
