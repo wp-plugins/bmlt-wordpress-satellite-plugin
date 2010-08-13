@@ -17,7 +17,8 @@ It is very easy to install and use. It has an administration panel that lets you
 
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<!--BMLT-->` in the HTML view of a page. It will be replaced by the plugin.
+1. Place `<!--BMLT-->` or `[[BMLT]]` in the HTML view of a page. It will be replaced by the plugin.
+1. You can also use <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/the-bmlt-in-depth/using-the-simple-table-output/">special shortcodes and HTML comments</a> (It's a slow page -have patience) to specify tables and blocks of predetermined search results.
 
 == Screenshots ==
 
