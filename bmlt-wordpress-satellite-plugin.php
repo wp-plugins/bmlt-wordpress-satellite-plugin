@@ -9,7 +9,7 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.5.8
+Version: 1.5.9
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
@@ -134,13 +134,13 @@ class BMLTPlugin
 		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
 			{
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params, false ) );
+			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params ) );
 			}
 				
 		if ( isset ( $this->my_http_vars['direct_simple'] ) )
 			{
 			$root_server = $options['root_server']."client_interface/simple/index.php";
-			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params, false );
+			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params );
 			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
 			if ( $this->my_http_vars['single_uri'] )
 				{
@@ -330,7 +330,7 @@ class BMLTPlugin
 				{
 				// This stupid thing is because WP is nice enough to mess up the ampersands.
 				$uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
-				$the_new_content = self::call_curl ( $uri, true );
+				$the_new_content = self::call_curl ( $uri );
 				$the_content = preg_replace('|(\<p[^>]*?>)?\<!\-\-\s?BMLT_SIMPLE.*?\-\-\>(\<\/p[^>]*?>)?|', $the_new_content, $the_content, 1 );
 				}
 			
@@ -339,7 +339,7 @@ class BMLTPlugin
 				{
 				// This stupid thing is because WP is nice enough to mess up the ampersands.
 				$uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
-				$the_new_content = self::call_curl ( $uri, true );
+				$the_new_content = self::call_curl ( $uri );
 				$the_content = preg_replace('|(\<p[^>]*?>)?\[\[\s?BMLT_SIMPLE.*?\]\](\<\/p[^>]*?>)?|', $the_new_content, $the_content, 1 );
 				}
 			}
@@ -861,7 +861,7 @@ class BMLTPlugin
 		\throws an exception if the call fails.
 	*/
 	static function call_curl ( $in_uri,				///< A string. The URI to call.
-								$in_post = true,		///< If false, the transaction is a GET, not a POST. Default is true.
+								$in_post = false,		///< If false, the transaction is a GET, not a POST. Default is true.
 								&$http_status = null	///< Optional reference to a string. Returns the HTTP call status.
 								)
 		{
