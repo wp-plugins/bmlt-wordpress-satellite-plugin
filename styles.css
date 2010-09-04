@@ -6,14 +6,18 @@ table#bmlt_container .no_js
 	color:red;
 }
 
-table#bmlt_container.bmlt_container_table
+table#bmlt_container.bmlt_container_table,
+table#bmlt_container .bmlt_search_spec_table
 {
 	text-align: center;
 	width: 100%;
-	margin-left:auto;
-	margin-right:auto;
 }
 
+table#bmlt_container #c_comdef_search_specification_form_container_div
+{
+	width:100%;
+}
+					
 table#bmlt_container .c_comdef_search_specification_map_vis_a,
 table#bmlt_container .c_comdef_search_specification_map_invis_a
 {
