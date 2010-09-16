@@ -27,6 +27,9 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
+1.5.11 -September 16, 2010
+	Added support for some new initial screen modes.
+	
 1.5.10 -September 4, 2010
 	Added a bit of default CSS to make the search specification screen more adaptable.
 	
