@@ -620,7 +620,7 @@ class BMLTPlugin
 										{
 										echo ' selected="selected"';
 										}
-									echo '>'.htmlspecialchars ( $prompts[$c] ).'</option>';
+									echo '>'.__( htmlspecialchars ( $prompts[$c] ), "BMLTPlugin" ).'</option>';
 									}
 							?>
 							</select>
