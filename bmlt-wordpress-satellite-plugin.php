@@ -9,12 +9,10 @@ Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin implementation of the Basic Meeting List Toolbox.
 This will replace the "&lt;!--BMLT--&gt;" in the content with the BMLT search.
 If you place that in any part of a page (not a post), the page will contain a BMLT satellite server.
-Version: 1.4.3
+Version: 1.5.11
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 You need to specify "<!--BMLT-->" in the code section of a page (Will not work in a post).
 */ 
-//ini_set('display_errors', 1);
-//ini_set('error_reporting', E_ALL);
 
 /**
 	\class BMLTPlugin
@@ -51,7 +49,7 @@ class BMLTPlugin
 	var $language_menu_prompt = 'Select a Language:';
 	var $support_old_browsers_prompt = 'Support Non-JavaScript Browsers';
 	var $no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a>.</noscript>';
-	var $initial_view = array ( 'values' => array ( '', 'map', 'text', 'advanced' ), 'prompts' => array ( 'Root Server Decides', 'Map', 'Text', 'Advanced' ) );
+	var $initial_view = array ( 'values' => array ( '', 'map', 'text', 'advanced', 'advanced_map', 'advanced_text' ), 'prompts' => array ( 'Root Server Decides', 'Map', 'Text', 'Advanced (Server Decides)', 'Advanced Map', 'Advanced Text' ) );
 	var $initial_view_prompt = 'Initial Search Type:';
 	var $new_search_label = 'Specific URL For a New Search:';
 	var $new_search_suffix = ' (Leave blank for automatic)';
@@ -107,7 +105,7 @@ class BMLTPlugin
 			
 		foreach ( $this->my_http_vars as $key => $value )
 			{
-			if ( $key != 'switcher' )	// We don't propagate switcher.
+			if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )	// We don't propagate switcher.
 				{
 				if ( is_array ( $value ) )
 					{
@@ -136,7 +134,20 @@ class BMLTPlugin
 		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
 			{
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params, false ) );
+			die ( self::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params ) );
+			}
+				
+		if ( isset ( $this->my_http_vars['direct_simple'] ) )
+			{
+			$root_server = $options['root_server']."client_interface/simple/index.php";
+			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params );
+			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+			if ( $this->my_http_vars['single_uri'] )
+				{
+				$result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".__('Follow This Link for Details About This Meeting.')."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+				$result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.__('Follow This Link to be Taken to A Google Maps Location for This Meeting.').'"', $result );
+				}
+			die ( $result );
 			}
 				
 		if ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
@@ -166,6 +177,16 @@ class BMLTPlugin
 			{
 			$ret = isset ( $this->my_http_vars['simulate_android'] ) || preg_match ( '/android/i', $_SERVER['HTTP_USER_AGENT'] );
 			}
+
+		if ( !$ret )
+			{
+			$ret = isset ( $this->my_http_vars['simulate_blackberry'] ) || preg_match ( '/blackberry/i', $_SERVER['HTTP_USER_AGENT'] );
+			}
+	
+		if ( !$ret )
+			{
+			$ret = isset ( $this->my_http_vars['simulate_opera_mini'] ) || preg_match ( "/opera\s+mini/i", $_SERVER['HTTP_USER_AGENT'] );
+			}
 		
 		return $ret;
 		}
@@ -177,6 +198,7 @@ class BMLTPlugin
 		{
 		$options = $this->getAdminOptions ( );
 		$root_server_root = $options['root_server'];
+		$plugin_dir = preg_replace ( '|.*?'.preg_quote ( 'wp-content/plugins/' ).'|', get_option('siteurl').'/wp-content/plugins/', dirname ( __FILE__ ) );
 		
 		if ( $root_server_root )
 			{
@@ -185,10 +207,10 @@ class BMLTPlugin
 			if ( $page_obj_id )
 				{
 				$page_obj = get_page ( $page_obj_id );
-				if ( $page_obj && preg_match ( "/<!-- ?BMLT ?-->/", $page_obj->post_content ) )
+				if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
 					{
 					// Mobile browsers get redirected to the root server.
-					if ( $this->_mobileBrowser() )
+					if ( $this->_mobileBrowser() && !$this->my_http_vars['single_meeting_id'] && !$this->my_http_vars['do_search'] )
 						{
 						header ( 'Location: '.$root_server_root );
 						}
@@ -196,9 +218,18 @@ class BMLTPlugin
 					$root_server = $root_server_root."client_interface/xhtml/index.php";
 					
 					echo "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-					echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-					echo '<link rel="stylesheet" href="'.get_option('siteurl').'/wp-content/plugins/bmlt-wordpress-satellite-plugin/styles.css" type="text/css" />';
+					try
+						{
+						echo self::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+						}
+					catch ( Exception $e )
+						{
+						}
+					
+					echo '<link rel="stylesheet" href="'.$plugin_dir.'/style_stripper.php?filename=styles.css" type="text/css" />';
+					
 					$additional_css = trim ( $options['additional_css'] );
+					
 					if ( $options['push_down_more_details'] )
 						{
 						$additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
@@ -210,6 +241,11 @@ class BMLTPlugin
 						{
 						echo '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
 						}
+					}
+				else	// This is necessary for the simple search feature.
+					{
+					echo "<!-- Added by the BMLT plugin. -->\n";
+					echo '<script src="'.$plugin_dir.'/js_stripper.php?filename=ajax_threads.js" type="text/javascript"></script>';
 					}
 				}
 			}
@@ -229,7 +265,7 @@ class BMLTPlugin
 			{
 			$root_server = $root_server_root."client_interface/xhtml/index.php";
 				
-			if ( preg_match ( "/<!-- ?BMLT ?-->/", $the_content) && is_page() )
+			if ( (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $the_content) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $the_content)) && is_page() )
 				{
 				$pid = get_page_uri(get_the_ID());
 				
@@ -261,7 +297,13 @@ class BMLTPlugin
 					
 					$map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
 					$uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center$pre_checked_param";
-					$the_new_content = self::call_curl ( $uri );
+					try
+						{
+						$the_new_content = self::call_curl ( $uri );
+						}
+					catch ( Exception $e )
+						{
+						}
 					}
 				elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
 					{
@@ -279,10 +321,85 @@ class BMLTPlugin
 					}
 				
 				$the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
+		
+				$the_content = preg_replace ( "|(\<p[^>]*?>)?\[\[\s?BMLT\s?\]\](\<\/p[^>]*?>)?|", $the_new_content, $the_content );
+				$the_content = preg_replace ( "|(\<p[^>]*?>)?\<\!\-\-\s?BMLT\s?\-\-\>(\<\/p[^>]*?>)?|", $the_new_content, $the_content );
+				}
+			
+			$matches = array();
+			while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|', $the_content, $matches ) )
+				{
+				// This stupid thing is because WP is nice enough to mess up the ampersands.
+				$uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+				$the_new_content = self::call_curl ( $uri );
+				$the_content = preg_replace('|(\<p[^>]*?>)?\<!\-\-\s?BMLT_SIMPLE.*?\-\-\>(\<\/p[^>]*?>)?|', $the_new_content, $the_content, 1 );
+				}
+			
+			$matches = array();
+			while ( preg_match ( '|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]>|', $the_content, $matches ) )
+				{
+				// This stupid thing is because WP is nice enough to mess up the ampersands.
+				$uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+				$the_new_content = self::call_curl ( $uri );
+				$the_content = preg_replace('|(\<p[^>]*?>)?\[\[\s?BMLT_SIMPLE.*?\]\](\<\/p[^>]*?>)?|', $the_new_content, $the_content, 1 );
 				}
 			}
 		
-		return preg_replace ( "|(\<p[^>]*?>)?\<\!\-\-BMLT\-\-\>(\<\/p[^>]*?>)?|", $the_new_content, $the_content );
+		return $the_content;
+		}
+		
+	/**
+		\brief This is a function that filters the content, and replaces a portion with the "simple"
+		search, if provided by the 'bmlt_simple_searches' custom field.
+		
+		\returns a string, containing the content. Null if the call fails to get any data.
+	*/	
+	function display_simple_searches ( $in_content )
+		{
+		if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $in_content ) )
+			{
+			$text = get_post_meta ( get_the_ID(), 'bmlt_simple_searches', true );
+			$display .= '';
+			if ( $text )
+				{
+				$text_ar = explode ( "\n", $text );
+				if ( is_array ( $text_ar ) && count ( $text_ar ) )
+					{
+					$display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
+					$display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
+					$display .= '<select id="meeting_search_select"class="simple_search_list" onchange="bmlt_fill_div(this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+					$display .= '<option disabled="disabled" selected="selected">'.__('Select A Meeting Search').'</option>';
+					$lines_max = count ( $text_ar );
+					$lines = 0;
+					while ( $lines < $lines_max )
+						{
+						$line['parameters'] = trim($text_ar[$lines++]);
+						$line['prompt'] = trim($text_ar[$lines++]);
+						if ( $line['parameters'] && $line['prompt'] )
+							{
+							$uri = get_bloginfo('home').'/index.php?direct_simple&amp;switcher=GetSearchResults&amp;'.htmlspecialchars($line['parameters']);
+							$display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
+							}
+						}
+					$display .= '<option disabled="disabled"></option>';
+					$display .= '<option disabled="disabled" value="">'.__('Clear Search Results').'</option>';
+					$display .= '</select></div></form>';
+		
+					$display .= '<script type="text/javascript">';
+					$display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';document.getElementById(\'meeting_search_select\').selectedIndex=0;';
+					$display .= 'function bmlt_fill_div(in_uri,in_header){if(!in_uri){var option_list=document.getElementById(\'meeting_search_select\').options;document.getElementById(\'simple_search_container\').innerHTML=\'\';document.getElementById(\'meeting_search_select\').selectedIndex=0;option_list[option_list.length-1].disabled=true;}else{document.getElementById(\'simple_search_container\').innerHTML=\'<img class="bmlt_simple_throbber_img" alt="throbber" src="'.get_bloginfo( 'stylesheet_directory' ).'/images/throbber.gif" />\';SimpleAJAXCall(in_uri,bmlt_fill_div_callback,\'get\',in_header);};};';
+					$display .= 'function bmlt_fill_div_callback(in_text,in_header){document.getElementById(\'simple_search_container\').innerHTML=\'<h2 class="bmlt_simple_header">\'+in_header+\'</h2>\'+in_text;};';
+					$display .= '</script>';
+					$display .= '<div id="simple_search_container"></div></div>';
+					}
+				}
+			
+			$in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1 );
+			
+			$in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $display, $in_content, 1 );
+			}
+		
+		return $in_content;
 		}
 	
 	/**
@@ -314,6 +431,8 @@ class BMLTPlugin
 		  		$BMLTOptions[$key] = $value;
 				}
 			}
+
+		$BMLTOptions['root_server'] = preg_replace ( "#\/*?$#", "/", trim($BMLTOptions['root_server']), 1 );
 
 		update_option ( $this->adminOptionsName, $BMLTOptions );
 
@@ -452,6 +571,7 @@ class BMLTPlugin
 									$lang_popup .= ' selected="selected"';
 									}
 								
+
 								$lang_popup .= ">$value</option>";
 								}
 							$lang_popup .= '</select>';
@@ -464,6 +584,7 @@ class BMLTPlugin
 					}
 				}
 
+			$BMLTOptions['root_server'] = preg_replace ( "#\/*?$#", "/", trim($BMLTOptions['root_server']), 1 );
 			update_option ( $this->adminOptionsName, $BMLTOptions );
 			
 			echo '<div class="updated">';
@@ -499,7 +620,7 @@ class BMLTPlugin
 										{
 										echo ' selected="selected"';
 										}
-									echo '>'.htmlspecialchars ( $prompts[$c] ).'</option>';
+									echo '>'.__( htmlspecialchars ( $prompts[$c] ), "BMLTPlugin" ).'</option>';
 									}
 							?>
 							</select>
@@ -589,6 +710,7 @@ class BMLTPlugin
 				/** \brief	
 				*/
 				c_geocoder_browser_set_center.prototype.Zoomend = function ( in_old_zoom, in_new_zoom )
+
 				{
 					document.getElementById('bmlt_map_zoom').value = in_new_zoom;
 				};
@@ -740,7 +862,7 @@ class BMLTPlugin
 		\throws an exception if the call fails.
 	*/
 	static function call_curl ( $in_uri,				///< A string. The URI to call.
-								$in_post = true,		///< If false, the transaction is a GET, not a POST. Default is true.
+								$in_post = false,		///< If false, the transaction is a GET, not a POST. Default is true.
 								&$http_status = null	///< Optional reference to a string. Returns the HTTP call status.
 								)
 		{
@@ -762,7 +884,7 @@ class BMLTPlugin
 			// If we will be POSTing this transaction, we split up the URI.
 			if ( $in_post )
 				{
-				$spli = explode ( "?", $in_uri, 1 );
+				$spli = explode ( "?", $in_uri, 2 );
 				
 				if ( is_array ( $spli ) && count ( $spli ) )
 					{
@@ -835,7 +957,7 @@ class BMLTPlugin
 			}
 		
 		return $ret;
-	}
+		}
 };
 
 if ( class_exists ( "BMLTPlugin" ) )
@@ -870,6 +992,7 @@ if ( class_exists ( "BMLTPlugin" ) )
 		}
 	
 	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'content_filter'), 10  );
+	add_filter ( 'the_content', array ( &$BMLTPluginOp, 'display_simple_searches'), 10  );
 	add_filter ( 'wp_head', array ( &$BMLTPluginOp, 'head' ) );
 	add_action ( 'init', array ( &$BMLTPluginOp, 'init' ) );
 	}
