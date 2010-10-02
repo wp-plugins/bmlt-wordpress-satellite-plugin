@@ -15,7 +15,7 @@ table#bmlt_container .bmlt_search_spec_table
 
 table#bmlt_container #c_comdef_search_specification_form_container_div
 {
-	width:100%;
+	width:auto;
 }
 					
 table#bmlt_container .c_comdef_search_specification_map_vis_a,
