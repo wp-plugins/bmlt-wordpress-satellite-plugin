@@ -27,8 +27,9 @@ It is very easy to install and use. It has an administration panel that lets you
 3. The administration screen
 
 == Changelog ==
-1.5.12 -October 10, 2010
-	Changed the width of the specification screen to "auto" (Style change) in order to better fit some implementations.
+1.5.12 -October 2, 2010
+	Very, very minor change to a text display to make the plugin easier to localize.
+	Changed the CSS so that the plugin will adapt more efficiently to different environments.
 	
 1.5.11 -September 18, 2010
 	Added support for some new initial screen modes.
