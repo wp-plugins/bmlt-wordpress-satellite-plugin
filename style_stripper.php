@@ -21,22 +21,19 @@
 			$pathname = dirname ( __FILE__ )."/$pathname";
 			$opt = file_get_contents ( $pathname );
 			$opt = preg_replace( "|\/\*.*?\*\/|s", "", $opt );
-			$opt = preg_replace( "|\t+|s", " ", $opt );
-			$opt = preg_replace( "| +|s", " ", $opt );
-			$opt = preg_replace( "|[\n\r]+|s", "\n", $opt );
-			$opt = preg_replace( "|\n+|s", "\n", $opt );
-			$opt = preg_replace( "|\n+|", " ", $opt );
-			header ( "Content-type: text/css" );	
+			$opt = preg_replace( "|\s+|s", " ", $opt );
+			
+			header ( "Content-type: text/css" );
+			
+			$handler = null;
+			
 			if ( zlib_get_coding_type() === false )
 				{
-				ob_start("ob_gzhandler");
+				$handler = 'ob_gzhandler';
 				}
-			else
-				{
-				ob_start();
-				}
-
-				echo $opt;
+			
+			ob_start($handler);
+			echo $opt;
 			ob_end_flush();
 			}
 		else

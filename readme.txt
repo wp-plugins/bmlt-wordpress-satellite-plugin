@@ -22,11 +22,9 @@ It is very easy to install and use. It has an administration panel that lets you
 
 == Screenshots ==
 
-1. Search by map
-2. A map search result
-3. The administration screen
-
 == Changelog ==
+2.0 -
+
 1.5.12 -October 2, 2010
 	Very, very minor change to a text display to make the plugin easier to localize.
 	Changed the CSS so that the plugin will adapt more efficiently to different environments.
