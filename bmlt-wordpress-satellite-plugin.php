@@ -49,7 +49,9 @@ class BMLTPlugin
 	****************************************************************************************/
 	
 	// These are the old settings that we still care about.
-	static	$adminOptionsName = "BMLTAdminOptions";									///< The name, in the database, for the options for this plugin.
+	static	$adminOptionsName = "BMLTAdminOptions";									///< The name, in the database, for the version 1 options for this plugin.
+	static	$admin2OptionsName = "BMLT2AdminOptions";								///< These options are for version 2.
+	
 	static	$default_rootserver = 'http://bmlt.magshare.net/stable/main_server';	///< This is the default root BMLT server URI.
 	static	$default_map_center_latitude = 29.764377375163125;						///< This is the default basic search map center latitude
 	static	$default_map_center_longitude = -95.4931640625;							///< This is the default basic search map center longitude
@@ -140,71 +142,153 @@ class BMLTPlugin
 		{
 		return $this->my_driver;
 		}
-		
+	
 	/************************************************************************************//**
 	*	\brief This gets the admin options from the database.								*
 	*																						*
+	*	This takes some 'splainin'.															*
+	*	The admin2 options track how many servers we're tracking, and allow the admin to	*
+	*	increment by 1. The first options don't have a number. "Numbered" options begin at	*
+	*	2. You are allowed to save new options at 1 past the current number of options. You	*
+	*	delete options by decrementing the number in the admin2 options (the index). This	*
+	*	does not delete the options from the database. If you re-increment the options, you	*
+	*	will see the old values. It is possible to reset to default, and you do that by		*
+	*	specifying an option number less than 0 (-1).										*
+	*																						*
 	*	\returns an associative array, with the option settings.							*
 	****************************************************************************************/
-	function getAdminOptions ( $in_option_number = null	///< It is possible to store multiple options. If there is a number here (>0), that will be used.
+	function getBMLTOptions ( $in_option_number = null	///< It is possible to store multiple options. If there is a number here (>1), that will be used.
 							)
 		{
-		$BMLTOptions = array (	'root_server' => $this->default_rootserver,
-								'map_center_latitude' => $this->default_map_center_latitude,
-								'map_center_longitude' => $this->default_map_center_longitude,
-								'map_zoom' => $this->default_map_zoom,
-								'bmlt_language' => $this->default_language,
-								'bmlt_new_search_url' => $this->default_new_search,
-								'additional_css' => $this->default_additional_css
-								);
-
+		$BMLTOptions = null;
+		
 		if ( function_exists ( 'get_option' ) )
 			{
-			$option_number = null;
-			if ( intval ( $in_option_number ) > 0 )
-				{
-				$option_number = '_'.intval( $in_option_number );
-				}
+			$admin2Options = $this->getAdmin2Options ( );
 			
-			$old_BMLTOptions = get_option ( $this->adminOptionsName.$option_number );
+			$BMLTOptions = array (	'root_server' => self::$default_rootserver,
+									'map_center_latitude' => self::$default_map_center_latitude,
+									'map_center_longitude' => self::$default_map_center_longitude,
+									'map_zoom' => self::$default_map_zoom,
+									'bmlt_language' => self::$default_language,
+									'bmlt_new_search_url' => self::$default_new_search,
+									'additional_css' => self::$default_additional_css
+									);
 			
-			if ( is_array ( $old_BMLTOptions ) && count ( $old_BMLTOptions ) )
+			// Make sure we aren't resetting to default.
+			if ( ($in_option_number == null) || (intval ( $in_option_number ) > 0) )
 				{
-				foreach ( $old_BMLTOptions as $key => $value )
+				$option_number = null;
+				// If they want a certain option number, then it needs to be greater than 1, and within the number we have assigned.
+				if ( (intval ( $in_option_number ) > 1) && (intval ( $in_option_number ) <= $admin2Options['num_servers']) )
 					{
-					if ( isset ( $BMLTOptions[$key] ) )	// We deliberately ignore old settings that no longer apply.
+					$option_number = '_'.intval( $in_option_number );
+					}
+			
+				// These are the standard options.
+				$old_BMLTOptions = get_option ( self::$adminOptionsName.$option_number );
+				
+				if ( is_array ( $old_BMLTOptions ) && count ( $old_BMLTOptions ) )
+					{
+					foreach ( $old_BMLTOptions as $key => $value )
 						{
-						$BMLTOptions[$key] = $value;
+						if ( isset ( $BMLTOptions[$key] ) )	// We deliberately ignore old settings that no longer apply.
+							{
+							$BMLTOptions[$key] = $value;
+							}
 						}
 					}
+				
+				// Strip off the trailing slash.
+				$BMLTOptions['root_server'] = preg_replace ( "#\/$#", "", trim($BMLTOptions['root_server']), 1 );
 				}
 			
-			// Strip off the trailing slash.
-			$BMLTOptions['root_server'] = preg_replace ( "#\/+?$#", "", trim($BMLTOptions['root_server']), 1 );
-			
-			$this->setAdminOptions ( $in_option_number, $BMLTOptions );
+			$this->setBMLTOptions ( $in_option_number, $BMLTOptions );
 			}
 		else
 			{
 			echo "<!-- BMLTPlugin ERROR! No get_option()! -->";
 			}
+		
+		return $BMLTOptions;
 		}
 	
 	/************************************************************************************//**
 	*	\brief This updates the database with the given options.							*
 	****************************************************************************************/
-	function setAdminOptions (	$in_option_number = null,	///< It is possible to store multiple options. If there is a number here (>0), that will be used.
+	function setBMLTOptions (	$in_option_number = null,	///< It is possible to store multiple options. If there is a number here (>1), that will be used.
 								$in_options					///< An array. The options to be stored.
 							)
 		{
 		if ( function_exists ( 'update_option' ) )
 			{
+			$admin2Options = $this->getAdmin2Options ( );
+			
 			$option_number = null;
-			if ( intval ( $in_option_number ) > 0 )
+			// If they want a certain option number, then it needs to be greater than 1, and within the number we have assigned (We can also increase by 1).
+			if ( (intval ( $in_option_number ) > 1) && (intval ( $in_option_number ) <= ($admin2Options['num_servers']) + 1) )
 				{
 				$option_number = '_'.intval( $in_option_number );
 				}
-			update_option ( $this->adminOptionsName.$option_number, $BMLTOptions );
+			update_option ( $this->adminOptionsName.$option_number, $in_options );
+			
+			// If they want a certain option number, then it needs to be greater than 1, and within the number we have assigned.
+			if ( intval ( $in_option_number ) == ($admin2Options['num_servers'] + 1) )
+				{
+				$admin2Options['num_servers'] = intval( $in_option_number );
+
+				$this->setAdmin2Options ( $admin2Options );
+				}
+			}
+		else
+			{
+			echo "<!-- BMLTPlugin ERROR! No update_option()! -->";
+			}
+		}
+		
+	/************************************************************************************//**
+	*	\brief This gets the admin 2 options from the database.								*
+	*																						*
+	*	\returns an associative array, with the option settings.							*
+	****************************************************************************************/
+	function getAdmin2Options ( )
+		{
+		$bmlt2_BMLTOptions = null;
+		
+		if ( function_exists ( 'get_option' ) )
+			{
+			$bmlt2_BMLTOptions = array ('num_servers' => 1	///< This is how many servers we start with (1)
+										);
+			// We have a special set of options for version 2.
+			$old_BMLTOptions = get_option ( self::$admin2OptionsName );
+			
+			if ( is_array ( $old_BMLTOptions ) && count ( $old_BMLTOptions ) )
+				{
+				foreach ( $old_BMLTOptions as $key => $value )
+					{
+					$bmlt2_BMLTOptions[$key] = $value;
+					}
+				}
+			
+			$this->setAdmin2Options ( $bmlt2_BMLTOptions );
+			}
+		else
+			{
+			echo "<!-- BMLTPlugin ERROR! No get_option()! -->";
+			}
+			
+		return $bmlt2_BMLTOptions;
+		}
+	
+	/************************************************************************************//**
+	*	\brief This updates the database with the given options (Admin2 options).			*
+	****************************************************************************************/
+	function setAdmin2Options (	$in_options	///< An array. The options to be stored.
+								)
+		{
+		if ( function_exists ( 'update_option' ) )
+			{
+			update_option ( self::$admin2OptionsName, $in_options );
 			}
 		else
 			{
@@ -232,7 +316,7 @@ class BMLTPlugin
 	****************************************************************************************/
 	function head ( )
 		{
-			$head_content = "";
+			$head_content = "<!-- Added by the BMLTPlugin -->";
 			
 			echo $head_content;
 		}
