@@ -161,6 +161,189 @@ function u_test_get_test_server_uri ( )
 }
 
 /****************************************************************************************//**
+*	\brief Abuses the options functionality, to make sure they work.						*
+*																							*
+*	\returns A string. The XHTML to be displayed.											*
+********************************************************************************************/
+function u_test_options()
+{
+	global	$options;
+	$plugin_object =& BMLTPlugin::get_plugin_object();
+	$ret = '';
+	$ret .= '<h2>BEGIN OPTIONS TEST</h2>';
+	$ret .= '<div class="test_container_div">';
+	
+	// First, we check for the first options (Should be none).
+	$ret .= '<h3>BEGIN START FROM SCRATCH TEST</h3>';
+	$ret .= '<div class="test_container_div">';
+		$num = $plugin_object->get_num_options();
+		
+		$ret .= '<div class="test_container_div">';
+			$ret .= "There are $num options stored.";
+		$ret .= '</div>';
+		
+		$opt = $plugin_object->getBMLTOptions();
+		$ret .= '<div class="test_container_div">';
+			$ret .= 'Options returned: <pre>'.htmlspecialchars(print_r($opt,true)).'</pre>';
+		$ret .= '</div>';
+		$ret .= '<div class="test_container_div">';
+			$ret .= 'Options actually stored: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+		$ret .= '</div>';
+		$opt['root_server'] = 'THIS HAS BEEN CHANGED';
+		if ( !$plugin_object->setBMLTOptions ($opt) )
+			{
+			$ret .= '<h3>ERROR! The options were not saved by ID!</h3>';
+			}
+		else
+			{
+			$ret .= '<div class="test_container_div">';
+				$ret .= 'Options actually stored: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+			$ret .= '</div>';
+			}
+	$ret .= '</div>';
+	$ret .= '<h3>END START FROM SCRATCH TEST</h3>';
+	
+	$ret .= '<h3>BEGIN START FROM OLDER SETTINGS TEST</h3>';
+	$ret .= '<div class="test_container_div">';
+	$options = array ( 'BMLTAdminOptions' => array (
+		"root_server" => "http://localhost/test/bmlt_trunk/",
+		"gmaps_api_key" => "ABQIAAAABCC8PsaKPPEsC3k649kYPRTayKsye0hTYG-iMuljzAHNM4JcxhSlV55ZKpjgC9b-QsLtlkYPMO6omg",
+		"bmlt_fullscreen" => 0,
+		"map_center_latitude" => "40.66188943992168",
+		"map_center_longitude" => "-73.96991729736328",
+		"map_zoom" => "12",
+		"bmlt_language" => "en",
+		"support_old_browsers" => 0,
+		"bmlt_initial_view" => "map",
+		"bmlt_new_search_url" => "",
+		"bmlt_service_body_filters" => null,
+		"push_down_more_details" => "1",
+		"additional_css" => 'table#bmlt_container div#c_comdef_search_results_single_ajax_throbber_div{margin: 0;top: 50% !important;left: 50% !important;margin-left: -50px;margin-top: -50px;}'
+		));
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$opt = $plugin_object->getBMLTOptions();
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options returned: <pre>'.htmlspecialchars(print_r($opt,true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '</div>';
+	$ret .= '<h3>END START FROM OLDER SETTINGS TEST</h3>';
+	
+	$ret .= '<h3>BEGIN CREATE NEW SETTINGS TEST</h3>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$opt = $plugin_object->make_new_options();
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we made (index: '.$opt.'): <pre>'.htmlspecialchars(print_r($plugin_object->getBMLTOptions($opt),true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$opt = $plugin_object->make_new_options();
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we made (index: '.$opt.'): <pre>'.htmlspecialchars(print_r($plugin_object->getBMLTOptions($opt),true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$opt = $plugin_object->make_new_options();
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we made (index: '.$opt.'): <pre>'.htmlspecialchars(print_r($plugin_object->getBMLTOptions($opt),true)).'</pre>';
+	$ret .= '</div>';
+	$opt = $plugin_object->make_new_options();
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we made (index: '.$opt.'): <pre>'.htmlspecialchars(print_r($plugin_object->getBMLTOptions($opt),true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '</div>';
+	$ret .= '<h3>END CREATE NEW SETTINGS TEST</h3>';
+	
+	$ret .= '<h3>BEGIN CHANGE INDEXED SETTINGS TEST</h3>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$opt = $plugin_object->getBMLTOptions(1);
+	$opt['root_server'] = 'The ID of This Setting is '.$opt['id'];
+	$plugin_object->setBMLTOptions($opt);
+	$opt = $plugin_object->getBMLTOptions(2);
+	$opt['root_server'] = 'The ID of This Setting is '.$opt['id'];
+	$plugin_object->setBMLTOptions($opt);
+	$opt = $plugin_object->getBMLTOptions(3);
+	$opt['root_server'] = 'The ID of This Setting is '.$opt['id'];
+	$plugin_object->setBMLTOptions($opt, 3);
+	$opt = $plugin_object->getBMLTOptions(4);
+	$opt['root_server'] = 'The ID of This Setting is '.$opt['id'];
+	$plugin_object->setBMLTOptions($opt);
+	$opt = $plugin_object->getBMLTOptions(5);
+	$opt['root_server'] = 'The ID of This Setting is '.$opt['id'];
+	$plugin_object->setBMLTOptions($opt,5);
+	$ret .= '</div>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '<h3>END CHANGE INDEXED SETTINGS TEST</h3>';
+	
+	$ret .= '<h3>BEGIN DELETE INDEXED SETTINGS TEST</h3>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= '<h4>Starting Point</h4>';
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	
+	$ret .= '<h4>Delete the first one</h4>';
+	$plugin_object->delete_options(1);
+	
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	
+	$ret .= '<h4>Delete the third one</h4>';
+	$plugin_object->delete_options(3);
+	
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	
+	$ret .= '<h4>Delete the last one</h4>';
+	$plugin_object->delete_options(3);
+	
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	
+	$ret .= '<h4>Delete the first one</h4>';
+	$plugin_object->delete_options(1);
+	
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	
+	$ret .= '<h4>This one should fail. We can\'t delete the last one.</h4>';
+	// This should fail
+	$plugin_object->delete_options(1);
+	
+	$ret .= '<div class="test_container_div">';
+	$ret .= 'Options we have stored now: <pre>'.htmlspecialchars(print_r($options,true)).'</pre>';
+	$ret .= '</div>';
+	$ret .= '</div>';
+	$ret .= '<h3>END DELETE INDEXED SETTINGS TEST</h3>';
+
+	$ret .= '</div>';
+	$ret .= '<h2>END OPTIONS TEST</h2>';
+	
+	return $ret;
+}
+
+/****************************************************************************************//**
 *	\brief Runs the unit tests.																*
 *																							*
 *	\returns A string. The XHTML to be displayed.											*
@@ -266,6 +449,8 @@ function u_test()
 						{
 						$ret .= '<h3>ERROR! The options_page() function is not callable!</h3>';
 						}
+					
+					$ret .= u_test_options();
 					}
 				else
 					{

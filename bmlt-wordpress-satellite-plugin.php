@@ -112,7 +112,7 @@ class BMLTPlugin
 					}
 				else
 					{
-					echo "<!-- BMLTPlugin ERROR! No add_filter()! -->";
+					echo "<!-- BMLTPlugin ERROR (__construct)! No add_filter()! -->";
 					}
 				
 				if ( function_exists ( 'add_action' ) )
@@ -122,12 +122,12 @@ class BMLTPlugin
 					}
 				else
 					{
-					echo "<!-- BMLTPlugin ERROR! No add_action()! -->";
+					echo "<!-- BMLTPlugin ERROR (__construct)! No add_action()! -->";
 					}
 				}
 			else
 				{
-				echo "<!-- BMLTPlugin ERROR! Can't Instantiate the Satellite Driver! Please reinstall the plugin! -->";
+				echo "<!-- BMLTPlugin ERROR (__construct)! Can't Instantiate the Satellite Driver! Please reinstall the plugin! -->";
 				}
 			}
 		else
@@ -189,7 +189,7 @@ class BMLTPlugin
 									'bmlt_language' => self::$default_language,
 									'bmlt_new_search_url' => self::$default_new_search,
 									'additional_css' => self::$default_additional_css,
-									'id' => (function_exists ( 'microtime' ) ? microtime() : time())	// This gives the option a unique slug
+									'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time())	// This gives the option a unique slug
 									);
 			
 			// Make sure we aren't resetting to default.
@@ -215,24 +215,20 @@ class BMLTPlugin
 							}
 						}
 					}
-				
-				// If the option number is out of range (shouldn't be, but just to make sure), we set it to 1 if it is out of range.
-				if ( (intval ( $BMLTOptions['option_index'] ) < 1) || (intval ( $BMLTOptions['option_index'] ) > $this->get_num_options ( )) )
-					{
-					echo "<!-- BMLTPlugin ERROR! Option index out of range! -->";
-					$in_option_number = 1;
-					$BMLTOptions['option_index'] = 1;
-					}
 			
 				// Strip off the trailing slash.
 				$BMLTOptions['root_server'] = preg_replace ( "#\/$#", "", trim($BMLTOptions['root_server']), 1 );
 				}
+			else
+				{
+				$in_option_number = $this->get_num_options() + 1;
+				}
 			
-			$this->setBMLTOptions ( $in_option_number, $BMLTOptions );
+			$this->setBMLTOptions ( $BMLTOptions, $in_option_number );
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No get_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (getBMLTOptions)! No get_option()! -->";
 			}
 		
 		return $BMLTOptions;
@@ -268,54 +264,34 @@ class BMLTPlugin
 					$option_number = "_$i";
 					}
 				
-				$temp_BMLTOptions = get_option ( self::$adminOptionsName.$option_number );
+				$name = self::$adminOptionsName.$option_number;
+				$temp_BMLTOptions = get_option ( $name );
 				
-				if ( $temp_BMLTOptions['id'] == $in_option_id )
+				if ( is_array ( $temp_BMLTOptions ) && count ( $temp_BMLTOptions ) )
 					{
-					$BMLTOptions = $temp_BMLTOptions;
-					// If they want to know the ID, we supply it here.
-					if ( isset ( $out_option_number ) )
+					if ( intval ($temp_BMLTOptions['id']) == intval($in_option_id) )
 						{
-						$out_option_number = $i;
+						$BMLTOptions = $temp_BMLTOptions;
+						// If they want to know the ID, we supply it here.
+						if ( isset ( $out_option_number ) )
+							{
+							$out_option_number = $i;
+							}
+						break;
 						}
-					break;
+					}
+				else
+					{
+					echo "<!-- BMLTPlugin ERROR (getBMLTOptions_by_id)! No options found for $name! -->";
 					}
 				}
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No get_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (getBMLTOptions_by_id)! No get_option()! -->";
 			}
 		
 		return $BMLTOptions;
-		}
-	
-	/************************************************************************************//**
-	*	\brief This updates the database with the given options, using the ID in the 		*
-	*	options array. The options must already be saved. If the id is not found, they		*
-	*	will not be saved.																	*
-	*																						*
-	*	\returns a boolean. true if success.												*
-	****************************************************************************************/
-	function setBMLTOptions_by_id (	$in_options		///< An array. The options to be stored.
-									)
-		{
-		$ret = false;
-		$id = $in_options['id'];
-		$index = 0;
-		
-		$this->getBMLTOptions_by_id ( $id, $index );
-		
-		if ( $index > 0 )
-			{
-			$ret = $this->setBMLTOptions ( $index, $in_options );
-			}
-		else
-			{
-			echo "<!-- BMLTPlugin ERROR! ID not found! -->";
-			}
-			
-		return $ret;
 		}
 	
 	/************************************************************************************//**
@@ -323,37 +299,53 @@ class BMLTPlugin
 	*																						*
 	*	\returns a boolean. true if success.												*
 	****************************************************************************************/
-	function setBMLTOptions (	$in_option_number = null,	///< It is possible to store multiple options. If there is a number here (>1), that will be used.
-								$in_options					///< An array. The options to be stored.
+	function setBMLTOptions (	$in_options,				///< An array. The options to be stored. If no number is supplied in the next parameter, the ID is used.
+								$in_option_number = null	///< It is possible to store multiple options. If there is a number here (>1), that will be used.
 							)
 		{
 		$ret = false;
 		
 		if ( function_exists ( 'update_option' ) )
 			{
-			$option_number = null;
-			// If they want a certain option number, then it needs to be greater than 1, and within the number we have assigned (We can also increase by 1).
-			if ( (intval ( $in_option_number ) > 1) && (intval ( $in_option_number ) <= ($this->get_num_options ( ) + 1)) )
+			if ( ($in_option_number == null) || (intval($in_option_number) < 1) || (intval($in_option_number) > ($this->get_num_options ( ) + 1)) )
 				{
-				$option_number = '_'.intval( $in_option_number );
-				}
-			$in_option_number = (intval ( $in_option_number ) > 1) ? intval ( $in_option_number ) : 1;
-			
-			update_option ( $this->adminOptionsName.$option_number, $in_options );
-			
-			// If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
-			if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
-				{
-				$admin2Options = array ('num_servers' => intval( $in_option_number ));
-
-				$this->setAdmin2Options ( $admin2Options );
+				$in_option_number = 0;
+				$this->getBMLTOptions_by_id ( $in_options['id'], $in_option_number );
 				}
 			
-			$ret = true;
+			if ( intval ( $in_option_number ) > 0 )
+				{
+				$option_number = null;
+				// If they want a certain option number, then it needs to be greater than 1, and within the number we have assigned (We can also increase by 1).
+				if ( (intval ( $in_option_number ) > 1) && (intval ( $in_option_number ) <= ($this->get_num_options ( ) + 1)) )
+					{
+					$option_number = '_'.intval( $in_option_number );
+					}
+				$in_option_number = (intval ( $in_option_number ) > 1) ? intval ( $in_option_number ) : 1;
+				
+				$name = self::$adminOptionsName.$option_number;
+				
+				// If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
+				if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
+					{
+					$in_options['id'] = (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time());	// This gives the option a unique slug
+					$admin2Options = array ('num_servers' => intval( $in_option_number ));
+	
+					$this->setAdmin2Options ( $admin2Options );
+					}
+				
+				update_option ( $name, $in_options );
+				
+				$ret = true;
+				}
+			else
+				{
+				echo "<!-- BMLTPlugin ERROR (setBMLTOptions)! The option number ($in_option_number) is out of range! -->";
+				}
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No update_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (setBMLTOptions)! No update_option()! -->";
 			}
 			
 		return $ret;
@@ -387,7 +379,7 @@ class BMLTPlugin
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No get_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (getAdmin2Options)! No get_option()! -->";
 			}
 			
 		return $bmlt2_BMLTOptions;
@@ -410,7 +402,7 @@ class BMLTPlugin
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No update_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (setAdmin2Options)! No update_option()! -->";
 			}
 		
 		return $ret;
@@ -451,12 +443,11 @@ class BMLTPlugin
 		// If we successfully get the options, we save them, in order to 
 		if ( is_array ( $opt ) && count ( $opt ) )
 			{
-			$ret = $this->get_num_options ( ) + 1;
-			$this->setBMLTOptions ( $ret, $opt );
+			$ret = $this->get_num_options ( );
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! Failed to create new options! -->";
+			echo "<!-- BMLTPlugin ERROR (make_new_options)! Failed to create new options! -->";
 			}
 		
 		return $ret;
@@ -489,14 +480,14 @@ class BMLTPlugin
 	*	This is a bit of a delicate operation, because we need to re-index all of the other	*
 	*	options, beyond the one being deleted.												*
 	*																						*
-	*	You cannot delete the first options (1).											*
+	*	You cannot delete the first options (1), if they are the only ones.					*
 	*																						*
 	*	\returns a boolean. true if success.												*
 	****************************************************************************************/
-	function delete_options ( $in_option_number /**<	The number of the option to delete.
-														It can be 2 -> the number of available options.
+	function delete_options ( $in_option_number /**<	The index of the option to delete.
+														It can be 1 -> the number of available options.
 														For safety's sake, this cannot be optional.
-														We cannot delete the first (primary) option.
+														We cannot delete the first (primary) option if there are no others.
 												*/
 							)
 		{
@@ -507,7 +498,7 @@ class BMLTPlugin
 			{
 			$last_num = $this->get_num_options ( );
 			
-			if ( ($first_num > 1) && ($first_num <= $last_num ) )
+			if ( (($first_num > 1) && ($first_num <= $last_num )) || (($first_num == 1) && ($last_num > 1)) )
 				{
 				/*
 					OK. At this point, we know which option we'll be deleting. The way we "delete"
@@ -515,11 +506,10 @@ class BMLTPlugin
 					If this is the last one, then there's no need for a cascade, and we simply delete it.
 				*/
 				
-				
 				for ( $i = $first_num; $i < $last_num; $i++ )
 					{
 					$opt = $this->getBMLTOptions ( $i + 1 );
-					$this->setBMLTOptions ( $i, $opt );
+					$this->setBMLTOptions ( $opt, $i );
 					}
 				
 				$option_number = "_$last_num";
@@ -537,12 +527,12 @@ class BMLTPlugin
 				}
 			else
 				{
-				echo "<!-- BMLTPlugin ERROR! Option request number out of range! It must be between 2 and $last_num -->";
+				echo "<!-- BMLTPlugin ERROR (delete_options)! Option request number out of range! It must be between 2 and $last_num -->";
 				}
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! no delete_option()! -->";
+			echo "<!-- BMLTPlugin ERROR (delete_options)! no delete_option()! -->";
 			}
 		
 		return $ret;
@@ -595,11 +585,11 @@ class BMLTPlugin
 			}
 		elseif ( !function_exists ( 'add_options_page' ) )
 			{
-			echo "<!-- BMLTPlugin ERROR! No add_options_page()! -->";
+			echo "<!-- BMLTPlugin ERROR (option_menu)! No add_options_page()! -->";
 			}
 		else
 			{
-			echo "<!-- BMLTPlugin ERROR! No BMLTPlugin Object! -->";
+			echo "<!-- BMLTPlugin ERROR (option_menu)! No BMLTPlugin Object! -->";
 			}
 		}
 		
