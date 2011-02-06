@@ -108,7 +108,7 @@ function update_option (	$in_option_name,	///< The name of the option to update.
 /****************************************************************************************//**
 *	\brief Simulates the "delete_option" from WordPress										*
 ********************************************************************************************/
-function delete_option ( 	$in_option_name,	///< The name of the option to delete.
+function delete_option ( 	$in_option_name	///< The name of the option to delete.
 						)
 {
 	global	$options;
