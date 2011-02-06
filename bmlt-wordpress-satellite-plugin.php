@@ -18,6 +18,9 @@
 *	Install: Drop this directory into the "wp-content/plugins/" directory and activate it.	*
 ********************************************************************************************/
 
+// Include the satellite driver class.
+require_once ( 'bmlt_satellite_controller.class.php' );
+
 /****************************************************************************************//**
 *	\class BMLTPlugin																		*
 *																							*
@@ -27,9 +30,6 @@
 
 class BMLTPlugin
 {
-	// Include the satellite driver class.
-	require_once ( 'bmlt_satellite_controller.class.php' );
-
 	/************************************************************************************//**
 	*							STATIC DATA MEMBERS (SINGLETON)								*
 	****************************************************************************************/
