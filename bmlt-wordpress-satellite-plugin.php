@@ -452,7 +452,7 @@ class BMLTPlugin
 		if ( is_array ( $opt ) && count ( $opt ) )
 			{
 			$ret = $this->get_num_options ( ) + 1;
-			$this-.setBMLTOptions ( $ret, $opt );
+			$this->setBMLTOptions ( $ret, $opt );
 			}
 		else
 			{
