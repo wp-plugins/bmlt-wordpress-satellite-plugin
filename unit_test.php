@@ -17,6 +17,9 @@ define ('U_TEST_REMOTE_URI', 'http://bmlt.magshare.net/trunk/main_server' );
 /// If running on localhost, you can specify a local root URI. Comment this out to always use remote.
 define ('U_TEST_LOCAL_URI', 'http://localhost/test/bmlt_trunk' );
 
+/// This allows the JavaScript to be more easily debugged.
+define ('_DEBUG_MODE__', 1 );
+
 /// These hold the various callbacks.
 
 global	$callbacks;
@@ -30,6 +33,23 @@ global	$options;
 $options = null;
 
 require_once ( 'bmlt-wordpress-satellite-plugin.php' );
+
+/****************************************************************************************//**
+*	\brief Simulates the "plugins_url" from WordPress										*
+********************************************************************************************/
+function plugins_url ( )
+{
+	return "";
+}
+
+/****************************************************************************************//**
+*	\brief Simulates the "__" from WordPress												*
+********************************************************************************************/
+function __ ($in_string		///< The string to process
+			)
+{
+	return $in_string;
+}
 
 /****************************************************************************************//**
 *	\brief Simulates the "add_action" from WordPress										*
@@ -424,6 +444,17 @@ function u_test()
 					
 				if ( $callbacks['admin_menu'][0] instanceof BMLTPlugin )
 					{
+					$ret .= u_test_options();
+					global $options;
+
+					// Make a bunch of options for the form to display.
+					$plugin_object =& BMLTPlugin::get_plugin_object();
+					$opt = $plugin_object->make_new_options();
+					$opt = $plugin_object->make_new_options();
+					$opt = $plugin_object->make_new_options();
+					$opt = $plugin_object->make_new_options();
+					$opt = $plugin_object->make_new_options();
+
 					$ret .= '<div class="test_container_div">';
 					ob_start();
 					call_user_func ( $callbacks['admin_menu'] );
@@ -449,8 +480,6 @@ function u_test()
 						{
 						$ret .= '<h3>ERROR! The options_page() function is not callable!</h3>';
 						}
-					
-					$ret .= u_test_options();
 					}
 				else
 					{
