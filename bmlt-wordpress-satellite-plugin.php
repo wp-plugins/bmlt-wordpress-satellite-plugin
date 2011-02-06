@@ -11,11 +11,11 @@
 *	\brief	This is a WordPress plugin of a BMLT satellite client.							*
 *	\version 2.0.0																			*
 *																							*
-*	Plugin Name: BMLT Satellite Server														*
-*	Plugin URI: http://magshare.org/bmlt													*
-*	Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.	*
-*	Version: 2.0																			*
-*	Install: Drop this directory into the "wp-content/plugins/" directory and activate it.	*
+Plugin Name: BMLT WordPress Satellite
+Plugin URI: http://magshare.org/bmlt
+Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
+Version: 2.0
+Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
 // Include the satellite driver class.
