@@ -148,4 +148,32 @@
 .BMLTPlugin_option_sheet_line_root_server_text
 {
 	width: 600px;
+	float:left;
+}
+
+.BMLTPlugin_option_sheet_BAD,
+.BMLTPlugin_option_sheet_OK,
+.BMLTPlugin_option_sheet_NEUT
+{
+	width: 16px;
+	height:24px;
+	float:left;
+	margin-left:8px;
+}
+
+.BMLTPlugin_option_sheet_BAD,
+.BMLTPlugin_option_sheet_OK
+{
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+
+.BMLTPlugin_option_sheet_BAD
+{
+	background-image:url(admin_images/RedX.gif);
+}
+
+.BMLTPlugin_option_sheet_OK
+{
+	background-image:url(admin_images/GreenBall.gif);
 }

@@ -9,8 +9,6 @@
 *										AJAX HANDLER										*
 ********************************************************************************************/
 
-var	g_BMLTPlugin_AjaxRequest_object = null;
-
 /****************************************************************************************//**
 *	\brief A simple, generic AJAX request function.											*
 *																							*
@@ -22,12 +20,6 @@ function BMLTPlugin_AjaxRequest (	url,		///< The URI to be called
 									method		///< The method ('get' or 'post')
 									)
 {
-	if ( g_BMLTPlugin_AjaxRequest_object )
-		{
-		g_BMLTPlugin_AjaxRequest_object.abort();
-		g_BMLTPlugin_AjaxRequest_object = null;
-		};
-	
 	/************************************************************************************//**
 	*	\brief Create a generic XMLHTTPObject.												*
 	*																						*
@@ -63,17 +55,17 @@ function BMLTPlugin_AjaxRequest (	url,		///< The URI to be called
 		return xmlhttp;
 	};
 	
-	g_BMLTPlugin_AjaxRequest_object = createXMLHTTPObject();
-	g_BMLTPlugin_AjaxRequest_object.finalCallback = callback;
-	g_BMLTPlugin_AjaxRequest_object.onreadystatechange = function ( )
+	var req = createXMLHTTPObject();
+	req.finalCallback = callback;
+	req.onreadystatechange = function ( )
 		{
-		if ( g_BMLTPlugin_AjaxRequest_object.readyState != 4 ) return;
-		if( g_BMLTPlugin_AjaxRequest_object.status != 200 ) return;
-		callback ( g_BMLTPlugin_AjaxRequest_object );
-		g_BMLTPlugin_AjaxRequest_object = null;
+		if ( req.readyState != 4 ) return;
+		if( req.status != 200 ) return;
+		callback ( req );
+		req = null;
 		};
-	g_BMLTPlugin_AjaxRequest_object.open ( method,url, true );
-	g_BMLTPlugin_AjaxRequest_object.send ( null );
+	req.open ( method,url, true );
+	req.send ( null );
 	
-	return g_BMLTPlugin_AjaxRequest_object;
+	return req;
 };

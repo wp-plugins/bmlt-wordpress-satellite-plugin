@@ -224,22 +224,21 @@ function BMLTPlugin_TestRootUri_call()
 function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 										)
 {
-	var fader = document.getElementById ( 'BMLTPlugin_Fader' );
-	if ( in_success != '1' )
+	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
+	var option_index = 1;
+	if ( option_select )
 		{
-		if ( fader )
-			{
-			fader.innerHTML = c_g_BMLTPlugin_root_canal;
-			fader.FadeState = null;
-			fader.style.opacity = 1
-			BMLTPlugin_StartFader();
-			};
+		option_index = parseInt ( option_select.value );
+		};
+	
+	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
+	
+	if ( parseInt(in_success.responseText) != 1 )
+		{
+		indicator.className = 'BMLTPlugin_option_sheet_BAD';
 		}
 	else
 		{
-		if ( fader )
-			{
-			fader.innerHTML = '';
-			};
+		indicator.className = 'BMLTPlugin_option_sheet_OK';
 		};
 };

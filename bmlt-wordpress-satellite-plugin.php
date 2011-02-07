@@ -661,9 +661,10 @@ class BMLTPlugin
 					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_rootserver_label ).'</label>';
 						$string = (isset ( $options['root_server'] ) && $options['root_server'] ? $options['root_server'] : self::$local_options_no_root_server_string );
 					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
-					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',false)"';
-					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',true)"';
-					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',false);BMLTPlugin_TestRootUri_call()"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',true);;BMLTPlugin_TestRootUri_call()"';
+					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" onkeyup="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" />';
+					$ret .= '<div class="BMLTPlugin_option_sheet_NEUT" id="BMLTPlugin_option_sheet_indicator_'.$in_options_index.'"></div>';
 				$ret .= '</div>';
 			$ret .= '</div>';
 			}
@@ -979,7 +980,7 @@ class BMLTPlugin
 								
 							if ( $count > 1 )
 								{
-								$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.')">';
+								$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.');BMLTPlugin_TestRootUri_call()">';
 									for ( $i = 1; $i <= $count; $i++ )
 										{
 										$options = $this->getBMLTOptions ( $i );
@@ -1061,6 +1062,7 @@ class BMLTPlugin
 						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
 						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
 						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
+						$html .= 'BMLTPlugin_TestRootUri_call()';
 					$html .= '</script>';
 				$html .= '</div>';
 			$html .= '</div>';
