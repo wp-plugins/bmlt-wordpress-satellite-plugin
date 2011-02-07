@@ -49,6 +49,12 @@ function BMLTPlugin_SelectOptionSheet ( in_value,		///< The current value of the
 			item.style.display = ((i == in_value) ? 'block' : 'none');
 			};
 		};
+		
+	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+in_value );
+	
+	indicator.className = 'BMLTPlugin_option_sheet_NEUT';
+	
+	BMLTPlugin_TestRootUri_call();
 };
 
 /****************************************************************************************//**
@@ -229,8 +235,7 @@ function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 	if ( option_select )
 		{
 		option_index = parseInt ( option_select.value );
-		};
-	
+		}
 	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
 	
 	if ( parseInt(in_success.responseText) != 1 )

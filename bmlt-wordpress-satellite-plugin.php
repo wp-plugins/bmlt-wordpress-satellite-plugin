@@ -701,7 +701,7 @@ class BMLTPlugin
 				
 				$ret = '0';
 				
-				if ( $test instanceof bmlt_satellite_controller )
+				if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
 					{
 					if ( !$test->get_m_error_message() )
 						{
