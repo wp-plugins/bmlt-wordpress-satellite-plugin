@@ -86,6 +86,7 @@ class BMLTPlugin
 	static	$local_options_delete_success = 'The setting was deleted successfully.';						///< The string displayed upon successful deletion of an option page.
 	static	$local_options_create_success = 'The setting was created successfully.';						///< The string displayed upon successful creation of an option page.
 	static	$local_options_save_success = 'The setting was updated successfully.';							///< The string displayed upon successful update of an option page.
+	static	$local_options_url_bad = 'This root server URL will not work for this plugin.';					///< The string displayed if a root server URI fails to point to a valid root server.
 	
 	/// These are all for the admin page option sheets.
 	static	$local_options_name_label = 'Setting Name:';					///< The Label for the setting name item.
@@ -687,6 +688,29 @@ class BMLTPlugin
 	****************************************************************************************/
 	function init ( )
 		{
+		if ( isset ( $_GET['BMLTPlugin_AJAX_Call'] ) )
+			{
+			$ret = null;
+			
+			if ( isset ( $_GET['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+				{
+				$uri = trim ( $_GET['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
+				
+				$test = new bmlt_satellite_controller ( $uri );
+				
+				$ret = '0';
+				
+				if ( $test instanceof bmlt_satellite_controller )
+					{
+					if ( !$test->get_m_error_message() )
+						{
+						$ret = '1';
+						}
+					}
+				}
+			
+			die ( $ret );
+			}
 		}
 		
 	/************************************************************************************//**
@@ -844,7 +868,7 @@ class BMLTPlugin
 			}
 		
 		$timing = self::$local_options_success_time;	// Success is a shorter fade, but failure is longer.
-		$ret = '<div class="BMLTPlugin_Message_bar_div">';
+		$ret = '<div id="BMLTPlugin_Message_bar_div" class="BMLTPlugin_Message_bar_div">';
 			if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
 				{
 				$out_option_number = $this->make_new_options ( );
@@ -926,6 +950,10 @@ class BMLTPlugin
 						}
 					}
 				}
+			else
+				{
+				$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">&nbsp;</h2>';
+				}
 			$ret .= '<script type="text/javascript">var BMLTPlugin_TimeToFade = '.$timing.';BMLTPlugin_StartFader()</script>';
 		$ret .= '</div>';
 		return $ret;
@@ -985,7 +1013,15 @@ class BMLTPlugin
 								}
 							elseif ( $count == 1 )
 								{
-								$html .= self::process_text ( self::$local_options_prefix ).'1';
+								$options = $this->getBMLTOptions ( 1 );
+								if ( isset ( $options['setting_name'] ) && $options['setting_name'] )
+									{
+									$html .= htmlspecialchars ( $options['setting_name'] );
+									}
+								else
+									{
+									$html .= self::process_text ( self::$local_options_prefix ).'1';
+									}
 								}
 							else
 								{
@@ -1024,6 +1060,7 @@ class BMLTPlugin
 						$html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';";
 						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
 						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
+						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
 					$html .= '</script>';
 				$html .= '</div>';
 			$html .= '</div>';

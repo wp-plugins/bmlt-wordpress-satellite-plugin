@@ -193,3 +193,53 @@ function BMLTPlugin_animateFade (	lastTick,	///< The time of the last tick.
 	
 	setTimeout ( "BMLTPlugin_animateFade(" + curTick + ",'" + eid + "')", 33 );
 };
+
+/****************************************************************************************//**
+*	\brief Uses AJAX to test the given root server URI.										*
+********************************************************************************************/
+function BMLTPlugin_TestRootUri_call()
+{
+	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
+	var option_index = 1;
+	if ( option_select )
+		{
+		option_index = parseInt ( option_select.value );
+		};
+	
+	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_AJAX_Call=1&BMLTPlugin_AJAX_Call_Check_Root_URI=';
+	
+	var	root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
+
+	if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
+		{
+		url += encodeURIComponent ( root_server );
+		};
+	
+	BMLTPlugin_AjaxRequest ( url, BMLTPlugin_TestRootUriCallback, 'get' );
+};
+
+/****************************************************************************************//**
+*	\brief Uses AJAX to test the given root server URI.										*
+********************************************************************************************/
+function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
+										)
+{
+	var fader = document.getElementById ( 'BMLTPlugin_Fader' );
+	if ( in_success != '1' )
+		{
+		if ( fader )
+			{
+			fader.innerHTML = c_g_BMLTPlugin_root_canal;
+			fader.FadeState = null;
+			fader.style.opacity = 1
+			BMLTPlugin_StartFader();
+			};
+		}
+	else
+		{
+		if ( fader )
+			{
+			fader.innerHTML = '';
+			};
+		};
+};
