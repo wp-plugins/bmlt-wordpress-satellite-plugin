@@ -75,18 +75,17 @@ class BMLTPlugin
 	/// These are all for the admin pages.
 	static	$local_options_title = 'Basic Meeting List Toolbox Options';	///< This is the title that is displayed over the options.
 	static	$local_menu_string = 'BMLT Options';							///< The name of the menu item.
-	static	$local_options_prefix = 'Select Options ';						///< The string displayed before each number in the options popup.
-	static	$local_options_add_new = 'Add A new Option';					///< The string displayed in the "Add New Option" button.
+	static	$local_options_prefix = 'Select Setting ';						///< The string displayed before each number in the options popup.
+	static	$local_options_add_new = 'Add A new Setting';					///< The string displayed in the "Add New Option" button.
 	static	$local_options_save = 'Save Changes';							///< The string displayed in the "Save Changes" button.
-	static	$local_options_message = 'Edit the BMLT Option Sets';			///< The string displayed in the message bar, when no actions have been selected.
-	static	$local_options_delete_option = 'Delete This Option';			///< The string displayed in the "Delete Option" button.
-	static	$local_options_delete_option_confirm = 'Are you sure that you want to delete this option?';	///< The string displayed in the "Are you sure?" confirm.
-	static	$local_options_delete_success = 'The option was deleted successfully.';	///< The string displayed upon successful deletion of an option page.
-	static	$local_options_delete_failure = 'The option deletion failed.';	///< The string displayed upon unsuccessful deletion of an option page.
-	static	$local_options_create_success = 'The option was created successfully.';	///< The string displayed upon successful creation of an option page.
-	static	$local_options_create_failure = 'The option creation failed.';	///< The string displayed upon unsuccessful creation of an option page.
-	static	$local_options_save_success = 'The options were updated successfully.';	///< The string displayed upon successful update of an option page.
-	static	$local_options_save_failure = 'The options were not successfully updated.';	///< The string displayed upon unsuccessful update of an option page.
+	static	$local_options_delete_option = 'Delete This Setting';			///< The string displayed in the "Delete Option" button.
+	static	$local_options_delete_option_confirm = 'Are you sure that you want to delete this setting?';	///< The string displayed in the "Are you sure?" confirm.
+	static	$local_options_delete_success = 'The setting was deleted successfully.';	///< The string displayed upon successful deletion of an option page.
+	static	$local_options_delete_failure = 'The setting deletion failed.';	///< The string displayed upon unsuccessful deletion of an option page.
+	static	$local_options_create_success = 'The setting was created successfully.';	///< The string displayed upon successful creation of an option page.
+	static	$local_options_create_failure = 'The setting creation failed.';	///< The string displayed upon unsuccessful creation of an option page.
+	static	$local_options_save_success = 'The setting was updated successfully.';	///< The string displayed upon successful update of an option page.
+	static	$local_options_save_failure = 'The setting was update failed.';	///< The string displayed upon unsuccessful update of an option page.
 	
 	/// These are all for the admin page option sheets.
 	static	$local_options_rootserver_label = 'Root Server:';	///< The Label for the root server item.
@@ -809,7 +808,7 @@ class BMLTPlugin
 			{
 			$out_option_number = intval ( $_GET['BMLTPlugin_select_option'] );
 			}
-		
+		$timing = 2000;	// Success is a shorter fade, but failure is longer.
 		$ret = '<div class="BMLTPlugin_Message_bar_div">';
 			if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
 				{
@@ -822,6 +821,7 @@ class BMLTPlugin
 					}
 				else
 					{
+					$timing = 4000;
 					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
 						$ret .= self::process_text ( self::$local_options_create_failure );
 					$ret .= '</h2>';
@@ -839,6 +839,7 @@ class BMLTPlugin
 					}
 				else
 					{
+					$timing = 4000;
 					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
 						$ret .= self::process_text ( self::$local_options_delete_failure );
 					$ret .= '</h2>';
@@ -864,13 +865,14 @@ class BMLTPlugin
 						}
 					else
 						{
+						$timing = 4000;
 						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
 							$ret .= self::process_text ( self::$local_options_save_failure );
 						$ret .= '</h2>';
 						}
 					}
 				}
-			$ret .= '<script type="text/javascript">BMLTPlugin_StartFader()</script>';
+			$ret .= '<script type="text/javascript">var BMLTPlugin_TimeToFade = '.$timing.';BMLTPlugin_StartFader()</script>';
 		$ret .= '</div>';
 		return $ret;
 		}

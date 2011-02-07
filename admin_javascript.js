@@ -5,8 +5,6 @@
 * \license Public Domain -No restrictions at all.											*
 ********************************************************************************************/
 
-var BMLTPlugin_TimeToFade = 2000.0;	///< The fade time (2 seconds).
-
 /****************************************************************************************//**
 *	\brief Switches the visibility of the property sheets -called when the select changes.	*
 ********************************************************************************************/
