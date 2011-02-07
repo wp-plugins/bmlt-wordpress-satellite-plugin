@@ -18,6 +18,8 @@ Version: 2.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
+define ( '_DEBUG_MODE__', 1 );
+
 // Include the satellite driver class.
 require_once ( 'bmlt_satellite_controller.class.php' );
 
@@ -68,11 +70,28 @@ class BMLTPlugin
 	****************************************************************************************/
 	
 	/// These are used internal to the class, but can be localized
+	static	$local_noscript = 'This will not work, because you do not have JavaScript active.';		///< The string displayed in a <noscript> element.
+
+	/// These are all for the admin pages.
 	static	$local_options_title = 'Basic Meeting List Toolbox Options';	///< This is the title that is displayed over the options.
 	static	$local_menu_string = 'BMLT Options';							///< The name of the menu item.
-	static	$local_noscript = 'This will not work, because you do not have JavaScript active.';		///< The string displayed in a <noscript> element.
 	static	$local_options_prefix = 'Select Options ';						///< The string displayed before each number in the options popup.
+	static	$local_options_add_new = 'Add A new Option';					///< The string displayed in the "Add New Option" button.
+	static	$local_options_save = 'Save Changes';							///< The string displayed in the "Save Changes" button.
+	static	$local_options_message = 'Edit the BMLT Option Sets';			///< The string displayed in the message bar, when no actions have been selected.
+	static	$local_options_delete_option = 'Delete This Option';			///< The string displayed in the "Delete Option" button.
+	static	$local_options_delete_option_confirm = 'Are you sure that you want to delete this option?';	///< The string displayed in the "Are you sure?" confirm.
+	static	$local_options_delete_success = 'The option was deleted successfully.';	///< The string displayed upon successful deletion of an option page.
+	static	$local_options_delete_failure = 'The option deletion failed.';	///< The string displayed upon unsuccessful deletion of an option page.
+	static	$local_options_create_success = 'The option was created successfully.';	///< The string displayed upon successful creation of an option page.
+	static	$local_options_create_failure = 'The option creation failed.';	///< The string displayed upon unsuccessful creation of an option page.
+	static	$local_options_save_success = 'The options were updated successfully.';	///< The string displayed upon successful update of an option page.
+	static	$local_options_save_failure = 'The options were not successfully updated.';	///< The string displayed upon unsuccessful update of an option page.
 	
+	/// These are all for the admin page option sheets.
+	static	$local_options_rootserver_label = 'Root Server:';	///< The Label for the root server item.
+	
+
 	/************************************************************************************//**
 	*									DYNAMIC DATA MEMBERS								*
 	****************************************************************************************/
@@ -618,7 +637,11 @@ class BMLTPlugin
 		if ( is_array ( $options ) && count ( $options ) && isset ( $options['id'] ) )
 			{
 			$ret .= '<div class="BMLTPlugin_option_sheet" id="BMLTPlugin_option_sheet_'.$in_options_index.'_div" style="display:'.htmlspecialchars ( $display_mode ).'">';
-				$ret .= '<h3>OPTION '.$in_options_index.'</h3>';
+				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+					$id = 'BMLTPlugin_option_sheet_root_server_'.$in_options_index;
+					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_rootserver_label ).'</label>';
+					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars($options['root_server']).'" onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+				$ret .= '</div>';
 			$ret .= '</div>';
 			}
 		else
@@ -775,55 +798,166 @@ class BMLTPlugin
 		}
 		
 	/************************************************************************************//**
+	*	\brief This does any admin actions necessary.										*
+	****************************************************************************************/
+	function process_admin_page ( &$out_option_number	///< If an option number needs to be selected, it is set here.
+								)
+		{
+		$out_option_number = 1;
+		
+		if ( isset ( $_GET['BMLTPlugin_select_option'] ) && (intval ( $_GET['BMLTPlugin_select_option'] ) > 1) && (intval ( $_GET['BMLTPlugin_select_option'] ) <= $this->$this->get_num_options()) )
+			{
+			$out_option_number = intval ( $_GET['BMLTPlugin_select_option'] );
+			}
+		
+		$ret = '<div class="BMLTPlugin_Message_bar_div">';
+			if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
+				{
+				$out_option_number = $this->make_new_options ( );
+				if ( $out_option_number )
+					{
+					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
+						$ret .= self::process_text ( self::$local_options_create_success );
+					$ret .= '</h2>';
+					}
+				else
+					{
+					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
+						$ret .= self::process_text ( self::$local_options_create_failure );
+					$ret .= '</h2>';
+					}
+				}
+			elseif ( isset ( $_GET['BMLTPlugin_delete_option'] ) )
+				{
+				$option_index = intval ( $_GET['BMLTPlugin_delete_option'] );
+		
+				if ( $this->delete_options ( $option_index ) )
+					{
+					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
+						$ret .= self::process_text ( self::$local_options_delete_success );
+					$ret .= '</h2>';
+					}
+				else
+					{
+					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
+						$ret .= self::process_text ( self::$local_options_delete_failure );
+					$ret .= '</h2>';
+					}
+				}
+			elseif ( isset ( $_GET['BMLTPlugin_set_options'] ) )
+				{
+				$option_index = intval ( $_GET['BMLTPlugin_set_options'] );
+				$options = $this->getBMLTOptions ( $option_index );
+				
+				if ( is_array ( $options ) && count ( $options ) )
+					{
+					if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
+						{
+						$options['root_server'] = preg_replace ( '#\/+$#', '', trim ( $_GET['BMLTPlugin_option_sheet_root_server'] ) );
+						}
+					
+					if ( $this->setBMLTOptions ( $options ) )
+						{
+						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
+							$ret .= self::process_text ( self::$local_options_save_success );
+						$ret .= '</h2>';
+						}
+					else
+						{
+						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
+							$ret .= self::process_text ( self::$local_options_save_failure );
+						$ret .= '</h2>';
+						}
+					}
+				}
+			$ret .= '<script type="text/javascript">BMLTPlugin_StartFader()</script>';
+		$ret .= '</div>';
+		return $ret;
+		}
+		
+	/************************************************************************************//**
 	*	\brief Presents the admin page.														*
 	****************************************************************************************/
 	function admin_page ( )
 		{
 		$selected_option = 1;
-		
+		$process_html = $this->process_admin_page($selected_option);
+
 		$html = '<div class="BMLTPlugin_option_page" id="BMLTPlugin_option_page_div">';
 			$html .= '<noscript>'.self::process_text ( self::$local_noscript ).'</noscript>';
-			$html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
-				$html .= '<legend class="BMLTPlugin_legend">';
-					$count = $this->get_num_options();
-						
-					if ( $count )
-						{
-						$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.')">';
-							for ( $i = 1; $i <= $count; $i++ )
-								{
-								$options = $this->getBMLTOptions ( $i );
-								
-								if ( is_array ( $options ) && count ( $options ) && isset ( $options['id'] ) )
+			$html .= '<h1 class="BMLTPlugin_Admin_h1">'.self::process_text ( self::$local_options_title ).'</h1>';
+			$html .= $process_html;
+			$html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get" onsubmit="function(){return false}">';
+				$html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
+					$html .= '<legend class="BMLTPlugin_legend">';
+						$count = $this->get_num_options();
+							
+						if ( $count > 1 )
+							{
+							$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.')">';
+								for ( $i = 1; $i <= $count; $i++ )
 									{
-									$html .= '<option value="'.$i.'"';
+									$options = $this->getBMLTOptions ( $i );
 									
-									if ( $i == $selected_option )
+									if ( is_array ( $options ) && count ( $options ) && isset ( $options['id'] ) )
 										{
-										$html .= ' selected="selected"';
+										$html .= '<option value="'.$i.'"';
+										
+										if ( $i == $selected_option )
+											{
+											$html .= ' selected="selected"';
+											}
+										
+										$html .= '>';
+											$html .= self::process_text ( self::$local_options_prefix ).$i;
+										$html .= '</option>';
 										}
-									
-									$html .= '>';
-										$html .= self::process_text ( self::$local_options_prefix ).$i;
-									$html .= '</option>';
+									else
+										{
+										echo "<!-- BMLTPlugin ERROR (admin_page)! Options not found for $i! -->";
+										}
 									}
-								else
-									{
-									echo "<!-- BMLTPlugin ERROR (admin_page)! Options not found for $i! -->";
-									}
-								}
-						$html .= '</select>';
-						}
-					else
+							$html .= '</select>';
+							}
+						elseif ( $count == 1 )
+							{
+							$html .= self::process_text ( self::$local_options_prefix ).'1';
+							}
+						else
+							{
+							echo "<!-- BMLTPlugin ERROR (admin_page)! No options! -->";
+							}
+					$html .= '</legend>';
+					for ( $i = 1; $i <= $count; $i++ )
 						{
-						echo "<!-- BMLTPlugin ERROR (admin_page)! No options! -->";
+						$html .= $this->display_options_sheet ( $i, (($i == $selected_option) ? 'block' : 'none') );
 						}
-				$html .= '</legend>';
-				for ( $i = 1; $i <= $count; $i++ )
+				$html .= '</fieldset>';
+			$html .= '</form>';
+			$html .= '<div class="BMLTPlugin_toolbar_line_bottom">';
+				$html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get" onsubmit="function(){return false}">';
+				if ( $count > 1 )
 					{
-					$html .= $this->display_options_sheet ( $i, (($i == 1) ? 'block' : 'none') );
+					$html .= '<div class="BMLTPlugin_toolbar_button_line_left">';
+						$html .= '<script type="text/javascript">';
+							$html .= "var c_g_delete_confirm_message='".self::process_text ( self::$local_options_delete_option_confirm )."';";
+						$html .= '</script>';
+						$html .= '<input type="button" class="BMLTPlugin_delete_button" value="'.self::process_text ( self::$local_options_delete_option ).'" onclick="BMLTPlugin_DeleteOptionSheet()" />';
+					$html .= '</div>';
 					}
-			$html .= '</fieldset>';
+				
+				$html .= '<div class="BMLTPlugin_toolbar_button_line_right">';
+					$html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.self::process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptionSheet()" />';
+				$html .= '</div>';
+				$html .= '</form>';
+				$html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get">';
+				$html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $_GET['page'] ).'" />';
+				$html .= '<input type="submit" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.self::process_text ( self::$local_options_add_new ).'" />';
+				$html .= '</form>';
+				$html .= '<script type="text/javascript">';
+					$html .= "BMLTPlugin_DirtifyOptionSheet(true)";
+				$html .= '</script>';
+			$html .= '</div>';
 		$html .= '</div>';
 		
 		echo $html;
