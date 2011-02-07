@@ -129,7 +129,23 @@
 	color:white;
 }
 
+.BMLTPlugin_option_sheet_line_div label
+{
+	width: 200px;
+	text-align: right;
+	font-weight:bold;
+	margin-right:8px;
+	display:block;
+	float:left;
+	clear:both;
+}
+
+.BMLTPlugin_option_sheet_line_name_text
+{
+	width: 300px;
+}
+
 .BMLTPlugin_option_sheet_line_root_server_text
 {
-	width: 100%;
+	width: 600px;
 }

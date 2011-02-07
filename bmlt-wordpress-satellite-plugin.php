@@ -57,7 +57,7 @@ class BMLTPlugin
 	static	$adminOptionsName = "BMLTAdminOptions";									///< The name, in the database, for the version 1 options for this plugin.
 	static	$admin2OptionsName = "BMLT2AdminOptions";								///< These options are for version 2.
 	
-	static	$default_rootserver = 'http://bmlt.magshare.net/stable/main_server';	///< This is the default root BMLT server URI.
+	static	$default_rootserver = '';												///< This is the default root BMLT server URI.
 	static	$default_map_center_latitude = 29.764377375163125;						///< This is the default basic search map center latitude
 	static	$default_map_center_longitude = -95.4931640625;							///< This is the default basic search map center longitude
 	static	$default_map_zoom = 9;													///< This is the default basic search map zoom level
@@ -90,6 +90,8 @@ class BMLTPlugin
 	/// These are all for the admin page option sheets.
 	static	$local_options_name_label = 'Setting Name:';					///< The Label for the setting name item.
 	static	$local_options_rootserver_label = 'Root Server:';				///< The Label for the root server item.
+	static	$local_options_no_name_string = 'Enter Setting Name';			///< The Value to use for a name field for a setting with no name.
+	static	$local_options_no_root_server_string = 'Enter a Root Server URL';	///< The Value to use for a root with no name.
 	
 	/************************************************************************************//**
 	*								STATIC DATA MEMBERS (MISC)								*
@@ -248,7 +250,8 @@ class BMLTPlugin
 									'bmlt_language' => self::$default_language,
 									'bmlt_new_search_url' => self::$default_new_search,
 									'additional_css' => self::$default_additional_css,
-									'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time())	// This gives the option a unique slug
+									'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time()),	// This gives the option a unique slug
+									'setting_name' => ''
 									);
 			
 			// Make sure we aren't resetting to default.
@@ -644,9 +647,22 @@ class BMLTPlugin
 			{
 			$ret .= '<div class="BMLTPlugin_option_sheet" id="BMLTPlugin_option_sheet_'.$in_options_index.'_div" style="display:'.htmlspecialchars ( $display_mode ).'">';
 				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+					$id = 'BMLTPlugin_option_sheet_name_'.$in_options_index;
+					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_name_label ).'</label>';
+						$string = (isset ( $options['setting_name'] ) && $options['setting_name'] ? $options['setting_name'] : self::$local_options_no_name_string );
+					$ret .= '<input class="BMLTPlugin_option_sheet_line_name_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_name_string).'\',false)"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_name_string).'\',true)"';
+					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+				$ret .= '</div>';
+				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
 					$id = 'BMLTPlugin_option_sheet_root_server_'.$in_options_index;
 					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_rootserver_label ).'</label>';
-					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars($options['root_server']).'" onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+						$string = (isset ( $options['root_server'] ) && $options['root_server'] ? $options['root_server'] : self::$local_options_no_root_server_string );
+					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',false)"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',true)"';
+					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
 				$ret .= '</div>';
 			$ret .= '</div>';
 			}
@@ -763,6 +779,17 @@ class BMLTPlugin
 					$head_content .= 'js_stripper.php?filename=';
 					}
 				
+				$head_content .= 'javascript.js"></script>';
+				
+				$head_content .= '<script type="text/javascript" src="';
+				
+				$head_content .= htmlspecialchars ( $url );
+				
+				if ( !defined ('_DEBUG_MODE__' ) )
+					{
+					$head_content .= 'js_stripper.php?filename=';
+					}
+				
 				$head_content .= 'admin_javascript.js"></script>';
 				}
 			else
@@ -811,10 +838,11 @@ class BMLTPlugin
 		{
 		$out_option_number = 1;
 		
-		if ( isset ( $_GET['BMLTPlugin_select_option'] ) && (intval ( $_GET['BMLTPlugin_select_option'] ) > 1) && (intval ( $_GET['BMLTPlugin_select_option'] ) <= $this->$this->get_num_options()) )
+		if ( isset ( $_GET['BMLTPlugin_set_options'] ) && $_GET['BMLTPlugin_set_options'] )
 			{
-			$out_option_number = intval ( $_GET['BMLTPlugin_select_option'] );
+			$out_option_number = intval ( $_GET['BMLTPlugin_set_options'] );
 			}
+		
 		$timing = self::$local_options_success_time;	// Success is a shorter fade, but failure is longer.
 		$ret = '<div class="BMLTPlugin_Message_bar_div">';
 			if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
@@ -859,12 +887,31 @@ class BMLTPlugin
 				
 				if ( is_array ( $options ) && count ( $options ) )
 					{
-					if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
+					if ( isset ( $_GET['BMLTPlugin_option_sheet_name'] ) )
 						{
-						$options['root_server'] = preg_replace ( '#\/+$#', '', trim ( $_GET['BMLTPlugin_option_sheet_root_server'] ) );
+						if ( trim ( $_GET['BMLTPlugin_option_sheet_name'] ) )
+							{
+							$options['setting_name'] = trim ( $_GET['BMLTPlugin_option_sheet_name'] );
+							}
+						else
+							{
+							$options['setting_name'] = '';
+							}
 						}
 					
-					if ( $this->setBMLTOptions ( $options ) )
+					if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
+						{
+						if ( trim ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
+							{
+							$options['root_server'] = trim ( $_GET['BMLTPlugin_option_sheet_root_server'] );
+							}
+						else
+							{
+							$options['root_server'] = '';
+							}
+						}
+					
+					if ( $this->setBMLTOptions ( $options, $option_index ) )
 						{
 						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
 							$ret .= self::process_text ( self::$local_options_save_success );
@@ -919,7 +966,14 @@ class BMLTPlugin
 												}
 											
 											$html .= '>';
-												$html .= self::process_text ( self::$local_options_prefix ).$i;
+												if ( isset ( $options['setting_name'] ) && $options['setting_name'] )
+													{
+													$html .= htmlspecialchars ( $options['setting_name'] );
+													}
+												else
+													{
+													$html .= self::process_text ( self::$local_options_prefix ).$i;
+													}
 											$html .= '</option>';
 											}
 										else
@@ -968,6 +1022,8 @@ class BMLTPlugin
 						$html .= "BMLTPlugin_DirtifyOptionSheet(true);";	// This sets up the "Save Changes" button as disabled.
 						// This is a trick I use to hide irrelevant content from non-JS browsers. The element is drawn, hidden, then uses JS to show. No JS, no element.
 						$html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';";
+						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
+						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
 					$html .= '</script>';
 				$html .= '</div>';
 			$html .= '</div>';

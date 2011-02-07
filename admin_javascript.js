@@ -6,19 +6,47 @@
 ********************************************************************************************/
 
 /****************************************************************************************//**
+*	\brief Hides "primer" text in text items.												*
+********************************************************************************************/
+function BMLTPlugin_ClickInText (	in_id,				///< The ID of the item
+									in_default_text,	///< The "primer" text.
+									in_blur				///< If this is true, then we reverse the process.
+									)
+{
+	var item = document.getElementById(in_id);
+	
+	if ( item && (item.type == 'text') )
+		{
+		var value = item.value.toString();
+		
+		if ( (in_blur != true) && value && (value == in_default_text) )
+			{
+			item.value = '';
+			}
+		else
+			{
+			if ( (in_blur == true) && !value )
+				{
+				item.value = in_default_text;
+				};
+			};
+		};
+}
+
+/****************************************************************************************//**
 *	\brief Switches the visibility of the property sheets -called when the select changes.	*
 ********************************************************************************************/
 function BMLTPlugin_SelectOptionSheet ( in_value,		///< The current value of the select
 										in_num_options	///< The number of available options.
 										)
 {
-	for(var i=1;i<=in_num_options;i++)
+	for ( var i=1; i<=in_num_options; i++ )
 		{
 		var item_id = 'BMLTPlugin_option_sheet_'+i+'_div';
 		var item = document.getElementById(item_id);
 		if ( item )
 			{
-			item.style.display = ((i==in_value)?'block':'none');
+			item.style.display = ((i == in_value) ? 'block' : 'none');
 			};
 		};
 };
@@ -57,8 +85,22 @@ function BMLTPlugin_SaveOptionSheet()
 		};
 	
 	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_set_options='+option_index;
+	var	name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
+	url += '&BMLTPlugin_option_sheet_name=';
+	if ( name && (name != c_g_BMLTPlugin_no_name) )
+		{
+		url += encodeURIComponent ( name );
+		};
+	
 	var	root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
-	url += '&BMLTPlugin_option_sheet_root_server='+encodeURIComponent ( root_server );
+	
+	url += '&BMLTPlugin_option_sheet_root_server=';
+
+	if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
+		{
+		url += encodeURIComponent ( root_server );
+		};
+	
 	window.location.replace ( url );
 };
 
