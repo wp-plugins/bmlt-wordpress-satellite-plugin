@@ -769,11 +769,12 @@ class BMLTPlugin
 	****************************************************************************************/
 	function admin_head ( )
 		{
+			$this->standard_head ( );	// We start with the standard stuff.
+			
 			$head_content = "";
 			
 			if ( function_exists ( 'plugins_url' ) )
 				{
-				$head_content = "<!-- Added by the BMLTPlugin -->";
 				$head_content .= '<link rel="stylesheet" type="text/css" href="';
 				
 				$url = '';
@@ -794,17 +795,6 @@ class BMLTPlugin
 					}
 				
 				$head_content .= 'admin_styles.css" />';
-				
-				$head_content .= '<script type="text/javascript" src="';
-				
-				$head_content .= htmlspecialchars ( $url );
-				
-				if ( !defined ('_DEBUG_MODE__' ) )
-					{
-					$head_content .= 'js_stripper.php?filename=';
-					}
-				
-				$head_content .= 'javascript.js"></script>';
 				
 				$head_content .= '<script type="text/javascript" src="';
 				
@@ -1055,6 +1045,10 @@ class BMLTPlugin
 					$html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $_GET['page'] ).'" />';
 					$html .= '<input type="submit" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.self::process_text ( self::$local_options_add_new ).'" />';
 					$html .= '</form>';
+				$html .= '</div>';
+				$html .= '<div class="BMLTPlugin_toolbar_line_map">';
+					$html .= '<div class="BMLTPlugin_Map_Div" id="BMLTPlugin_Map_Div"></div>';
+					$html .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';	// Load the Google Maps stuff for our map.
 					$html .= '<script type="text/javascript">';
 						$html .= "BMLTPlugin_DirtifyOptionSheet(true);";	// This sets up the "Save Changes" button as disabled.
 						// This is a trick I use to hide irrelevant content from non-JS browsers. The element is drawn, hidden, then uses JS to show. No JS, no element.
@@ -1062,7 +1056,8 @@ class BMLTPlugin
 						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
 						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
 						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
-						$html .= 'BMLTPlugin_TestRootUri_call()';
+						$html .= 'BMLTPlugin_TestRootUri_call();';
+						$html .= 'BMLTPlugin_admin_load_map();';
 					$html .= '</script>';
 				$html .= '</div>';
 			$html .= '</div>';

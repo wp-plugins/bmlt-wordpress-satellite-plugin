@@ -9,7 +9,8 @@
 .BMLTPlugin_toolbar_line,
 .BMLTPlugin_toolbar_line_bottom,
 .BMLTPlugin_Message_bar_success,
-.BMLTPlugin_Message_bar_fail
+.BMLTPlugin_Message_bar_fail,
+.BMLTPlugin_toolbar_line_map
 {
 	text-align:center;
 }
@@ -20,6 +21,12 @@
 	margin-right: 12px;
 	padding: 8px;
 	background:white;
+}
+
+.BMLTPlugin_toolbar_line_map,
+.BMLTPlugin_Map_Div
+{
+	border:1px solid #6cf;
 }
 
 .BMLTPlugin_option_fieldset
@@ -176,4 +183,13 @@
 .BMLTPlugin_option_sheet_OK
 {
 	background-image:url(admin_images/GreenBall.gif);
+}
+
+.BMLTPlugin_Map_Div
+{
+	height:640px;
+	width:640px;
+	margin:8px;
+	margin-left:auto;
+	margin-right:auto;
 }

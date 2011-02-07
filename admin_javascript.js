@@ -5,6 +5,10 @@
 * \license Public Domain -No restrictions at all.											*
 ********************************************************************************************/
 
+var g_BMLTPlugin_admin_main_map = null;			///< This will hold the map instance.
+var	g_BMLTPlugin_admin_location_coords = null;	///< This will hold the location coordinates.
+var	g_BMLTPlugin_admin_location_zoom = null;	///< This will hold the location zoom.
+
 /****************************************************************************************//**
 *	\brief Hides "primer" text in text items.												*
 ********************************************************************************************/
@@ -246,4 +250,22 @@ function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 		{
 		indicator.className = 'BMLTPlugin_option_sheet_OK';
 		};
+};
+	
+/****************************************************************************************//**
+*	\brief Load the map and set it up.														*
+********************************************************************************************/
+
+function BMLTPlugin_admin_load_map ( )
+{
+	var myOptions = null;
+
+	myOptions = { 'zoom': 7, 'center': g_BMLTPlugin_admin_location_coords, 'mapTypeId': google.maps.MapTypeId.ROADMAP,
+		'mapTypeControl': true,
+		'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+		'zoomControl': true,
+		'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.SMALL }
+		};
+
+	g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);
 };
