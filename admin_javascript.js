@@ -259,8 +259,17 @@ function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 function BMLTPlugin_admin_load_map ( )
 {
 	var myOptions = null;
-
-	myOptions = { 'zoom': 7, 'center': g_BMLTPlugin_admin_location_coords, 'mapTypeId': google.maps.MapTypeId.ROADMAP,
+	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
+	var option_index = 1;
+	if ( option_select )
+		{
+		option_index = parseInt ( option_select.value );
+		}
+	
+	g_BMLTPlugin_admin_location_coords = new google.maps.LatLng ( parseFloat(c_g_BMLTPlugin_coords[option_index-1].lat), parseFloat(c_g_BMLTPlugin_coords[option_index-1].lng) );
+	g_BMLTPlugin_admin_location_zoom = parseInt(c_g_BMLTPlugin_coords[option_index-1].zoom);
+	
+	myOptions = { 'zoom': g_BMLTPlugin_admin_location_zoom, 'center': g_BMLTPlugin_admin_location_coords, 'mapTypeId': google.maps.MapTypeId.ROADMAP,
 		'mapTypeControl': true,
 		'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
 		'zoomControl': true,

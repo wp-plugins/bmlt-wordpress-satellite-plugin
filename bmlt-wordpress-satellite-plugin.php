@@ -957,6 +957,7 @@ class BMLTPlugin
 		{
 		$selected_option = 1;
 		$process_html = $this->process_admin_page($selected_option);
+		$options_coords = array();
 
 		$html = '<div class="BMLTPlugin_option_page" id="BMLTPlugin_option_page_div">';
 			$html .= '<noscript>'.self::process_text ( self::$local_noscript ).'</noscript>';
@@ -977,6 +978,8 @@ class BMLTPlugin
 										
 										if ( is_array ( $options ) && count ( $options ) && isset ( $options['id'] ) )
 											{
+											$options_coords[$i] = array ( 'lat' => $options['map_center_latitude'], 'lng' => $options['map_center_longitude'], 'zoom' => $options['map_zoom'] );
+											
 											$html .= '<option value="'.$i.'"';
 											
 											if ( $i == $selected_option )
@@ -1056,6 +1059,29 @@ class BMLTPlugin
 						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
 						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
 						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
+						$html .= "var c_g_BMLTPlugin_coords = new Array();";
+						if ( is_array ( $options_coords ) && count ( $options_coords ) )
+							{
+							foreach ( $options_coords as $value )
+								{
+								$html .= 'c_g_BMLTPlugin_coords[c_g_BMLTPlugin_coords.length] = {';
+								$f = true;
+								foreach ( $value as $key2 => $value2 )
+									{
+									if ( $f )
+										{
+										$f = false;
+										}
+									else
+										{
+										$html .= ',';
+										}
+									$html .= "'".htmlspecialchars ( $key2 )."':";
+									$html .= "'".htmlspecialchars ( $value2 )."'";
+									}
+								$html .= '};';
+								}
+							}
 						$html .= 'BMLTPlugin_TestRootUri_call();';
 						$html .= 'BMLTPlugin_admin_load_map();';
 					$html .= '</script>';
