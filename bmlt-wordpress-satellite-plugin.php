@@ -89,6 +89,7 @@ class BMLTPlugin
     static  $local_options_url_bad = 'This root server URL will not work for this plugin.';                 ///< The string displayed if a root server URI fails to point to a valid root server.
     static  $local_options_access_failure = 'You are not allowed to perform this operation.';               ///< This is displayed if a user attempts a no-no.
     static  $local_options_unsaved_message = 'You have unsaved changes. Are you sure you want to leave without saving them?';   ///< This is displayed if a user attempts to leave a page without saving the options.
+    static  $local_options_settings_id_prompt = 'The ID for this Setting is ';                              ///< This is so that users can see the ID for the setting.
     
     /// These are all for the admin page option sheets.
     static  $local_options_name_label = 'Setting Name:';                    ///< The Label for the setting name item.
@@ -658,7 +659,9 @@ class BMLTPlugin
         
         if ( is_array ( $options ) && count ( $options ) && isset ( $options['id'] ) )
             {
+
             $ret .= '<div class="BMLTPlugin_option_sheet" id="BMLTPlugin_option_sheet_'.$in_options_index.'_div" style="display:'.htmlspecialchars ( $display_mode ).'">';
+                $ret .= '<h2 class="BMLTPlugin_option_id_h2">'.self::process_text ( self::$local_options_settings_id_prompt ).htmlspecialchars ( intVal ( $options['id'] ) ).'</h2>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_name_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_name_label ).'</label>';

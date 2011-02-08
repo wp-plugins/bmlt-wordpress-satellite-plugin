@@ -76,8 +76,6 @@ function BMLTPlugin_SelectOptionSheet ( in_value,       ///< The current value o
     var indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+in_value );
     
     indicator.className = 'BMLTPlugin_option_sheet_NEUT';
-    
-    BMLTPlugin_TestRootUri_call();
 };
 
 /****************************************************************************************//**

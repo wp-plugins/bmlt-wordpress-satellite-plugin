@@ -231,12 +231,23 @@
     margin-right:auto;
 }
 
+.BMLTPlugin_option_sheet .BMLTPlugin_option_id_h2,
 .BMLTPlugin_map_label_h2
 {
     text-align:center;
     color: #36c;
     margin: 0;
+    padding: 0;
+}
+
+.BMLTPlugin_option_sheet .BMLTPlugin_option_id_h2
+{
+    margin-bottom: 8px;
+    margin-top: 4px;
+}
+
+.BMLTPlugin_map_label_h2
+{
     margin-top: 8px;
     margin-bottom: 4px;
-    padding: 0;
 }
