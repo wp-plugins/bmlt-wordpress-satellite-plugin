@@ -6,8 +6,9 @@
 ********************************************************************************************/
 
 var g_BMLTPlugin_admin_main_map = null;			///< This will hold the map instance.
-var	g_BMLTPlugin_admin_marker = null;
-var g_BMLTPlugin_AjaxRequest = null;
+var	g_BMLTPlugin_admin_marker = null;			///< This holds the marker object.
+var g_BMLTPlugin_AjaxRequest = null;			///< Used to stop server checks from stepping on each other.
+var g_BMLTPlugin_oldBeforeUnload = null;		///< We replace the window's beforeUnload with our prompt.
 
 /****************************************************************************************//**
 *	\brief Returns the selected option index.												*
@@ -195,7 +196,29 @@ function BMLTPlugin_DirtifyOptionSheet(	in_disable	///< If this is true, then we
 		document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
 		document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
 		};
+		
+	if ( !document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled )
+		{
+		if ( window.onbeforeunload != BMLTPlugin_CloseHandler )
+			{
+			g_BMLTPlugin_oldBeforeUnload = window.onbeforeunload;
+			window.onbeforeunload = BMLTPlugin_CloseHandler;
+			};
+		}
+	else
+		{
+		window.onbeforeunload = g_BMLTPlugin_oldBeforeUnload;
+		};
 };
+
+/****************************************************************************************//**
+*	\brief Puts up an "are you sure?" message if the dirty flag is set.						*
+*																							*
+********************************************************************************************/
+function BMLTPlugin_CloseHandler()
+{
+	return c_g_BMLTPlugin_unsaved_prompt;
+}
 
 /****************************************************************************************//**
 *	\brief Starts the message "fader."														*

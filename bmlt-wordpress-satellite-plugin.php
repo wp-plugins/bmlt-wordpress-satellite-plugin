@@ -88,6 +88,7 @@ class BMLTPlugin
 	static	$local_options_save_failure = 'The settings were not updated.';									///< The string displayed upon unsuccessful update of an option page.
 	static	$local_options_url_bad = 'This root server URL will not work for this plugin.';					///< The string displayed if a root server URI fails to point to a valid root server.
 	static	$local_options_access_failure = 'You are not allowed to perform this operation.';				///< This is displayed if a user attempts a no-no.
+	static	$local_options_unsaved_message = 'You have unsaved changes. Are you sure you want to leave without saving them?';	///< This is displayed if a user attempts to leave a page without saving the options.
 	
 	/// These are all for the admin page option sheets.
 	static	$local_options_name_label = 'Setting Name:';					///< The Label for the setting name item.
@@ -1114,6 +1115,7 @@ class BMLTPlugin
 						$html .= "var c_g_BMLTPlugin_failure_message = '".self::process_text ( self::$local_options_save_failure )."';";
 						$html .= "var c_g_BMLTPlugin_success_time = ".intVal ( self::$local_options_success_time ).";";
 						$html .= "var c_g_BMLTPlugin_failure_time = ".intVal ( self::$local_options_failure_time ).";";
+						$html .= "var c_g_BMLTPlugin_unsaved_prompt = '".self::process_text ( self::$local_options_unsaved_message )."';";
 						$html .= "var c_g_BMLTPlugin_coords = new Array();";
 						$html .= "var g_BMLTPlugin_TimeToFade = ".intVal ( self::$local_options_success_time ).";";
 						if ( is_array ( $options_coords ) && count ( $options_coords ) )
