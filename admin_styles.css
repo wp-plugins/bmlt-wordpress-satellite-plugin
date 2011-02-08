@@ -29,6 +29,11 @@
 	border:1px solid #6cf;
 }
 
+.BMLTPlugin_toolbar_line_map
+{
+	margin-right: 12px;
+}
+
 .BMLTPlugin_option_fieldset
 {
 	border-left:1px solid #6cf;

@@ -724,6 +724,7 @@ class BMLTPlugin
 			if ( function_exists ( 'plugins_url' ) )
 				{
 				$head_content = "<!-- Added by the BMLTPlugin -->";
+				$head_content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';	// Load the Google Maps stuff for our map.
 				$head_content .= '<link rel="stylesheet" type="text/css" href="';
 				
 				$url = '';
@@ -1051,7 +1052,6 @@ class BMLTPlugin
 				$html .= '</div>';
 				$html .= '<div class="BMLTPlugin_toolbar_line_map">';
 					$html .= '<div class="BMLTPlugin_Map_Div" id="BMLTPlugin_Map_Div"></div>';
-					$html .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';	// Load the Google Maps stuff for our map.
 					$html .= '<script type="text/javascript">';
 						$html .= "BMLTPlugin_DirtifyOptionSheet(true);";	// This sets up the "Save Changes" button as disabled.
 						// This is a trick I use to hide irrelevant content from non-JS browsers. The element is drawn, hidden, then uses JS to show. No JS, no element.
@@ -1082,6 +1082,17 @@ class BMLTPlugin
 								$html .= '};';
 								}
 							}
+						$url = '';
+						if ( plugins_url() )
+							{
+							$url = plugins_url()."/bmlt-wordpress-satellite-plugin/google_map_images";
+							}
+						elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+							{
+							$url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/google_map_images";
+							}
+						$url = htmlspecialchars ( $url );
+						$html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
 						$html .= 'BMLTPlugin_TestRootUri_call();';
 						$html .= 'BMLTPlugin_admin_load_map();';
 					$html .= '</script>';

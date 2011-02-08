@@ -6,8 +6,24 @@
 ********************************************************************************************/
 
 var g_BMLTPlugin_admin_main_map = null;			///< This will hold the map instance.
-var	g_BMLTPlugin_admin_location_coords = null;	///< This will hold the location coordinates.
-var	g_BMLTPlugin_admin_location_zoom = null;	///< This will hold the location zoom.
+var	g_BMLTPlugin_admin_marker = null;
+
+/****************************************************************************************//**
+*	\brief Returns the selected option index.												*
+*																							*
+*	\returns an integer.																	*
+********************************************************************************************/
+function BMLTPlugin_GetSelectedOptionIndex()
+{
+	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
+	var option_index = 1;
+	if ( option_select )
+		{
+		option_index = parseInt ( option_select.value );
+		}
+	
+	return option_index;
+}
 
 /****************************************************************************************//**
 *	\brief Hides "primer" text in text items.												*
@@ -53,7 +69,8 @@ function BMLTPlugin_SelectOptionSheet ( in_value,		///< The current value of the
 			item.style.display = ((i == in_value) ? 'block' : 'none');
 			};
 		};
-		
+	
+	BMLTPlugin_admin_load_map();
 	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+in_value );
 	
 	indicator.className = 'BMLTPlugin_option_sheet_NEUT';
@@ -69,12 +86,7 @@ function BMLTPlugin_DeleteOptionSheet()
 	// The c_g_delete_confirm_message is actually set in the PHP file. It is a constant global.
 	if ( confirm ( c_g_delete_confirm_message ) )
 		{
-		var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
-		var option_index = 1;
-		if ( option_select )
-			{
-			option_index = parseInt ( option_select.value );
-			};
+		var option_index = BMLTPlugin_GetSelectedOptionIndex();
 		
 		var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_delete_option=' + option_index;
 
@@ -87,12 +99,7 @@ function BMLTPlugin_DeleteOptionSheet()
 ********************************************************************************************/
 function BMLTPlugin_SaveOptionSheet()
 {
-	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
-	var option_index = 1;
-	if ( option_select )
-		{
-		option_index = parseInt ( option_select.value );
-		};
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
 	
 	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_set_options='+option_index;
 	var	name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
@@ -209,12 +216,7 @@ function BMLTPlugin_animateFade (	lastTick,	///< The time of the last tick.
 ********************************************************************************************/
 function BMLTPlugin_TestRootUri_call()
 {
-	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
-	var option_index = 1;
-	if ( option_select )
-		{
-		option_index = parseInt ( option_select.value );
-		};
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
 	
 	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_AJAX_Call=1&BMLTPlugin_AJAX_Call_Check_Root_URI=';
 	
@@ -223,6 +225,11 @@ function BMLTPlugin_TestRootUri_call()
 	if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
 		{
 		url += encodeURIComponent ( root_server );
+		};
+	
+	if ( g_BMLTPlugin_AjaxRequest )
+		{
+		g_BMLTPlugin_AjaxRequest = null;
 		};
 	
 	BMLTPlugin_AjaxRequest ( url, BMLTPlugin_TestRootUriCallback, 'get' );
@@ -234,12 +241,8 @@ function BMLTPlugin_TestRootUri_call()
 function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 										)
 {
-	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
-	var option_index = 1;
-	if ( option_select )
-		{
-		option_index = parseInt ( option_select.value );
-		}
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
+
 	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
 	
 	if ( parseInt(in_success.responseText) != 1 )
@@ -255,26 +258,82 @@ function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
 /****************************************************************************************//**
 *	\brief Load the map and set it up.														*
 ********************************************************************************************/
-
 function BMLTPlugin_admin_load_map ( )
 {
 	var myOptions = null;
-	var option_select = document.getElementById ( 'BMLTPlugin_legend_select' );
-	var option_index = 1;
-	if ( option_select )
+
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
+	var	longitude = parseFloat ( c_g_BMLTPlugin_coords[option_index-1].lng );
+	var latitude = parseFloat ( c_g_BMLTPlugin_coords[option_index-1].lat );
+	var zoom = parseInt ( c_g_BMLTPlugin_coords[option_index-1].zoom );
+
+	if ( !g_BMLTPlugin_admin_main_map )
 		{
-		option_index = parseInt ( option_select.value );
+		myOptions = { 'zoom': zoom, 'center': new google.maps.LatLng ( latitude, longitude ), 'mapTypeId': google.maps.MapTypeId.ROADMAP,
+			'mapTypeControl': true,
+			'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+			'zoomControl': true,
+			'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.SMALL }
+			};
+	
+		g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);
+		google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "click", function (in_event) { g_BMLTPlugin_admin_marker.setPosition(in_event.latLng); BMLTPlugin_admin_MovedMarker(); } );
+		google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "zoom_changed", function () { c_g_BMLTPlugin_coords[BMLTPlugin_GetSelectedOptionIndex()-1].zoom = g_BMLTPlugin_admin_main_map.getZoom(); } );
+		}
+	else
+		{
+		g_BMLTPlugin_admin_main_map.panTo ( new google.maps.LatLng ( latitude, longitude ) );
+		g_BMLTPlugin_admin_main_map.setZoom ( zoom );
+		};
+	
+	
+	BMLTPlugin_admin_CreateMarker ( );
+};
+
+/************************************************************************************//**
+*	\brief Create a generic marker.														*
+****************************************************************************************/
+function BMLTPlugin_admin_CreateMarker ( )
+{
+	/// These describe the "You are here" icon.
+	var center_icon_image = new google.maps.MarkerImage ( c_g_BMLTPlugin_admin_google_map_images+'/NACenterMarker.png', new google.maps.Size(21, 36), new google.maps.Point(0,0), new google.maps.Point(11, 36) );
+	var center_icon_shadow = new google.maps.MarkerImage( c_g_BMLTPlugin_admin_google_map_images+'/NACenterMarkerS.png', new google.maps.Size(43, 36), new google.maps.Point(0,0), new google.maps.Point(11, 36) );
+	var center_icon_shape = { coord: [16,0,18,1,19,2,19,3,20,4,20,5,20,6,20,7,20,8,20,9,20,10,20,11,19,12,17,13,16,14,16,15,15,16,15,17,14,18,14,19,13,20,13,21,13,22,13,23,12,24,12,25,12,26,12,27,11,28,11,29,11,30,11,31,11,32,11,33,11,34,11,35,10,35,10,34,9,33,9,32,9,31,9,30,9,29,9,28,8,27,8,26,8,25,8,24,8,23,7,22,7,21,7,20,6,19,6,18,5,17,5,16,4,15,4,14,3,13,1,12,0,11,0,10,0,9,0,8,0,7,0,6,0,5,0,4,1,3,1,2,3,1,4,0,16,0], type: 'poly' };
+
+	if ( g_BMLTPlugin_admin_marker )
+		{
+		g_BMLTPlugin_admin_marker.setMap( null );
+		g_BMLTPlugin_admin_marker = null;
 		}
 	
-	g_BMLTPlugin_admin_location_coords = new google.maps.LatLng ( parseFloat(c_g_BMLTPlugin_coords[option_index-1].lat), parseFloat(c_g_BMLTPlugin_coords[option_index-1].lng) );
-	g_BMLTPlugin_admin_location_zoom = parseInt(c_g_BMLTPlugin_coords[option_index-1].zoom);
-	
-	myOptions = { 'zoom': g_BMLTPlugin_admin_location_zoom, 'center': g_BMLTPlugin_admin_location_coords, 'mapTypeId': google.maps.MapTypeId.ROADMAP,
-		'mapTypeControl': true,
-		'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
-		'zoomControl': true,
-		'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.SMALL }
-		};
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
+	var	longitude = parseFloat ( c_g_BMLTPlugin_coords[option_index-1].lng );
+	var latitude = parseFloat ( c_g_BMLTPlugin_coords[option_index-1].lat );
 
-	g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);
+	g_BMLTPlugin_admin_marker = new google.maps.Marker ( { 'position':		new google.maps.LatLng ( latitude, longitude ),
+															'map':			g_BMLTPlugin_admin_main_map,
+															'shadow':		center_icon_shadow,
+															'icon':			center_icon_image,
+															'shape':		center_icon_shape,
+															'draggable':	true
+															} );
+	if ( g_BMLTPlugin_admin_marker )
+		{
+		google.maps.event.addListener ( g_BMLTPlugin_admin_marker, "dragend", BMLTPlugin_admin_MovedMarker );
+		};
+};
+
+/************************************************************************************//**
+*	\brief Create a generic marker.														*
+*																						*
+*	\returns a marker object.															*
+****************************************************************************************/
+function BMLTPlugin_admin_MovedMarker ( )
+{
+	var option_index = BMLTPlugin_GetSelectedOptionIndex();
+	
+	c_g_BMLTPlugin_coords[option_index-1].lat = g_BMLTPlugin_admin_marker.getPosition().lat();
+	c_g_BMLTPlugin_coords[option_index-1].lng = g_BMLTPlugin_admin_marker.getPosition().lng();
+	c_g_BMLTPlugin_coords[option_index-1].zoom = g_BMLTPlugin_admin_main_map.getZoom();
+	g_BMLTPlugin_admin_main_map.panTo ( g_BMLTPlugin_admin_marker.getPosition() );
 };
