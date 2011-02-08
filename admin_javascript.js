@@ -7,6 +7,7 @@
 
 var g_BMLTPlugin_admin_main_map = null;			///< This will hold the map instance.
 var	g_BMLTPlugin_admin_marker = null;
+var g_BMLTPlugin_AjaxRequest = null;
 
 /****************************************************************************************//**
 *	\brief Returns the selected option index.												*
@@ -159,6 +160,17 @@ function BMLTPlugin_SettingCallback (in_success	///< The HTTPRequest object
 			fader.className = 'BMLTPlugin_Message_bar_success';
 			g_BMLTPlugin_TimeToFade = c_g_BMLTPlugin_success_time;
 			BMLTPlugin_DirtifyOptionSheet ( true );
+			
+			for ( var option_index = 1; option_index <= c_g_BMLTPlugin_coords.length; option_index++ )
+				{
+				var	name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
+				var option = document.getElementById ( 'BMLTPlugin_option_sel_'+option_index );
+				if ( !option )
+					{
+					option = document.getElementById ( 'BMLTPlugin_legend' );
+					};
+				option.innerHTML = name;
+				};
 			};
 		
 		BMLTPlugin_StartFader();
@@ -177,9 +189,12 @@ function BMLTPlugin_DirtifyOptionSheet(	in_disable	///< If this is true, then we
 
 	document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).disabled = (in_disable != true);
 	document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_create_button').toString();
-
-	document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
-	document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
+	
+	if ( document.getElementById ( 'BMLTPlugin_toolbar_button_del' ) )
+		{
+		document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
+		document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
+		};
 };
 
 /****************************************************************************************//**
@@ -282,7 +297,7 @@ function BMLTPlugin_TestRootUri_call()
 		g_BMLTPlugin_AjaxRequest = null;
 		};
 	
-	BMLTPlugin_AjaxRequest ( url, BMLTPlugin_TestRootUriCallback, 'get' );
+	g_BMLTPlugin_AjaxRequest = BMLTPlugin_AjaxRequest ( url, BMLTPlugin_TestRootUriCallback, 'get' );
 };
 
 /****************************************************************************************//**

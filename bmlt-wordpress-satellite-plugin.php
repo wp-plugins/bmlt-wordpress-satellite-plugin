@@ -946,11 +946,6 @@ class BMLTPlugin
 		{
 		$out_option_number = 1;
 		
-		if ( isset ( $_GET['BMLTPlugin_set_options'] ) && $_GET['BMLTPlugin_set_options'] )
-			{
-			$out_option_number = intval ( $_GET['BMLTPlugin_set_options'] );
-			}
-		
 		$timing = self::$local_options_success_time;	// Success is a shorter fade, but failure is longer.
 		$ret = '<div id="BMLTPlugin_Message_bar_div" class="BMLTPlugin_Message_bar_div">';
 			if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
@@ -958,13 +953,14 @@ class BMLTPlugin
 				$out_option_number = $this->make_new_options ( );
 				if ( $out_option_number )
 					{
-					$def_options = $this->getBMLTOptions ( 1 );
 					$new_options = $this->getBMLTOptions ( $out_option_number );
+					$def_options = $this->getBMLTOptions ( 1 );
+					
 					$new_options['root_server'] = $def_options['root_server'];
 					$new_options['map_center_latitude'] = $def_options['map_center_latitude'];
 					$new_options['map_center_longitude'] = $def_options['map_center_longitude'];
 					$new_options['map_zoom'] = $def_options['map_zoom'];
-					$this->saveBMLTOptions ( $new_options, $out_option_number );
+					$this->setBMLTOptions ( $new_options, $out_option_number );
 					
 					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
 						$ret .= self::process_text ( self::$local_options_create_success );
@@ -1021,7 +1017,7 @@ class BMLTPlugin
 				$html .= $process_html;
 				$html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get" onsubmit="function(){return false}">';
 					$html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
-						$html .= '<legend class="BMLTPlugin_legend">';
+						$html .= '<legend id="BMLTPlugin_legend" class="BMLTPlugin_legend">';
 							$count = $this->get_num_options();
 								
 							if ( $count > 1 )
@@ -1035,7 +1031,7 @@ class BMLTPlugin
 											{
 											$options_coords[$i] = array ( 'lat' => $options['map_center_latitude'], 'lng' => $options['map_center_longitude'], 'zoom' => $options['map_zoom'] );
 											
-											$html .= '<option value="'.$i.'"';
+											$html .= '<option id="BMLTPlugin_option_sel_'.$i.'" value="'.$i.'"';
 											
 											if ( $i == $selected_option )
 												{
@@ -1063,6 +1059,7 @@ class BMLTPlugin
 							elseif ( $count == 1 )
 								{
 								$options = $this->getBMLTOptions ( 1 );
+								$options_coords[1] = array ( 'lat' => $options['map_center_latitude'], 'lng' => $options['map_center_longitude'], 'zoom' => $options['map_zoom'] );
 								if ( isset ( $options['setting_name'] ) && $options['setting_name'] )
 									{
 									$html .= htmlspecialchars ( $options['setting_name'] );

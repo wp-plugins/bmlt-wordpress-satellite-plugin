@@ -9,8 +9,6 @@
 *										AJAX HANDLER										*
 ********************************************************************************************/
 
-var g_BMLTPlugin_AjaxRequest = null;
-
 /****************************************************************************************//**
 *	\brief A simple, generic AJAX request function.											*
 *																							*
@@ -68,8 +66,6 @@ function BMLTPlugin_AjaxRequest (	url,		///< The URI to be called
 		};
 	req.open ( method,url, true );
 	req.send ( null );
-	
-	g_BMLTPlugin_AjaxRequest = req;
 	
 	return req;
 };
