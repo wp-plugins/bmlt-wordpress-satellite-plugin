@@ -1,13 +1,13 @@
 /***********************************************************************/
 /** \mainpage
-	<div style="height:24px"></div>
-	<div style="height:80px;background-color:#0013d2;background-image:url(../images/DocHeader.gif);background-position:center top;background-repeat:no-repeat"></div>
-	
-	<h2>INTRODUCTION</h2>
-	
-	This is the WordPress Plugin for the BMLT. It is designed to be extremely
-	easy to install and use.
-	
-	\license This code is completely open and free. You may access it by <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/">visiting the BMLT Project Site</a>. It should never be sold.
-	\version 2.0 (Read the changelog in the readme.txt file).
+    <div style="height:24px"></div>
+    <div style="height:80px;background-color:#0013d2;background-image:url(../images/DocHeader.gif);background-position:center top;background-repeat:no-repeat"></div>
+    
+    <h2>INTRODUCTION</h2>
+    
+    This is the WordPress Plugin for the BMLT. It is designed to be extremely
+    easy to install and use.
+    
+    \license This code is completely open and free. You may access it by <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/">visiting the BMLT Project Site</a>. It should never be sold.
+    \version 2.0 (Read the changelog in the readme.txt file).
 */

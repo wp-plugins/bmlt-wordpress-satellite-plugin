@@ -24,17 +24,17 @@
 			$opt = preg_replace( '#(?<!:)\/\/.*?\n#s', "", $opt );
 			$opt = preg_replace( "|\s+|s", " ", $opt );
 			header ( "Content-type: text/javascript" );
-			
-			$handler = null;
-			
-			if ( zlib_get_coding_type() === false )
-				{
-				$handler = "ob_gzhandler";
-				}
-			
-			ob_start($handler);
-			echo $opt;
-			ob_end_flush();
+            
+            $handler = null;
+            
+            if ( zlib_get_coding_type() === false )
+                {
+                $handler = "ob_gzhandler";
+                }
+            
+            ob_start($handler);
+            echo $opt;
+            ob_end_flush();
 			}
 		else
 			{

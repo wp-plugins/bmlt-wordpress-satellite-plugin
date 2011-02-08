@@ -1,8 +1,8 @@
 /****************************************************************************************//**
-* \file admin_styles.css																	*
-* \brief The CSS for the BMLTPlugin class (Admin options).									*
-* \version 1.0.0																			*
-* \license Public Domain -No restrictions at all.											*
+* \file admin_styles.css                                                                    *
+* \brief The CSS for the BMLTPlugin class (Admin options).                                  *
+* \version 1.0.0                                                                            *
+* \license Public Domain -No restrictions at all.                                           *
 ********************************************************************************************/
 
 .BMLTPlugin_Admin_h1,
@@ -12,231 +12,231 @@
 .BMLTPlugin_Message_bar_fail,
 .BMLTPlugin_toolbar_line_map
 {
-	text-align:center;
+    text-align:center;
 }
 
 .BMLTPlugin_Message_bar_div
 {
-	border:1px solid #6cf;
-	margin-right: 12px;
-	padding: 8px;
-	background:white;
+    border:1px solid #6cf;
+    margin-right: 12px;
+    padding: 8px;
+    background:white;
 }
 
 .BMLTPlugin_toolbar_line_map,
 .BMLTPlugin_Map_Div
 {
-	border:1px solid #6cf;
+    border:1px solid #6cf;
 }
 
 .BMLTPlugin_toolbar_line_map
 {
-	margin-right: 12px;
+    margin-right: 12px;
 }
 
 .BMLTPlugin_option_fieldset
 {
-	border-left:1px solid #6cf;
-	border-right:1px solid #6cf;
-	border-top:1px solid #6cf;
-	margin-top:8px;
-	margin-right: 12px;
-	padding: 8px;
+    border-left:1px solid #6cf;
+    border-right:1px solid #6cf;
+    border-top:1px solid #6cf;
+    margin-top:8px;
+    margin-right: 12px;
+    padding: 8px;
 }
 
 .BMLTPlugin_toolbar_line_bottom
 {
-	border-left:1px solid #6cf;
-	border-right:1px solid #6cf;
-	border-bottom:1px solid #6cf;
-	margin-right: 12px;
-	padding: 8px;
+    border-left:1px solid #6cf;
+    border-right:1px solid #6cf;
+    border-bottom:1px solid #6cf;
+    margin-right: 12px;
+    padding: 8px;
 }
 
 .BMLTPlugin_option_fieldset .BMLTPlugin_toolbar_line
 {
-	margin-right: 0px;
+    margin-right: 0px;
 }
 
 .BMLTPlugin_toolbar_button_line_left,
 .BMLTPlugin_toolbar_button_line_right
 {
-	text-align: center;
-	width: 45%
+    text-align: center;
+    width: 45%
 }
 
 .BMLTPlugin_toolbar_button_line_left
 {
-	float: left;
+    float: left;
 }
 
 .BMLTPlugin_toolbar_button_line_right
 {
-	float: right;
+    float: right;
 }
 
 .BMLTPlugin_legend
 {
-	margin: 8px;
-	padding-left:4px;
-	padding-right:4px;
+    margin: 8px;
+    padding-left:4px;
+    padding-right:4px;
 }
 
 .BMLTPlugin_Message_bar_success
 {
-	color:green;
+    color:green;
 }
 
 .BMLTPlugin_Message_bar_fail
 {
-	color:red;
+    color:red;
 }
 
 .BMLTPlugin_Message_bar_success,
 .BMLTPlugin_Message_bar_fail
 {
-	margin:0;
-	padding:0;
+    margin:0;
+    padding:0;
 }
 
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_delete_button
 {
-	background-color:#f96;
+    background-color:#f96;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_delete_button:hover
 {
-	background-color:red;
-	color:white;
+    background-color:red;
+    color:white;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_create_button
 {
-	background-color:#6f6;
+    background-color:#6f6;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_create_button:hover
 {
-	background-color:green;
-	color:white;
+    background-color:green;
+    color:white;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_toolbar_button_save_disabled,
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_toolbar_button_save_disabled:hover
 {
-	border:1px solid #999;
-	background-color:#ccc;
-	color:#999;
+    border:1px solid #999;
+    background-color:#ccc;
+    color:#999;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_toolbar_button_save_enabled
 {
-	background-color:#fcf;
-	color:#333;
+    background-color:#fcf;
+    color:#333;
 }
 
 .BMLTPlugin_toolbar_line_bottom .BMLTPlugin_toolbar_button_save_enabled:hover
 {
-	background-color:#939;
-	color:white;
+    background-color:#939;
+    color:white;
 }
 
 .BMLTPlugin_option_sheet_line_div
 {
-	clear:both;
+    clear:both;
 }
 
 .BMLTPlugin_option_sheet_line_div label
 {
-	width: 200px;
-	text-align: right;
-	font-weight:bold;
-	margin-right:8px;
-	display:block;
-	float:left;
+    width: 200px;
+    text-align: right;
+    font-weight:bold;
+    margin-right:8px;
+    display:block;
+    float:left;
 }
 
 .BMLTPlugin_option_sheet_line_name_text
 {
-	width: 300px;
+    width: 300px;
 }
 
 .BMLTPlugin_option_sheet_line_root_server_text,
 .BMLTPlugin_option_sheet_line_new_search_text
 {
-	width: 600px;
-	float:left;
+    width: 600px;
+    float:left;
 }
 
 .BMLTPlugin_option_sheet_Version
 {
-	float:left;
-	margin-left:8px;
+    float:left;
+    margin-left:8px;
 }
 
 .BMLTPlugin_option_sheet_Test_Button_div
 {
-	vertical-align:middle;
-	height:20px;
-	line-height:24px;
+    vertical-align:middle;
+    height:20px;
+    line-height:24px;
 }
 
 .BMLTPlugin_option_sheet_Test_Button_div image
 {
-	display:block;
-	float: left;
-	margin-top:auto;
-	margin-bottom:auto;
+    display:block;
+    float: left;
+    margin-top:auto;
+    margin-bottom:auto;
 }
 
 .BMLTPlugin_option_sheet_Test_Button_div input
 {
-	float:left;
+    float:left;
 }
 
 .BMLTPlugin_option_sheet_BAD,
 .BMLTPlugin_option_sheet_OK,
 .BMLTPlugin_option_sheet_NEUT
 {
-	width: 16px;
-	height:24px;
-	float:left;
-	margin-left:8px;
+    width: 16px;
+    height:24px;
+    float:left;
+    margin-left:8px;
 }
 
 .BMLTPlugin_option_sheet_BAD,
 .BMLTPlugin_option_sheet_OK
 {
-	background-position: center center;
-	background-repeat: no-repeat;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 
 .BMLTPlugin_option_sheet_BAD
 {
-	background-image:url(admin_images/RedX.gif);
+    background-image:url(admin_images/RedX.gif);
 }
 
 .BMLTPlugin_option_sheet_OK
 {
-	background-image:url(admin_images/GreenBall.gif);
+    background-image:url(admin_images/GreenBall.gif);
 }
 
 .BMLTPlugin_Map_Div
 {
-	height:640px;
-	width:640px;
-	margin:8px;
-	margin-left:auto;
-	margin-right:auto;
+    height:640px;
+    width:640px;
+    margin:8px;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 .BMLTPlugin_map_label_h2
 {
-	text-align:center;
-	color: #36c;
-	margin: 0;
-	margin-top: 8px;
-	margin-bottom: 4px;
-	padding: 0;
+    text-align:center;
+    color: #36c;
+    margin: 0;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    padding: 0;
 }
