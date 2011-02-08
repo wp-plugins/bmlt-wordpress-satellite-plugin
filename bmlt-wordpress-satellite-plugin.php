@@ -103,6 +103,10 @@ class BMLTPlugin
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.'; ///< This is the tooltip text for the "test server" button.
     static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';     ///< The Label for the map.
     
+    /// These are for the actual search displays
+    static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
+    static  $local_clear_search = 'Clear Search Results';                   ///< Used for the "Clear" item in the quick search popup.
+    
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
     ****************************************************************************************/
@@ -727,7 +731,15 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        if ( isset ( $_GET['BMLTPlugin_AJAX_Call'] ) )
+        if ( isset ( $_GET['direct_simple'] ) )
+            {
+            $settings_id = intval(trim($_GET['direct_simple']));
+            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$_GET['search_parameters'];
+            $response = bmlt_satellite_controller::call_curl ( $url );
+            die ( $response );
+            }
+        elseif ( isset ( $_GET['BMLTPlugin_AJAX_Call'] ) )
             {
             $ret = '0';
             
@@ -945,9 +957,82 @@ class BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
-        return $in_the_content;
+        return $this->display_simple_searches ( $in_the_content );
         }
         
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "simple" search, if provided by the 'bmlt_simple_searches' custom field.            *
+    *                                                                                       *
+    *   \returns a string, containing the content. Null if the call fails to get any data.  *
+    ****************************************************************************************/
+    function display_simple_searches ( $in_content )
+        {
+        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) )
+            {
+            $text = get_post_meta ( get_the_ID(), 'bmlt_simple_searches', true );
+            $display .= '';
+            if ( $text )
+                {
+                $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+                
+                if ( !$settings_id )
+                    {
+                    $options = $this->getBMLTOptions ( 1 );
+                    $settings_id = $options['id'];
+                    }
+                
+                $text_ar = explode ( "\n", $text );
+                
+                if ( is_array ( $text_ar ) && count ( $text_ar ) )
+                    {
+                    $display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
+                    $display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
+                    $display .= '<select id="meeting_search_select"class="simple_search_list" onchange="BMLTPlugin_simple_div_filler (this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+                    $display .= '<option disabled="disabled" selected="selected">'.self::process_text ( self::$local_select_search ).'</option>';
+                    $lines_max = count ( $text_ar );
+                    $lines = 0;
+                    while ( $lines < $lines_max )
+                        {
+                        $line['parameters'] = trim($text_ar[$lines++]);
+                        $line['prompt'] = trim($text_ar[$lines++]);
+                        if ( $line['parameters'] && $line['prompt'] )
+                            {
+                            $uri = get_bloginfo('home').'/index.php?direct_simple='.htmlspecialchars ( $settings_id ).'&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
+                            }
+                        }
+                    $display .= '<option disabled="disabled"></option>';
+                    $display .= '<option disabled="disabled" value="">'.self::process_text ( self::$local_clear_search ).'</option>';
+                    $display .= '</select></div></form>';
+                    
+                     if ( plugins_url() )
+                        {
+                        $img_url = plugins_url()."/bmlt-wordpress-satellite-plugin/images";
+                        }
+                    elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+                        {
+                        $img_url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/images";
+                        }
+                    $img_url = htmlspecialchars ( $img_url );
+                    
+                    $display .= '<script type="text/javascript">';
+                    $display .= "var c_g_BMLTPlugin_images = '$img_url';";
+                    $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
+                    $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
+                    $display .= '</script>';
+                    $display .= '<div id="simple_search_container"></div></div>';
+                    }
+                }
+            
+            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1 );
+            
+            $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $display, $in_content, 1 );
+            }
+        
+        return $in_content;
+        }
+       
     /************************************************************************************//**
     *   \brief Presents the admin menu options.                                             *
     ****************************************************************************************/

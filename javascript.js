@@ -17,7 +17,8 @@
     
 function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
                                     callback,   ///< The success callback
-                                    method      ///< The method ('get' or 'post')
+                                    method,     ///< The method ('get' or 'post')
+                                    extra_data  ///< If supplied, extra data to be delivered to the callback.
                                     )
 {
     /************************************************************************************//**
@@ -57,6 +58,10 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
     
     var req = createXMLHTTPObject();
     req.finalCallback = callback;
+    if ( extra_data )
+        {
+        req.extra_data = extra_data;
+        };
     req.onreadystatechange = function ( )
         {
         if ( req.readyState != 4 ) return;
@@ -68,4 +73,28 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
     req.send ( null );
     
     return req;
+};
+
+function BMLTPlugin_simple_div_filler ( in_uri,
+                                        in_header
+                                    )
+{
+    if ( !in_uri )
+        {
+        var option_list=document.getElementById ( 'meeting_search_select' ).options;
+        document.getElementById ( 'simple_search_container' ).innerHTML='';
+        document.getElementById ( 'meeting_search_select' ).selectedIndex=0;
+        option_list[option_list.length-1].disabled=true;
+        }
+    else
+        {
+        document.getElementById('simple_search_container').innerHTML='<img class="bmlt_simple_throbber_img" alt="throbber" src="'+c_g_BMLTPlugin_images+'/small_throbber.gif" />';
+        BMLTPlugin_AjaxRequest ( in_uri, BMLTPlugin_simple_div_filler_callback, 'get', in_header );
+        };
+};
+
+function BMLTPlugin_simple_div_filler_callback ( in_req
+                                                )
+{
+    document.getElementById('simple_search_container').innerHTML='<h2 class="bmlt_simple_header">'+in_req.extra_data+'</h2>'+in_req.responseText;
 };
