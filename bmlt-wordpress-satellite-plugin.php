@@ -744,11 +744,6 @@ class BMLTPlugin
 			
 			if ( isset ( $_GET['BMLTPlugin_set_options'] ) )
 				{
-// 				if ( !self::user_authorized() )
-// 					{
-// 					die ( self::process_text ( self::$local_options_access_failure ) );
-// 					}
-				
 				$ret = 1;
 				
 				$num_options = $this->get_num_options();
@@ -1096,17 +1091,17 @@ class BMLTPlugin
 							$html .= '<script type="text/javascript">';
 								$html .= "var c_g_delete_confirm_message='".self::process_text ( self::$local_options_delete_option_confirm )."';";
 							$html .= '</script>';
-							$html .= '<input type="button" class="BMLTPlugin_delete_button" value="'.self::process_text ( self::$local_options_delete_option ).'" onclick="BMLTPlugin_DeleteOptionSheet()" />';
+							$html .= '<input type="button" id="BMLTPlugin_toolbar_button_del" class="BMLTPlugin_delete_button" value="'.self::process_text ( self::$local_options_delete_option ).'" onclick="BMLTPlugin_DeleteOptionSheet()" />';
 						$html .= '</div>';
 						}
 					
 					$html .= '<div class="BMLTPlugin_toolbar_button_line_right">';
-						$html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.self::process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptionSheet()" />';
+						$html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.self::process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptions()" />';
 					$html .= '</div>';
 					$html .= '</form>';
 					$html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get">';
 					$html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $_GET['page'] ).'" />';
-					$html .= '<input type="submit" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.self::process_text ( self::$local_options_add_new ).'" />';
+					$html .= '<input type="submit" id="BMLTPlugin_toolbar_button_new" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.self::process_text ( self::$local_options_add_new ).'" />';
 					$html .= '</form>';
 				$html .= '</div>';
 				$html .= '<div class="BMLTPlugin_toolbar_line_map">';

@@ -97,7 +97,7 @@ function BMLTPlugin_DeleteOptionSheet()
 /****************************************************************************************//**
 *	\brief This actually saves the new options.												*
 ********************************************************************************************/
-function BMLTPlugin_SaveOptionSheet()
+function BMLTPlugin_SaveOptions()
 {
 	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action;
 	
@@ -174,6 +174,12 @@ function BMLTPlugin_DirtifyOptionSheet(	in_disable	///< If this is true, then we
 {
 	document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled = (in_disable == true);
 	document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).className = 'BMLTPlugin_toolbar_button_save_' + ((in_disable == true) ? 'disabled' : 'enabled').toString();
+
+	document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).disabled = (in_disable != true);
+	document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_create_button').toString();
+
+	document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
+	document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
 };
 
 /****************************************************************************************//**
@@ -375,7 +381,7 @@ function BMLTPlugin_admin_CreateMarker ( )
 function BMLTPlugin_admin_MovedMarker ( )
 {
 	var option_index = BMLTPlugin_GetSelectedOptionIndex();
-	
+	BMLTPlugin_DirtifyOptionSheet();
 	c_g_BMLTPlugin_coords[option_index-1].lat = g_BMLTPlugin_admin_marker.getPosition().lat();
 	c_g_BMLTPlugin_coords[option_index-1].lng = g_BMLTPlugin_admin_marker.getPosition().lng();
 	c_g_BMLTPlugin_coords[option_index-1].zoom = g_BMLTPlugin_admin_main_map.getZoom();
