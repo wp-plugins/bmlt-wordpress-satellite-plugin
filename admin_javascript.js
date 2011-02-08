@@ -99,26 +99,70 @@ function BMLTPlugin_DeleteOptionSheet()
 ********************************************************************************************/
 function BMLTPlugin_SaveOptionSheet()
 {
-	var option_index = BMLTPlugin_GetSelectedOptionIndex();
+	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action;
 	
-	var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action + '&BMLTPlugin_set_options='+option_index;
-	var	name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
-	url += '&BMLTPlugin_option_sheet_name=';
-	if ( name && (name != c_g_BMLTPlugin_no_name) )
+	url += '&BMLTPlugin_Save_Settings_AJAX_Call=1&BMLTPlugin_set_options=1';
+	
+	for ( var option_index = 1; option_index <= c_g_BMLTPlugin_coords.length; option_index++ )
 		{
-		url += encodeURIComponent ( name );
+		var	name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
+		url += '&BMLTPlugin_option_sheet_name_'+option_index+'=';
+		if ( name && (name != c_g_BMLTPlugin_no_name) )
+			{
+			url += encodeURIComponent ( name );
+			};
+		
+		var	root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
+		
+		url += '&BMLTPlugin_option_sheet_root_server_'+option_index+'=';
+	
+		if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
+			{
+			url += encodeURIComponent ( root_server );
+			};
+		
+		url += '&BMLTPlugin_option_latitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lat;
+		url += '&BMLTPlugin_option_longitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lng;
+		url += '&BMLTPlugin_option_zoom_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].zoom;
+	
+		if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
+			{
+			url += encodeURIComponent ( root_server );
+			};
 		};
 	
-	var	root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
-	
-	url += '&BMLTPlugin_option_sheet_root_server=';
+	BMLTPlugin_AjaxRequest ( url, BMLTPlugin_SettingCallback, 'get' );
+};
 
-	if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
-		{
-		url += encodeURIComponent ( root_server );
-		};
+/****************************************************************************************//**
+*	\brief AJAX callback for the settings.													*
+********************************************************************************************/
+function BMLTPlugin_SettingCallback (in_success	///< The HTTPRequest object
+									)
+{
+	var	fader = document.getElementById ( 'BMLTPlugin_Fader' );
 	
-	window.location.replace ( url );
+	if ( fader )
+		{
+		fader.style.opacity = 1;
+		fader.FadeState = null;
+		
+		if ( parseInt(in_success.responseText) != 1 )
+			{
+			fader.innerHTML = c_g_BMLTPlugin_failure_message;
+			fader.className = 'BMLTPlugin_Message_bar_fail';
+			g_BMLTPlugin_TimeToFade = c_g_BMLTPlugin_failure_time;
+			}
+		else
+			{
+			fader.innerHTML = c_g_BMLTPlugin_success_message;
+			fader.className = 'BMLTPlugin_Message_bar_success';
+			g_BMLTPlugin_TimeToFade = c_g_BMLTPlugin_success_time;
+			BMLTPlugin_DirtifyOptionSheet ( true );
+			};
+		
+		BMLTPlugin_StartFader();
+		};
 };
 
 /****************************************************************************************//**
@@ -162,12 +206,12 @@ function BMLTPlugin_StartFader()
 		if ( element.FadeState == 1 || element.FadeState == -1 )
 			{
 			element.FadeState = element.FadeState == 1 ? -1 : 1;
-			element.FadeTimeLeft = BMLTPlugin_TimeToFade - element.FadeTimeLeft;
+			element.FadeTimeLeft = g_BMLTPlugin_TimeToFade - element.FadeTimeLeft;
 			}
 		else
 			{
 			element.FadeState = element.FadeState == 2 ? -1 : 1;
-			element.FadeTimeLeft = BMLTPlugin_TimeToFade;
+			element.FadeTimeLeft = g_BMLTPlugin_TimeToFade;
 			setTimeout ( "BMLTPlugin_animateFade(" + new Date().getTime() + ",'" + eid + "')", 33);
 			};
 		};
@@ -198,7 +242,7 @@ function BMLTPlugin_animateFade (	lastTick,	///< The time of the last tick.
 	
 	element.FadeTimeLeft -= elapsedTicks;
 	
-	var newOpVal = element.FadeTimeLeft/BMLTPlugin_TimeToFade;
+	var newOpVal = element.FadeTimeLeft/g_BMLTPlugin_TimeToFade;
 	
 	if ( element.FadeState == 1 )
 		{
@@ -238,7 +282,7 @@ function BMLTPlugin_TestRootUri_call()
 /****************************************************************************************//**
 *	\brief Uses AJAX to test the given root server URI.										*
 ********************************************************************************************/
-function BMLTPlugin_TestRootUriCallback(in_success	///< This is either 1 or 0
+function BMLTPlugin_TestRootUriCallback(in_success	///< The text in this is either 1 or 0
 										)
 {
 	var option_index = BMLTPlugin_GetSelectedOptionIndex();

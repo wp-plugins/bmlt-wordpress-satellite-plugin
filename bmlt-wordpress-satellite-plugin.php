@@ -81,12 +81,13 @@ class BMLTPlugin
 	static	$local_options_delete_option = 'Delete This Setting';			///< The string displayed in the "Delete Option" button.
 	static	$local_options_delete_failure = 'The setting deletion failed.';	///< The string displayed upon unsuccessful deletion of an option page.
 	static	$local_options_create_failure = 'The setting creation failed.';	///< The string displayed upon unsuccessful creation of an option page.
-	static	$local_options_save_failure = 'The setting was update failed.';	///< The string displayed upon unsuccessful update of an option page.
 	static	$local_options_delete_option_confirm = 'Are you sure that you want to delete this setting?';	///< The string displayed in the "Are you sure?" confirm.
 	static	$local_options_delete_success = 'The setting was deleted successfully.';						///< The string displayed upon successful deletion of an option page.
 	static	$local_options_create_success = 'The setting was created successfully.';						///< The string displayed upon successful creation of an option page.
-	static	$local_options_save_success = 'The setting was updated successfully.';							///< The string displayed upon successful update of an option page.
+	static	$local_options_save_success = 'The settings were updated successfully.';						///< The string displayed upon successful update of an option page.
+	static	$local_options_save_failure = 'The settings were not updated.';									///< The string displayed upon unsuccessful update of an option page.
 	static	$local_options_url_bad = 'This root server URL will not work for this plugin.';					///< The string displayed if a root server URI fails to point to a valid root server.
+	static	$local_options_access_failure = 'You are not allowed to perform this operation.';				///< This is displayed if a user attempts a no-no.
 	
 	/// These are all for the admin page option sheets.
 	static	$local_options_name_label = 'Setting Name:';					///< The Label for the setting name item.
@@ -149,6 +150,7 @@ class BMLTPlugin
 				if ( function_exists ( 'add_action' ) )
 					{
 					add_action ( 'init', array ( self::get_plugin_object(), 'init' ) );
+					add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_init' ) );
 					add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
 					}
 				else
@@ -650,19 +652,19 @@ class BMLTPlugin
 				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
 					$id = 'BMLTPlugin_option_sheet_name_'.$in_options_index;
 					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_name_label ).'</label>';
-						$string = (isset ( $options['setting_name'] ) && $options['setting_name'] ? $options['setting_name'] : self::$local_options_no_name_string );
+						$string = (isset ( $options['setting_name'] ) && $options['setting_name'] ? $options['setting_name'] : self::process_text ( self::$local_options_no_name_string ) );
 					$ret .= '<input class="BMLTPlugin_option_sheet_line_name_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
-					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_name_string).'\',false)"';
-					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_name_string).'\',true)"';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text ( self::$local_options_no_name_string ).'\',false)"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text ( self::$local_options_no_name_string ).'\',true)"';
 					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
 				$ret .= '</div>';
 				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
 					$id = 'BMLTPlugin_option_sheet_root_server_'.$in_options_index;
 					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_rootserver_label ).'</label>';
-						$string = (isset ( $options['root_server'] ) && $options['root_server'] ? $options['root_server'] : self::$local_options_no_root_server_string );
+						$string = (isset ( $options['root_server'] ) && $options['root_server'] ? $options['root_server'] : self::process_text ( self::$local_options_no_root_server_string ) );
 					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
-					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',false);BMLTPlugin_TestRootUri_call()"';
-					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.htmlspecialchars(self::$local_options_no_root_server_string).'\',true);;BMLTPlugin_TestRootUri_call()"';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',false);BMLTPlugin_TestRootUri_call()"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',true);;BMLTPlugin_TestRootUri_call()"';
 					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" onkeyup="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" />';
 					$ret .= '<div class="BMLTPlugin_option_sheet_NEUT" id="BMLTPlugin_option_sheet_indicator_'.$in_options_index.'"></div>';
 				$ret .= '</div>';
@@ -671,6 +673,23 @@ class BMLTPlugin
 		else
 			{
 			echo "<!-- BMLTPlugin ERROR (display_options_sheet)! Options not found for $in_options_index! -->";
+			}
+		
+		return $ret;
+		}
+		
+	/************************************************************************************//**
+	*	\brief Checks to see if the current user is authorized.								*
+	*																						*
+	*	\returns a boolean. True if the user is authorized.									*
+	****************************************************************************************/
+	static function user_authorized ( )
+		{
+		$ret = false;
+		
+		if ( $current_user->user_level >  7 )
+			{
+			$ret = true;
 			}
 		
 		return $ret;
@@ -711,6 +730,84 @@ class BMLTPlugin
 				}
 			
 			die ( $ret );
+			}
+		}
+		
+	/************************************************************************************//**
+	*	\brief This does any admin actions necessary.										*
+	****************************************************************************************/
+	function admin_init ( )
+		{
+		if ( isset ( $_GET['BMLTPlugin_Save_Settings_AJAX_Call'] ) )
+			{
+			$ret = 0;
+			
+			if ( isset ( $_GET['BMLTPlugin_set_options'] ) )
+				{
+// 				if ( !self::user_authorized() )
+// 					{
+// 					die ( self::process_text ( self::$local_options_access_failure ) );
+// 					}
+				
+				$ret = 1;
+				
+				$num_options = $this->get_num_options();
+				
+				for ( $i = 1; $i <= $num_options; $i++ )
+					{
+					$options = $this->getBMLTOptions ( $i );
+					
+					if ( is_array ( $options ) && count ( $options ) )
+						{
+						if ( isset ( $_GET['BMLTPlugin_option_sheet_name_'.$i] ) )
+							{
+							if ( trim ( $_GET['BMLTPlugin_option_sheet_name_'.$i] ) )
+								{
+								$options['setting_name'] = trim ( $_GET['BMLTPlugin_option_sheet_name_'.$i] );
+								}
+							else
+								{
+								$options['setting_name'] = '';
+								}
+							}
+						
+						if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] ) )
+							{
+							if ( trim ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] ) )
+								{
+								$options['root_server'] = trim ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] );
+								}
+							else
+								{
+								$options['root_server'] = '';
+								}
+							}
+						
+						if ( isset ( $_GET['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] ) )
+							{
+							$options['map_center_latitude'] = floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] );
+							}
+						
+						if ( isset ( $_GET['BMLTPlugin_option_longitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_longitude_'.$i] ) )
+							{
+							$options['map_center_longitude'] = floatVal ( $_GET['BMLTPlugin_option_longitude_'.$i] );
+							}
+						
+						if ( isset ( $_GET['BMLTPlugin_option_zoom_'.$i] ) && intVal ( $_GET['BMLTPlugin_option_zoom_'.$i] ) )
+							{
+							$options['map_zoom'] = floatVal ( $_GET['BMLTPlugin_option_zoom_'.$i] );
+							}
+						
+						if ( !$this->setBMLTOptions ( $options, $i ) )
+							{
+							$ret = 0;
+							break;
+							}
+						}
+					}
+				}
+			
+			die ( strVal ( $ret ) );
 			}
 		}
 		
@@ -866,6 +963,14 @@ class BMLTPlugin
 				$out_option_number = $this->make_new_options ( );
 				if ( $out_option_number )
 					{
+					$def_options = $this->getBMLTOptions ( 1 );
+					$new_options = $this->getBMLTOptions ( $out_option_number );
+					$new_options['root_server'] = $def_options['root_server'];
+					$new_options['map_center_latitude'] = $def_options['map_center_latitude'];
+					$new_options['map_center_longitude'] = $def_options['map_center_longitude'];
+					$new_options['map_zoom'] = $def_options['map_zoom'];
+					$this->saveBMLTOptions ( $new_options, $out_option_number );
+					
 					$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
 						$ret .= self::process_text ( self::$local_options_create_success );
 					$ret .= '</h2>';
@@ -896,57 +1001,11 @@ class BMLTPlugin
 					$ret .= '</h2>';
 					}
 				}
-			elseif ( isset ( $_GET['BMLTPlugin_set_options'] ) )
-				{
-				$option_index = intval ( $_GET['BMLTPlugin_set_options'] );
-				$options = $this->getBMLTOptions ( $option_index );
-				
-				if ( is_array ( $options ) && count ( $options ) )
-					{
-					if ( isset ( $_GET['BMLTPlugin_option_sheet_name'] ) )
-						{
-						if ( trim ( $_GET['BMLTPlugin_option_sheet_name'] ) )
-							{
-							$options['setting_name'] = trim ( $_GET['BMLTPlugin_option_sheet_name'] );
-							}
-						else
-							{
-							$options['setting_name'] = '';
-							}
-						}
-					
-					if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
-						{
-						if ( trim ( $_GET['BMLTPlugin_option_sheet_root_server'] ) )
-							{
-							$options['root_server'] = trim ( $_GET['BMLTPlugin_option_sheet_root_server'] );
-							}
-						else
-							{
-							$options['root_server'] = '';
-							}
-						}
-					
-					if ( $this->setBMLTOptions ( $options, $option_index ) )
-						{
-						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
-							$ret .= self::process_text ( self::$local_options_save_success );
-						$ret .= '</h2>';
-						}
-					else
-						{
-						$timing = self::$local_options_failure_time;
-						$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">';
-							$ret .= self::process_text ( self::$local_options_save_failure );
-						$ret .= '</h2>';
-						}
-					}
-				}
 			else
 				{
 				$ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_fail">&nbsp;</h2>';
 				}
-			$ret .= '<script type="text/javascript">var BMLTPlugin_TimeToFade = '.$timing.';BMLTPlugin_StartFader()</script>';
+			$ret .= '<script type="text/javascript">g_BMLTPlugin_TimeToFade = '.$timing.';BMLTPlugin_StartFader()</script>';
 		$ret .= '</div>';
 		return $ret;
 		}
@@ -1056,10 +1115,15 @@ class BMLTPlugin
 						$html .= "BMLTPlugin_DirtifyOptionSheet(true);";	// This sets up the "Save Changes" button as disabled.
 						// This is a trick I use to hide irrelevant content from non-JS browsers. The element is drawn, hidden, then uses JS to show. No JS, no element.
 						$html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';";
-						$html .= "var c_g_BMLTPlugin_no_name = '".self::$local_options_no_name_string."';";
-						$html .= "var c_g_BMLTPlugin_no_root = '".self::$local_options_no_root_server_string."';";
+						$html .= "var c_g_BMLTPlugin_no_name = '".self::process_text ( self::$local_options_no_name_string )."';";
+						$html .= "var c_g_BMLTPlugin_no_root = '".self::process_text ( self::$local_options_no_root_server_string )."';";
 						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
+						$html .= "var c_g_BMLTPlugin_success_message = '".self::process_text ( self::$local_options_save_success )."';";
+						$html .= "var c_g_BMLTPlugin_failure_message = '".self::process_text ( self::$local_options_save_failure )."';";
+						$html .= "var c_g_BMLTPlugin_success_time = ".intVal ( self::$local_options_success_time ).";";
+						$html .= "var c_g_BMLTPlugin_failure_time = ".intVal ( self::$local_options_failure_time ).";";
 						$html .= "var c_g_BMLTPlugin_coords = new Array();";
+						$html .= "var g_BMLTPlugin_TimeToFade = ".intVal ( self::$local_options_success_time ).";";
 						if ( is_array ( $options_coords ) && count ( $options_coords ) )
 							{
 							foreach ( $options_coords as $value )
