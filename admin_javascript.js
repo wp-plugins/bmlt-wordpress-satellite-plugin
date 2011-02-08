@@ -377,7 +377,7 @@ function BMLTPlugin_admin_load_map ( )
 			'mapTypeControl': true,
 			'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
 			'zoomControl': true,
-			'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.SMALL }
+			'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.LARGE }
 			};
 	
 		g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);

@@ -51,6 +51,8 @@ class BMLTPlugin
 	*		$default_initial_view															*
 	*		$default_sb_array																*
 	*		$default_push_down_more_details													*
+	*		$default_additional_css															*
+	*		$default_language																*
 	****************************************************************************************/
 	
 	// These are the old settings that we still care about.
@@ -61,9 +63,7 @@ class BMLTPlugin
 	static	$default_map_center_latitude = 29.764377375163125;						///< This is the default basic search map center latitude
 	static	$default_map_center_longitude = -95.4931640625;							///< This is the default basic search map center longitude
 	static	$default_map_zoom = 9;													///< This is the default basic search map zoom level
-	static	$default_language = 'en';												///< This is the default language for the server.
 	static	$default_new_search = '';												///< If this is set to something, then a new search uses the exact URI.
-	static	$default_additional_css = '';											///< The admin can add arbitrary CSS here (NOTE: Version 1 CSS will no longer apply to Version 2).
 		
 	/************************************************************************************//**
 	*							STATIC DATA MEMBERS (LOCALIZABLE)							*
@@ -101,6 +101,7 @@ class BMLTPlugin
 	static	$local_options_test_server_success = 'Version ';				///< This is a prefix for the version, on success.
 	static	$local_options_test_server_failure = 'This Root Server URL is not Valid';				///< This is a prefix for the version, on failure.
 	static	$local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.';	///< This is the tooltip text for the "test server" button.
+	static	$local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';		///< The Label for the map.
 	
 	/************************************************************************************//**
 	*								STATIC DATA MEMBERS (MISC)								*
@@ -257,9 +258,7 @@ class BMLTPlugin
 									'map_center_latitude' => self::$default_map_center_latitude,
 									'map_center_longitude' => self::$default_map_center_longitude,
 									'map_zoom' => self::$default_map_zoom,
-									'bmlt_language' => self::$default_language,
 									'bmlt_new_search_url' => self::$default_new_search,
-									'additional_css' => self::$default_additional_css,
 									'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time()),	// This gives the option a unique slug
 									'setting_name' => ''
 									);
@@ -674,7 +673,7 @@ class BMLTPlugin
 					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',true)"';
 					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
 					$ret .= '<div class="BMLTPlugin_option_sheet_Test_Button_div">';
-						$ret .= '<input type="button" value="'.self::process_text ( self::$local_options_test_server ).'" onclick="BMLTPlugin_TestRootUri_call()" />';
+						$ret .= '<input type="button" value="'.self::process_text ( self::$local_options_test_server ).'" onclick="BMLTPlugin_TestRootUri_call()" title="'.self::process_text ( self::$local_options_test_server_tooltip ).'" />';
 						$ret .= '<div class="BMLTPlugin_option_sheet_NEUT" id="BMLTPlugin_option_sheet_indicator_'.$in_options_index.'"></div>';
 						$ret .= '<div class="BMLTPlugin_option_sheet_Version" id="BMLTPlugin_option_sheet_version_indicator_'.$in_options_index.'"></div>';
 					$ret .= '</div>';
@@ -1132,6 +1131,7 @@ class BMLTPlugin
 					$html .= '</form>';
 				$html .= '</div>';
 				$html .= '<div class="BMLTPlugin_toolbar_line_map">';
+					$html .= '<h2 class="BMLTPlugin_map_label_h2">'.self::process_text ( self::$local_options_map_label ).'</h2>';
 					$html .= '<div class="BMLTPlugin_Map_Div" id="BMLTPlugin_Map_Div"></div>';
 					$html .= '<script type="text/javascript">';
 						$html .= "BMLTPlugin_DirtifyOptionSheet(true);";	// This sets up the "Save Changes" button as disabled.
