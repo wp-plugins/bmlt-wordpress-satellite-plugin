@@ -93,8 +93,14 @@ class BMLTPlugin
 	/// These are all for the admin page option sheets.
 	static	$local_options_name_label = 'Setting Name:';					///< The Label for the setting name item.
 	static	$local_options_rootserver_label = 'Root Server:';				///< The Label for the root server item.
+	static	$local_options_new_search_label = 'New Search URL:';			///< The Label for the new search item.
 	static	$local_options_no_name_string = 'Enter Setting Name';			///< The Value to use for a name field for a setting with no name.
-	static	$local_options_no_root_server_string = 'Enter a Root Server URL';	///< The Value to use for a root with no name.
+	static	$local_options_no_root_server_string = 'Enter a Root Server URL';	///< The Value to use for a root with no URL.
+	static	$local_options_no_new_search_string = 'Enter a New Search URL';	///< The Value to use for a new search with no URL.
+	static	$local_options_test_server = 'Test';							///< This is the title for the "test server" button.
+	static	$local_options_test_server_success = 'Version ';				///< This is a prefix for the version, on success.
+	static	$local_options_test_server_failure = 'This Root Server URL is not Valid';				///< This is a prefix for the version, on failure.
+	static	$local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.';	///< This is the tooltip text for the "test server" button.
 	
 	/************************************************************************************//**
 	*								STATIC DATA MEMBERS (MISC)								*
@@ -664,10 +670,23 @@ class BMLTPlugin
 					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_rootserver_label ).'</label>';
 						$string = (isset ( $options['root_server'] ) && $options['root_server'] ? $options['root_server'] : self::process_text ( self::$local_options_no_root_server_string ) );
 					$ret .= '<input class="BMLTPlugin_option_sheet_line_root_server_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
-					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',false);BMLTPlugin_TestRootUri_call()"';
-					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',true);;BMLTPlugin_TestRootUri_call()"';
-					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" onkeyup="BMLTPlugin_DirtifyOptionSheet();BMLTPlugin_TestRootUri_call()" />';
-					$ret .= '<div class="BMLTPlugin_option_sheet_NEUT" id="BMLTPlugin_option_sheet_indicator_'.$in_options_index.'"></div>';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',false)"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_root_server_string).'\',true)"';
+					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+					$ret .= '<div class="BMLTPlugin_option_sheet_Test_Button_div">';
+						$ret .= '<input type="button" value="'.self::process_text ( self::$local_options_test_server ).'" onclick="BMLTPlugin_TestRootUri_call()" />';
+						$ret .= '<div class="BMLTPlugin_option_sheet_NEUT" id="BMLTPlugin_option_sheet_indicator_'.$in_options_index.'"></div>';
+						$ret .= '<div class="BMLTPlugin_option_sheet_Version" id="BMLTPlugin_option_sheet_version_indicator_'.$in_options_index.'"></div>';
+					$ret .= '</div>';
+				$ret .= '</div>';
+				$ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+					$id = 'BMLTPlugin_option_sheet_new_search_'.$in_options_index;
+					$ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_new_search_label ).'</label>';
+						$string = (isset ( $options['bmlt_new_search_url'] ) && $options['bmlt_new_search_url'] ? $options['bmlt_new_search_url'] : self::process_text ( self::$local_options_no_new_search_string ) );
+					$ret .= '<input class="BMLTPlugin_option_sheet_line_new_search_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
+					$ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_new_search_string).'\',false)"';
+					$ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_new_search_string).'\',true)"';
+					$ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
 				$ret .= '</div>';
 			$ret .= '</div>';
 			}
@@ -711,7 +730,7 @@ class BMLTPlugin
 		{
 		if ( isset ( $_GET['BMLTPlugin_AJAX_Call'] ) )
 			{
-			$ret = null;
+			$ret = '0';
 			
 			if ( isset ( $_GET['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
 				{
@@ -719,13 +738,11 @@ class BMLTPlugin
 				
 				$test = new bmlt_satellite_controller ( $uri );
 				
-				$ret = '0';
-				
 				if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
 					{
 					if ( !$test->get_m_error_message() )
 						{
-						$ret = '1';
+						$ret = trim($test->get_server_version());
 						}
 					}
 				}
@@ -776,6 +793,18 @@ class BMLTPlugin
 							else
 								{
 								$options['root_server'] = '';
+								}
+							}
+						
+						if ( isset ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] ) )
+							{
+							if ( trim ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] ) )
+								{
+								$options['bmlt_new_search_url'] = trim ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] );
+								}
+							else
+								{
+								$options['bmlt_new_search_url'] = '';
 								}
 							}
 						
@@ -1023,7 +1052,7 @@ class BMLTPlugin
 								
 							if ( $count > 1 )
 								{
-								$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.');BMLTPlugin_TestRootUri_call()">';
+								$html .= '<select id="BMLTPlugin_legend_select" onchange="BMLTPlugin_SelectOptionSheet(this.value,'.$count.')">';
 									for ( $i = 1; $i <= $count; $i++ )
 										{
 										$options = $this->getBMLTOptions ( $i );
@@ -1110,12 +1139,15 @@ class BMLTPlugin
 						$html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';";
 						$html .= "var c_g_BMLTPlugin_no_name = '".self::process_text ( self::$local_options_no_name_string )."';";
 						$html .= "var c_g_BMLTPlugin_no_root = '".self::process_text ( self::$local_options_no_root_server_string )."';";
+						$html .= "var c_g_BMLTPlugin_no_search = '".self::process_text ( self::$local_options_no_new_search_string )."';";
 						$html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
 						$html .= "var c_g_BMLTPlugin_success_message = '".self::process_text ( self::$local_options_save_success )."';";
 						$html .= "var c_g_BMLTPlugin_failure_message = '".self::process_text ( self::$local_options_save_failure )."';";
 						$html .= "var c_g_BMLTPlugin_success_time = ".intVal ( self::$local_options_success_time ).";";
 						$html .= "var c_g_BMLTPlugin_failure_time = ".intVal ( self::$local_options_failure_time ).";";
 						$html .= "var c_g_BMLTPlugin_unsaved_prompt = '".self::process_text ( self::$local_options_unsaved_message )."';";
+						$html .= "var c_g_BMLTPlugin_test_server_success = '".self::process_text ( self::$local_options_test_server_success )."';";
+						$html .= "var c_g_BMLTPlugin_test_server_failure = '".self::process_text ( self::$local_options_test_server_failure )."';";
 						$html .= "var c_g_BMLTPlugin_coords = new Array();";
 						$html .= "var g_BMLTPlugin_TimeToFade = ".intVal ( self::$local_options_success_time ).";";
 						if ( is_array ( $options_coords ) && count ( $options_coords ) )
@@ -1151,7 +1183,6 @@ class BMLTPlugin
 							}
 						$url = htmlspecialchars ( $url );
 						$html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
-						$html .= 'BMLTPlugin_TestRootUri_call();';
 						$html .= 'BMLTPlugin_admin_load_map();';
 					$html .= '</script>';
 				$html .= '</div>';

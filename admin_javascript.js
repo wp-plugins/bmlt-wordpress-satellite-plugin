@@ -123,6 +123,15 @@ function BMLTPlugin_SaveOptions()
 			url += encodeURIComponent ( root_server );
 			};
 		
+		var	new_search = document.getElementById ( 'BMLTPlugin_option_sheet_new_search_'+option_index ).value.toString();
+		
+		url += '&BMLTPlugin_option_sheet_new_search_'+option_index+'=';
+	
+		if ( new_search && (new_search != c_g_BMLTPlugin_no_search) )
+			{
+			url += encodeURIComponent ( new_search );
+			};
+
 		url += '&BMLTPlugin_option_latitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lat;
 		url += '&BMLTPlugin_option_longitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lng;
 		url += '&BMLTPlugin_option_zoom_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].zoom;
@@ -320,6 +329,10 @@ function BMLTPlugin_TestRootUri_call()
 		g_BMLTPlugin_AjaxRequest = null;
 		};
 	
+	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
+	indicator.className = 'BMLTPlugin_option_sheet_NEUT';
+	var version = document.getElementById ('BMLTPlugin_option_sheet_version_indicator_'+option_index );
+	version.innerHTML = '<img src="'+c_g_BMLTPlugin_admin_google_map_images+'/small_throbber.gif" alt="AJAX Throbber" />';
 	g_BMLTPlugin_AjaxRequest = BMLTPlugin_AjaxRequest ( url, BMLTPlugin_TestRootUriCallback, 'get' );
 };
 
@@ -332,14 +345,17 @@ function BMLTPlugin_TestRootUriCallback(in_success	///< The text in this is eith
 	var option_index = BMLTPlugin_GetSelectedOptionIndex();
 
 	var	indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
+	var version = document.getElementById ('BMLTPlugin_option_sheet_version_indicator_'+option_index );
 	
-	if ( parseInt(in_success.responseText) != 1 )
+	if ( parseInt(in_success.responseText) == 0 )
 		{
 		indicator.className = 'BMLTPlugin_option_sheet_BAD';
+		version.innerHTML = c_g_BMLTPlugin_test_server_failure;
 		}
 	else
 		{
 		indicator.className = 'BMLTPlugin_option_sheet_OK';
+		version.innerHTML = c_g_BMLTPlugin_test_server_success+in_success.responseText;
 		};
 };
 	

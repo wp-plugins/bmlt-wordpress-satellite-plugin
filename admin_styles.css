@@ -141,6 +141,11 @@
 	color:white;
 }
 
+.BMLTPlugin_option_sheet_line_div
+{
+	clear:both;
+}
+
 .BMLTPlugin_option_sheet_line_div label
 {
 	width: 200px;
@@ -149,7 +154,6 @@
 	margin-right:8px;
 	display:block;
 	float:left;
-	clear:both;
 }
 
 .BMLTPlugin_option_sheet_line_name_text
@@ -157,9 +161,36 @@
 	width: 300px;
 }
 
-.BMLTPlugin_option_sheet_line_root_server_text
+.BMLTPlugin_option_sheet_line_root_server_text,
+.BMLTPlugin_option_sheet_line_new_search_text
 {
 	width: 600px;
+	float:left;
+}
+
+.BMLTPlugin_option_sheet_Version
+{
+	float:left;
+	margin-left:8px;
+}
+
+.BMLTPlugin_option_sheet_Test_Button_div
+{
+	vertical-align:middle;
+	height:20px;
+	line-height:24px;
+}
+
+.BMLTPlugin_option_sheet_Test_Button_div image
+{
+	display:block;
+	float: left;
+	margin-top:auto;
+	margin-bottom:auto;
+}
+
+.BMLTPlugin_option_sheet_Test_Button_div input
+{
 	float:left;
 }
 
