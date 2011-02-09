@@ -271,7 +271,7 @@ class BMLTPlugin
                                     'map_zoom' => self::$default_map_zoom,
                                     'bmlt_new_search_url' => self::$default_new_search,
                                     'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time()),   // This gives the option a unique slug
-                                    'gmap_key' => self::$default_gkey,
+                                    'gmaps_api_key' => self::$default_gkey,
                                     'setting_name' => ''
                                     );
             
@@ -705,7 +705,7 @@ class BMLTPlugin
                     $ret .= '<div class="BMLTPlugin_gmap_caveat_div">'.self::process_text ( self::$local_options_gkey_caveat ).'</div>';
                     $id = 'BMLTPlugin_option_sheet_gkey_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_gkey_label ).'</label>';
-                        $string = (isset ( $options['gmap_key'] ) && $options['gmap_key'] ? $options['gmap_key'] : self::process_text ( self::$local_options_no_gkey_string ) );
+                        $string = (isset ( $options['gmaps_api_key'] ) && $options['gmaps_api_key'] ? $options['gmaps_api_key'] : self::process_text ( self::$local_options_no_gkey_string ) );
                     $ret .= '<input class="BMLTPlugin_option_sheet_line_gkey_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
                     $ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',false)"';
                     $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',true)"';
@@ -781,28 +781,45 @@ class BMLTPlugin
                 }
             }
 		
+        if ( isset ( $my_http_vars['direct_simple'] ) && intVal ( $my_http_vars['direct_simple'] ) )
+            {
+            $settings_id = intVal ( $my_http_vars['direct_simple'] );
+            }
+        elseif ( isset ( $my_http_vars['bmlt_settings_id'] ) && intVal ( $my_http_vars['bmlt_settings_id'] ) )
+            {
+            $settings_id = intVal ( $my_http_vars['bmlt_settings_id'] );
+            }
+        
+        if ( !$settings_id )
+            {
+            $options = $this->getBMLTOptions ( 1 );
+            $settings_id = $options['id'];
+            }
+        
+        $options = $this->getBMLTOptions_by_id ( $settings_id );
+
 		if ( isset ( $my_http_vars['redirect_ajax'] ) && $my_http_vars['redirect_ajax'] )
 			{
-            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-            
-            if ( !$settings_id )
-                {
-                $options = $this->getBMLTOptions ( 1 );
-                $settings_id = $options['id'];
-                }
-            
-            $options = $this->getBMLTOptions_by_id ( $settings_id );
-
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params ) );
+			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX$this->my_params" ) );
 			}
         elseif ( isset ( $my_http_vars['direct_simple'] ) )
             {
-            $settings_id = intval(trim($my_http_vars['direct_simple']));
-            $options = $this->getBMLTOptions_by_id ( $settings_id );
             $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$my_http_vars['search_parameters'];
             die ( bmlt_satellite_controller::call_curl ( $url ) );
             }
+		elseif ( isset ( $my_http_vars['result_type_advanced'] ) && ($my_http_vars['result_type_advanced'] == 'booklet') )
+			{
+			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
+			header ( "Location: $uri" );
+			die();
+			}
+		elseif ( isset ( $my_http_vars['result_type_advanced'] ) && ($my_http_vars['result_type_advanced'] == 'listprint') )
+			{
+			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
+			header ( "Location: $uri" );
+			die();
+			}
         elseif ( isset ( $my_http_vars['BMLTPlugin_AJAX_Call'] ) )
             {
             $ret = '0';
@@ -887,11 +904,11 @@ class BMLTPlugin
                             {
                             if ( trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] ) )
                                 {
-                                $options['gmap_key'] = trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] );
+                                $options['gmaps_api_key'] = trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] );
                                 }
                             else
                                 {
-                                $options['gmap_key'] = '';
+                                $options['gmaps_api_key'] = '';
                                 }
                             }
                         
@@ -965,13 +982,29 @@ class BMLTPlugin
             
             $head_content .= 'javascript.js"></script>';
             
-            $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            if ( isset ( $_POST['bmlt_settings_id'] ) && intVal ( $_POST['bmlt_settings_id'] ) )
+                {
+                $this->my_option_id = intVal ( $_POST['bmlt_settings_id'] );
+                }
+            elseif ( isset ( $_GET['bmlt_settings_id'] ) && intVal ( $_GET['bmlt_settings_id'] ) )
+                {
+                $this->my_option_id = intVal ( $_GET['bmlt_settings_id'] );
+                }
+            else
+                {
+                $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+                }
             
             if ( !$this->my_option_id )
                 {
                 $options = $this->getBMLTOptions ( 1 );
                 $this->my_option_id = $options['id'];
                 }
+            
+            $this->my_params.= '&bmlt_settings_id='.$this->my_option_id;
+		    $this->my_params.= '&script_name='.preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
+		    $this->my_params.= '&satellite='.preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
+		    $this->my_params.= '&no_ajax_check=yes&supports_ajax=yes';
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
@@ -1106,19 +1139,25 @@ class BMLTPlugin
                     $menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
                     }
                
-                if ( isset ( $my_http_vars['single_meeting_id'] ) && $my_http_vars['single_meeting_id'] )
+                $pid = get_page_uri(get_the_ID());
+                
+                $plink = get_permalink ( get_the_ID() );
+                
+                $menu = '';
+                
+                if ( $pid && !isset ( $this->my_http_vars['search_form'] ) )
+                    {
+                    $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
+                    $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
+                    $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+                    }
+                elseif ( isset ( $my_http_vars['single_meeting_id'] ) && $my_http_vars['single_meeting_id'] )
                     {
                     $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intVal ( $my_http_vars['single_meeting_id'] ) );
                     }
                 elseif ( isset ( $my_http_vars['do_search'] ) )
                     {
                     $uri = "$root_server?switcher=GetSearchResults".$this->my_params;
-                    $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                    }
-                else
-                    {
-                    $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
-                    $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
                 
