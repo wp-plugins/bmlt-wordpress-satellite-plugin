@@ -155,6 +155,7 @@
     margin-right:8px;
     display:block;
     float:left;
+    color: #36c;
 }
 
 .BMLTPlugin_option_sheet_line_name_text
@@ -163,11 +164,13 @@
 }
 
 .BMLTPlugin_option_sheet_line_root_server_text,
-.BMLTPlugin_option_sheet_line_new_search_text
+.BMLTPlugin_option_sheet_line_new_search_text,
+.BMLTPlugin_option_sheet_line_gkey_text
 {
     width: 600px;
     float:left;
 }
+
 
 .BMLTPlugin_option_sheet_Version
 {
@@ -250,4 +253,11 @@
 {
     margin-top: 8px;
     margin-bottom: 4px;
+}
+.BMLTPlugin_gmap_caveat_div
+{
+    clear:both;
+    margin-left:200px;
+    font-style:italic;
+    color: #36c;
 }

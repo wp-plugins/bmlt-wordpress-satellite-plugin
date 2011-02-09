@@ -45,7 +45,6 @@ class BMLTPlugin
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (DEFAULTS)                              *
     *   In Version 2, these are all ignored:                                                *
-    *       $default_gkey                                                                   *
     *       $default_bmlt_fullscreen                                                        *
     *       $default_support_old_browsers                                                   *
     *       $default_initial_view                                                           *
@@ -55,15 +54,16 @@ class BMLTPlugin
     *       $default_language                                                               *
     ****************************************************************************************/
     
-    // These are the old settings that we still care about.
     static  $adminOptionsName = "BMLTAdminOptions";                                 ///< The name, in the database, for the version 1 options for this plugin.
     static  $admin2OptionsName = "BMLT2AdminOptions";                               ///< These options are for version 2.
     
+    // These are the old settings that we still care about.
     static  $default_rootserver = '';                                               ///< This is the default root BMLT server URI.
     static  $default_map_center_latitude = 29.764377375163125;                      ///< This is the default basic search map center latitude
     static  $default_map_center_longitude = -95.4931640625;                         ///< This is the default basic search map center longitude
-    static  $default_map_zoom = 9;                                                  ///< This is the default basic search map zoom level
+    static  $default_map_zoom = 8;                                                  ///< This is the default basic search map zoom level
     static  $default_new_search = '';                                               ///< If this is set to something, then a new search uses the exact URI.
+    static  $default_gkey = '';                                                     ///< This is only necessary for older versions.
         
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
@@ -95,18 +95,22 @@ class BMLTPlugin
     static  $local_options_name_label = 'Setting Name:';                    ///< The Label for the setting name item.
     static  $local_options_rootserver_label = 'Root Server:';               ///< The Label for the root server item.
     static  $local_options_new_search_label = 'New Search URL:';            ///< The Label for the new search item.
+    static  $local_options_gkey_label = 'Google Maps API Key:';             ///< The Label for the Google Maps API Key item.
     static  $local_options_no_name_string = 'Enter Setting Name';           ///< The Value to use for a name field for a setting with no name.
     static  $local_options_no_root_server_string = 'Enter a Root Server URL';   ///< The Value to use for a root with no URL.
     static  $local_options_no_new_search_string = 'Enter a New Search URL'; ///< The Value to use for a new search with no URL.
+    static  $local_options_no_gkey_string = 'Enter a New API Key';          ///< The Value to use for a new search with no URL.
     static  $local_options_test_server = 'Test';                            ///< This is the title for the "test server" button.
     static  $local_options_test_server_success = 'Version ';                ///< This is a prefix for the version, on success.
     static  $local_options_test_server_failure = 'This Root Server URL is not Valid';               ///< This is a prefix for the version, on failure.
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.'; ///< This is the tooltip text for the "test server" button.
     static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';     ///< The Label for the map.
+    static  $local_options_gkey_caveat = 'This is only necessary for old-style BMLT implementations';  ///< This lets people know that this is not necessary for newer installs.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
     static  $local_clear_search = 'Clear Search Results';                   ///< Used for the "Clear" item in the quick search popup.
+    static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu.
     
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
@@ -265,6 +269,7 @@ class BMLTPlugin
                                     'map_zoom' => self::$default_map_zoom,
                                     'bmlt_new_search_url' => self::$default_new_search,
                                     'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time()),   // This gives the option a unique slug
+                                    'gmap_key' => self::$default_gkey,
                                     'setting_name' => ''
                                     );
             
@@ -694,6 +699,16 @@ class BMLTPlugin
                     $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_new_search_string).'\',true)"';
                     $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
                 $ret .= '</div>';
+                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                    $ret .= '<div class="BMLTPlugin_gmap_caveat_div">'.self::process_text ( self::$local_options_gkey_caveat ).'</div>';
+                    $id = 'BMLTPlugin_option_sheet_gkey_'.$in_options_index;
+                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_gkey_label ).'</label>';
+                        $string = (isset ( $options['gmap_key'] ) && $options['gmap_key'] ? $options['gmap_key'] : self::process_text ( self::$local_options_no_gkey_string ) );
+                    $ret .= '<input class="BMLTPlugin_option_sheet_line_gkey_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
+                    $ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',false)"';
+                    $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',true)"';
+                    $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+                $ret .= '</div>';
             $ret .= '</div>';
             }
         else
@@ -734,21 +749,66 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        if ( isset ( $_GET['direct_simple'] ) )
+        $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+        
+        if ( !$settings_id )
             {
-            $settings_id = intval(trim($_GET['direct_simple']));
-            $options = $this->getBMLTOptions_by_id ( $settings_id );
-            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$_GET['search_parameters'];
-            $response = bmlt_satellite_controller::call_curl ( $url );
-            die ( $response );
+            $options = $this->getBMLTOptions ( 1 );
+            $settings_id = $options['id'];
             }
-        elseif ( isset ( $_GET['BMLTPlugin_AJAX_Call'] ) )
+        
+        $options = $this->getBMLTOptions_by_id ( $settings_id );
+
+        $my_params = '';
+		$my_http_vars = array_merge_recursive ( $_GET, $_POST );
+        foreach ( $my_http_vars as $key => $value )
+            {
+            if ( $key != 'switcher' )	// We don't propagate switcher.
+                {
+                if ( is_array ( $value ) )
+                    {
+                    foreach ( $value as $val )
+                        {
+                        if ( is_array ( $val ) )
+                            {
+                            $val = join ( ',', $val );
+                            }
+                        $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
+                        }
+                    $key = null;
+                    }
+                
+                if ( $key )
+                    {
+                    $my_params .= '&'.urlencode ( $key );
+                    
+                    if ( $value )
+                        {
+                        $my_params .= "=". urlencode ( $value );
+                        }
+                    }
+                }
+            }
+		
+		if ( isset ( $my_http_vars['redirect_ajax'] ) && $my_http_vars['redirect_ajax'] )
+			{
+			$root_server = $options['root_server']."client_interface/xhtml/index.php";
+			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX".$my_params ) );
+			}
+        elseif ( isset ( $my_http_vars['direct_simple'] ) )
+            {
+            $settings_id = intval(trim($my_http_vars['direct_simple']));
+            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$my_http_vars['search_parameters'];
+            die ( bmlt_satellite_controller::call_curl ( $url ) );
+            }
+        elseif ( isset ( $my_http_vars['BMLTPlugin_AJAX_Call'] ) )
             {
             $ret = '0';
             
-            if ( isset ( $_GET['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+            if ( isset ( $my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
                 {
-                $uri = trim ( $_GET['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
+                $uri = trim ( $my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
                 
                 $test = new bmlt_satellite_controller ( $uri );
                 
@@ -822,6 +882,18 @@ class BMLTPlugin
                                 }
                             }
                         
+                        if ( isset ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] ) )
+                            {
+                            if ( trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] ) )
+                                {
+                                $options['gmap_key'] = trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] );
+                                }
+                            else
+                                {
+                                $options['gmap_key'] = '';
+                                }
+                            }
+                        
                         if ( isset ( $_GET['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] ) )
                             {
                             $options['map_center_latitude'] = floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] );
@@ -855,50 +927,109 @@ class BMLTPlugin
     ****************************************************************************************/
     function standard_head ( )
         {
-            $head_content = "";
+        $head_content = "";
+        
+        if ( function_exists ( 'plugins_url' ) )
+            {
+            $head_content = "<!-- Added by the BMLTPlugin -->";
+            $head_content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';  // Load the Google Maps stuff for our map.
+            $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
-            if ( function_exists ( 'plugins_url' ) )
+            $url = '';
+            if ( plugins_url() )
                 {
-                $head_content = "<!-- Added by the BMLTPlugin -->";
-                $head_content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';  // Load the Google Maps stuff for our map.
-                $head_content .= '<link rel="stylesheet" type="text/css" href="';
-                
-                $url = '';
-                if ( plugins_url() )
-                    {
-                    $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                    }
-                elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                    {
-                    $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                    }
-                
-                $head_content .= htmlspecialchars ( $url );
-                
-                if ( !defined ('_DEBUG_MODE__' ) )
-                    {
-                    $head_content .= 'style_stripper.php?filename=';
-                    }
-                
-                $head_content .= 'styles.css" />';
-                
-                $head_content .= '<script type="text/javascript" src="';
-                
-                $head_content .= htmlspecialchars ( $url );
-                
-                if ( !defined ('_DEBUG_MODE__' ) )
-                    {
-                    $head_content .= 'js_stripper.php?filename=';
-                    }
-                
-                $head_content .= 'javascript.js"></script>';
+                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
                 }
-            else
+            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
                 {
-                echo "<!-- BMLTPlugin ERROR (head)! No plugins_url()! -->";
+                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
                 }
+            
+            $head_content .= htmlspecialchars ( $url );
+            
+            if ( !defined ('_DEBUG_MODE__' ) )
+                {
+                $head_content .= 'style_stripper.php?filename=';
+                }
+            
+            $head_content .= 'styles.css" />';
+            
+            $head_content .= '<script type="text/javascript" src="';
+            
+            $head_content .= htmlspecialchars ( $url );
+            
+            if ( !defined ('_DEBUG_MODE__' ) )
+                {
+                $head_content .= 'js_stripper.php?filename=';
+                }
+            
+            $head_content .= 'javascript.js"></script>';
+            
+            
+            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            
+            if ( !$settings_id )
+                {
+                $options = $this->getBMLTOptions ( 1 );
+                $settings_id = $options['id'];
+                }
+            
+            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            
+            $root_server_root = $options['root_server'];
+
+            if ( $root_server_root )
+                {
+                $root_server = $root_server_root."/client_interface/xhtml/index.php";
+                $my_params = '';
+                $my_http_vars = array_merge_recursive ( $_GET, $_POST );
+                foreach ( $my_http_vars as $key => $value )
+                    {
+                    if ( $key != 'switcher' )	// We don't propagate switcher.
+                        {
+                        if ( is_array ( $value ) )
+                            {
+                            foreach ( $value as $val )
+                                {
+                                if ( is_array ( $val ) )
+                                    {
+                                    $val = join ( ',', $val );
+                                    }
+                                $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
+                                }
+                            $key = null;
+                            }
+                        
+                        if ( $key )
+                            {
+                            $my_params .= '&'.urlencode ( $key );
+                            
+                            if ( $value )
+                                {
+                                $my_params .= "=". urlencode ( $value );
+                                }
+                            }
+                        }
+                    }
                 
-            echo $head_content;
+                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$my_params );
+					
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
+                $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
+                
+                if ( $additional_css )
+                    {
+                    $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+                    }
+                }
+            }
+        else
+            {
+            echo "<!-- BMLTPlugin ERROR (head)! No plugins_url()! -->";
+            }
+            
+        echo $head_content;
         }
         
     /************************************************************************************//**
@@ -906,50 +1037,50 @@ class BMLTPlugin
     ****************************************************************************************/
     function admin_head ( )
         {
-            $this->standard_head ( );   // We start with the standard stuff.
+        $this->standard_head ( );   // We start with the standard stuff.
+        
+        $head_content = "";
+        
+        if ( function_exists ( 'plugins_url' ) )
+            {
+            $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
-            $head_content = "";
+            $url = '';
+            if ( plugins_url() )
+                {
+                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+                }
+            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+                {
+                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+                }
             
-            if ( function_exists ( 'plugins_url' ) )
+            $head_content .= htmlspecialchars ( $url );
+            
+            if ( !defined ('_DEBUG_MODE__' ) )
                 {
-                $head_content .= '<link rel="stylesheet" type="text/css" href="';
-                
-                $url = '';
-                if ( plugins_url() )
-                    {
-                    $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                    }
-                elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                    {
-                    $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                    }
-                
-                $head_content .= htmlspecialchars ( $url );
-                
-                if ( !defined ('_DEBUG_MODE__' ) )
-                    {
-                    $head_content .= 'style_stripper.php?filename=';
-                    }
-                
-                $head_content .= 'admin_styles.css" />';
-                
-                $head_content .= '<script type="text/javascript" src="';
-                
-                $head_content .= htmlspecialchars ( $url );
-                
-                if ( !defined ('_DEBUG_MODE__' ) )
-                    {
-                    $head_content .= 'js_stripper.php?filename=';
-                    }
-                
-                $head_content .= 'admin_javascript.js"></script>';
+                $head_content .= 'style_stripper.php?filename=';
                 }
-            else
+            
+            $head_content .= 'admin_styles.css" />';
+            
+            $head_content .= '<script type="text/javascript" src="';
+            
+            $head_content .= htmlspecialchars ( $url );
+            
+            if ( !defined ('_DEBUG_MODE__' ) )
                 {
-                echo "<!-- BMLTPlugin ERROR (head)! No plugins_url()! -->";
+                $head_content .= 'js_stripper.php?filename=';
                 }
-                
-            echo $head_content;
+            
+            $head_content .= 'admin_javascript.js"></script>';
+            }
+        else
+            {
+            echo "<!-- BMLTPlugin ERROR (head)! No plugins_url()! -->";
+            }
+            
+        echo $head_content;
         }
         
     /************************************************************************************//**
@@ -960,18 +1091,139 @@ class BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
-        return $this->display_simple_searches ( $in_the_content );
+        $count = 0;
+
+        $in_the_content = $this->display_simple_search ( $in_the_content, $count );
+        
+        if ( !$count )
+            {
+            $in_the_content = $this->display_old_search ( $in_the_content, $count );
+            }
+        
+        return $in_the_content;
+        }
+        
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "classic" search.                                                                   *
+    *                                                                                       *
+    *   \returns a string, containing the content.                                          *
+    ****************************************************************************************/
+    function display_old_search ($in_content,      ///< This is the content to be filtered.
+                                 &$out_count       ///< This is set to 1, if a substitution was made.
+                                 )
+        {
+        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
+            {
+            $display = '';
+            
+            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            
+            if ( !$settings_id )
+                {
+                $options = $this->getBMLTOptions ( 1 );
+                $settings_id = $options['id'];
+                }
+            
+            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            
+            $root_server_root = $options['root_server'];
+
+            if ( $root_server_root )
+                {
+                $root_server = $root_server_root."/client_interface/xhtml/index.php";
+    
+                $pid = get_page_uri(get_the_ID());
+                
+                $plink = get_permalink ( get_the_ID() );
+                
+                $menu = '';
+                    
+                if ( $pid && !isset ( $_GET['search_form'] ) )
+                    {
+                    if ( $options['bmlt_new_search_url'] )
+                        {
+                        $plink = $options['bmlt_new_search_url'];
+                        }
+                    $menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
+                    }
+                
+                $my_params = '';
+                
+                $my_http_vars = array_merge_recursive ( $_GET, $_POST );
+                foreach ( $my_http_vars as $key => $value )
+                    {
+                    if ( $key != 'switcher' )	// We don't propagate switcher.
+                        {
+                        if ( is_array ( $value ) )
+                            {
+                            foreach ( $value as $val )
+                                {
+                                if ( is_array ( $val ) )
+                                    {
+                                    $val = join ( ',', $val );
+                                    }
+                                $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
+                                }
+                            $key = null;
+                            }
+                        
+                        if ( $key )
+                            {
+                            $my_params .= '&'.urlencode ( $key );
+                            
+                            if ( $value )
+                                {
+                                $my_params .= "=". urlencode ( $value );
+                                }
+                            }
+                        }
+                    }
+               
+                if ( isset ( $my_http_vars['single_meeting_id'] ) && $my_http_vars['single_meeting_id'] )
+                    {
+                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intVal ( $my_http_vars['single_meeting_id'] ) );
+                    }
+                elseif ( isset ( $my_http_vars['do_search'] ) )
+                    {
+                    $uri = "$root_server?switcher=GetSearchResults".$my_params;
+                    $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+                    }
+                else
+                    {
+                    $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
+                    $uri = "$root_server?switcher=GetSimpleSearchForm$my_params$map_center";
+                    $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+                    }
+                
+                $the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
+    
+                // We only allow one instance per page.
+                $count = 0;
+                
+                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/", $the_new_content, $in_content, 1, $count );
+                
+                if ( !$count )
+                    {
+                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/", $the_new_content, $in_content, 1 );
+                    }
+                }
+            }
+        
+        return $in_content;
         }
         
     /************************************************************************************//**
     *   \brief This is a function that filters the content, and replaces a portion with the *
     *   "simple" search, if provided by the 'bmlt_simple_searches' custom field.            *
     *                                                                                       *
-    *   \returns a string, containing the content. Null if the call fails to get any data.  *
+    *   \returns a string, containing the content.                                          *
     ****************************************************************************************/
-    function display_simple_searches ( $in_content )
+    function display_simple_search ($in_content,      ///< This is the content to be filtered.
+                                    &$out_count       ///< This is set to 1, if a substitution was made.
+                                    )
         {
-        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) )
+        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
             {
             $text = get_post_meta ( get_the_ID(), 'bmlt_simple_searches', true );
             $display .= '';
@@ -989,6 +1241,7 @@ class BMLTPlugin
                 
                 if ( is_array ( $text_ar ) && count ( $text_ar ) )
                     {
+                    $display .= '<noscript>'.self::process_text ( self::$local_noscript ).'</noscript>';
                     $display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
                     $display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
                     $display .= '<select id="meeting_search_select"class="simple_search_list" onchange="BMLTPlugin_simple_div_filler (this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
@@ -1028,9 +1281,15 @@ class BMLTPlugin
                     }
                 }
             
-            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1 );
+            // We only allow one instance per page.
+            $count = 0;
             
-            $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $display, $in_content, 1 );
+            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1, $count );
+            
+            if ( !$count )
+                {
+                $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $display, $in_content, 1 );
+                }
             }
         
         return $in_content;
@@ -1238,6 +1497,7 @@ class BMLTPlugin
                         $html .= "var c_g_BMLTPlugin_test_server_failure = '".self::process_text ( self::$local_options_test_server_failure )."';";
                         $html .= "var c_g_BMLTPlugin_coords = new Array();";
                         $html .= "var g_BMLTPlugin_TimeToFade = ".intVal ( self::$local_options_success_time ).";";
+                        $html .= "var g_BMLTPlugin_no_gkey_string = '".self::process_text (self::$local_options_no_gkey_string)."';";
                         if ( is_array ( $options_coords ) && count ( $options_coords ) )
                             {
                             foreach ( $options_coords as $value )

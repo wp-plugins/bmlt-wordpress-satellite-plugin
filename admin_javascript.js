@@ -129,7 +129,16 @@ function BMLTPlugin_SaveOptions()
             {
             url += encodeURIComponent ( new_search );
             };
-
+        
+        var gmaps_key = document.getElementById ( 'BMLTPlugin_option_sheet_gkey_'+option_index ).value.toString();
+         
+        url += '&BMLTPlugin_option_sheet_gkey_'+option_index+'=';
+    
+        if ( gmaps_key && (gmaps_key != g_BMLTPlugin_no_gkey_string) )
+            {
+            url += encodeURIComponent ( gmaps_key );
+            };
+       
         url += '&BMLTPlugin_option_latitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lat;
         url += '&BMLTPlugin_option_longitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lng;
         url += '&BMLTPlugin_option_zoom_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].zoom;
