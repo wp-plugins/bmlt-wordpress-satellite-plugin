@@ -126,6 +126,7 @@ class BMLTPlugin
     var $my_driver = null;                                                  ///< This will contain an instance of the BMLT satellite driver class.
     var $my_params = null;                                                  ///< This will contain the $_GET and $_POST query variables.
     var $my_option_id = null;                                               ///< This will be used to hold a page-chosen option ID.
+    var $my_http_vars = null;                                               ///< This will hold all of the query arguments.
     
     /************************************************************************************//**
     *                                   FUNCTIONS/METHODS                                   *
@@ -751,8 +752,27 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-		$my_http_vars = array_merge_recursive ( $_GET, $_POST );
-        foreach ( $my_http_vars as $key => $value )
+		$this->my_http_vars = array_merge_recursive ( $_GET, $_POST );
+			
+		if ( !(isset ( $this->my_http_vars['search_form'] ) && $this->my_http_vars['search_form'] )
+			&& !(isset ( $this->my_http_vars['do_search'] ) && $this->my_http_vars['do_search'] ) 
+			&& !(isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] ) 
+			)
+			{
+			$this->my_http_vars['search_form'] = true;
+			}
+		
+		$this->my_http_vars['script_name'] = preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
+		$this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
+		$this->my_http_vars['satellite'] = $this->my_http_vars['script_name'];
+		$this->my_http_vars['lang_enum'] = $options['bmlt_language'];
+		$this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
+        $this->my_http_vars['supports_ajax'] = 'yes';
+        $this->my_http_vars['no_ajax_check'] = 'yes';
+
+		$this->my_params = '';
+
+        foreach ( $this->my_http_vars as $key => $value )
             {
             if ( $key != 'switcher' )	// We don't propagate switcher.
                 {
@@ -781,13 +801,13 @@ class BMLTPlugin
                 }
             }
 		
-        if ( isset ( $my_http_vars['direct_simple'] ) && intVal ( $my_http_vars['direct_simple'] ) )
+        if ( isset ( $this->my_http_vars['direct_simple'] ) && intVal ( $this->my_http_vars['direct_simple'] ) )
             {
-            $settings_id = intVal ( $my_http_vars['direct_simple'] );
+            $settings_id = intVal ( $this->my_http_vars['direct_simple'] );
             }
-        elseif ( isset ( $my_http_vars['bmlt_settings_id'] ) && intVal ( $my_http_vars['bmlt_settings_id'] ) )
+        elseif ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
             {
-            $settings_id = intVal ( $my_http_vars['bmlt_settings_id'] );
+            $settings_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
             }
         
         if ( !$settings_id )
@@ -798,35 +818,35 @@ class BMLTPlugin
         
         $options = $this->getBMLTOptions_by_id ( $settings_id );
 
-		if ( isset ( $my_http_vars['redirect_ajax'] ) && $my_http_vars['redirect_ajax'] )
+		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
 			{
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
 			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX$this->my_params" ) );
 			}
-        elseif ( isset ( $my_http_vars['direct_simple'] ) )
+        elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
             {
-            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$my_http_vars['search_parameters'];
+            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$this->my_http_vars['search_parameters'];
             die ( bmlt_satellite_controller::call_curl ( $url ) );
             }
-		elseif ( isset ( $my_http_vars['result_type_advanced'] ) && ($my_http_vars['result_type_advanced'] == 'booklet') )
+		elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
 			{
 			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
 			header ( "Location: $uri" );
 			die();
 			}
-		elseif ( isset ( $my_http_vars['result_type_advanced'] ) && ($my_http_vars['result_type_advanced'] == 'listprint') )
+		elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
 			{
 			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
 			header ( "Location: $uri" );
 			die();
 			}
-        elseif ( isset ( $my_http_vars['BMLTPlugin_AJAX_Call'] ) )
+        elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
             {
             $ret = '0';
             
-            if ( isset ( $my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+            if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
                 {
-                $uri = trim ( $my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
+                $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
                 
                 $test = new bmlt_satellite_controller ( $uri );
                 
@@ -1001,10 +1021,10 @@ class BMLTPlugin
                 $this->my_option_id = $options['id'];
                 }
             
-            $this->my_params.= '&bmlt_settings_id='.$this->my_option_id;
-		    $this->my_params.= '&script_name='.preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
-		    $this->my_params.= '&satellite='.preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
-		    $this->my_params.= '&no_ajax_check=yes&supports_ajax=yes';
+            if ( !preg_match ( '/bmlt_settings_id/', $this->my_params ) )
+                {
+                $this->my_params .= '&bmlt_settings_id='.$this->my_option_id;
+                }
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
@@ -1145,22 +1165,22 @@ class BMLTPlugin
                 
                 $menu = '';
                 
-                if ( $pid && !isset ( $this->my_http_vars['search_form'] ) )
+				if ( isset ( $this->my_http_vars['search_form'] ) )
                     {
                     $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
                     $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
-                elseif ( isset ( $my_http_vars['single_meeting_id'] ) && $my_http_vars['single_meeting_id'] )
+                elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
                     {
-                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intVal ( $my_http_vars['single_meeting_id'] ) );
+                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intVal ( $this->my_http_vars['single_meeting_id'] ) );
                     }
-                elseif ( isset ( $my_http_vars['do_search'] ) )
+                elseif ( isset ( $this->my_http_vars['do_search'] ) )
                     {
                     $uri = "$root_server?switcher=GetSearchResults".$this->my_params;
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
-                
+ 
                 $the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
     
                 // We only allow one instance per page.
