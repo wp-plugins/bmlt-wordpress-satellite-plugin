@@ -975,6 +975,40 @@ class BMLTPlugin
         if ( function_exists ( 'plugins_url' ) )
             {
             $head_content = "<!-- Added by the BMLTPlugin -->";
+
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
+                {
+                $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
+                }
+            else
+                {
+                $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+                }
+            
+            if ( !$this->my_option_id )
+                {
+                $options = $this->getBMLTOptions ( 1 );
+                $this->my_option_id = $options['id'];
+                }
+            
+		    $this->load_params ( );
+            
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            
+            $root_server_root = $options['root_server'];
+
+            if ( $root_server_root )
+                {
+                $root_server = $root_server_root."/client_interface/xhtml/index.php";
+                
+                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+					
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
+                $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
+                $additional_css .= 'table#bmlt_container div#c_comdef_search_specification_map_div { height: 640px }';
+                $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+                }
             $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
             $url = '';
@@ -1006,41 +1040,6 @@ class BMLTPlugin
                 }
             
             $head_content .= 'javascript.js"></script>';
-            
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
-                {
-                $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
-                }
-            else
-                {
-                $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-                }
-            
-            if ( !$this->my_option_id )
-                {
-                $options = $this->getBMLTOptions ( 1 );
-                $this->my_option_id = $options['id'];
-                }
-            
-            $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
-		    $this->load_params ( );
-            
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-            
-            $root_server_root = $options['root_server'];
-
-            if ( $root_server_root )
-                {
-                $root_server = $root_server_root."/client_interface/xhtml/index.php";
-                
-                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-					
-                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
-                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
-                $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
-                $additional_css .= 'table#bmlt_container div#c_comdef_search_specification_map_div { height: 640px }';
-                $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
-                }
             }
         else
             {
@@ -1109,6 +1108,23 @@ class BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
+        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
+            {
+            $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
+            }
+        else
+            {
+            $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            }
+        
+        if ( !$this->my_option_id )
+            {
+            $options = $this->getBMLTOptions ( 1 );
+            $this->my_option_id = $options['id'];
+            }
+        
+        $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
+        $this->load_params();
         $count = 0;
 
         $in_the_content = $this->display_simple_search ( $in_the_content, $count );
@@ -1135,7 +1151,7 @@ class BMLTPlugin
             {
             $display = '';
             
-            $options = $this->getBMLTOptions ( 1 );
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
             $root_server_root = $options['root_server'];
 
