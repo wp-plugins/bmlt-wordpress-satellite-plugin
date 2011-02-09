@@ -151,6 +151,21 @@ class BMLTPlugin
             {
             self::$g_s_there_can_only_be_one = $this;
             
+            $this->my_http_vars = array_merge_recursive ( $_GET, $_POST );
+                
+            if ( !(isset ( $this->my_http_vars['search_form'] ) && $this->my_http_vars['search_form'] )
+                && !(isset ( $this->my_http_vars['do_search'] ) && $this->my_http_vars['do_search'] ) 
+                && !(isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] ) 
+                )
+                {
+                $this->my_http_vars['search_form'] = true;
+                }
+            
+            $this->my_http_vars['script_name'] = preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
+            $this->my_http_vars['satellite'] = $this->my_http_vars['script_name'];
+            $this->my_http_vars['supports_ajax'] = 'yes';
+            $this->my_http_vars['no_ajax_check'] = 'yes';
+
             // We need to start off by setting up our driver.
             $this->my_driver = new bmlt_satellite_controller;
             
@@ -740,36 +755,10 @@ class BMLTPlugin
         }
     
     /************************************************************************************//**
-    *                               THE WORDPRESS CALLBACKS                                 *
+    *   \brief Loads the parameter list.                                                    *
     ****************************************************************************************/
-    
-    /************************************************************************************//**
-    *   \brief Called before anything else is run.                                          *
-    *                                                                                       *
-    *   This function will check for AJAX rerouters and for mobile rerouters. If it sees a  *
-    *   need for one, it dies the script with the appropriate response. Otherwise, it just  *
-    *   does nothing.                                                                       *
-    ****************************************************************************************/
-    function init ( )
+    function load_params ( )
         {
-		$this->my_http_vars = array_merge_recursive ( $_GET, $_POST );
-			
-		if ( !(isset ( $this->my_http_vars['search_form'] ) && $this->my_http_vars['search_form'] )
-			&& !(isset ( $this->my_http_vars['do_search'] ) && $this->my_http_vars['do_search'] ) 
-			&& !(isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] ) 
-			)
-			{
-			$this->my_http_vars['search_form'] = true;
-			}
-		
-		$this->my_http_vars['script_name'] = preg_replace ( '|(.*?)\?.*|', "$1", $_SERVER['REQUEST_URI'] );
-		$this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
-		$this->my_http_vars['satellite'] = $this->my_http_vars['script_name'];
-		$this->my_http_vars['lang_enum'] = $options['bmlt_language'];
-		$this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
-        $this->my_http_vars['supports_ajax'] = 'yes';
-        $this->my_http_vars['no_ajax_check'] = 'yes';
-
 		$this->my_params = '';
 
         foreach ( $this->my_http_vars as $key => $value )
@@ -800,7 +789,21 @@ class BMLTPlugin
                     }
                 }
             }
-		
+        }
+    
+    /************************************************************************************//**
+    *                               THE WORDPRESS CALLBACKS                                 *
+    ****************************************************************************************/
+    
+    /************************************************************************************//**
+    *   \brief Called before anything else is run.                                          *
+    *                                                                                       *
+    *   This function will check for AJAX rerouters and for mobile rerouters. If it sees a  *
+    *   need for one, it dies the script with the appropriate response. Otherwise, it just  *
+    *   does nothing.                                                                       *
+    ****************************************************************************************/
+    function init ( )
+        {
         if ( isset ( $this->my_http_vars['direct_simple'] ) && intVal ( $this->my_http_vars['direct_simple'] ) )
             {
             $settings_id = intVal ( $this->my_http_vars['direct_simple'] );
@@ -818,10 +821,12 @@ class BMLTPlugin
         
         $options = $this->getBMLTOptions_by_id ( $settings_id );
 
+		$this->load_params ( );
+
 		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
 			{
-			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX$this->my_params" ) );
+			$url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
+			die ( bmlt_satellite_controller::call_curl ( $url ) );
 			}
         elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
             {
@@ -1002,13 +1007,9 @@ class BMLTPlugin
             
             $head_content .= 'javascript.js"></script>';
             
-            if ( isset ( $_POST['bmlt_settings_id'] ) && intVal ( $_POST['bmlt_settings_id'] ) )
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
                 {
-                $this->my_option_id = intVal ( $_POST['bmlt_settings_id'] );
-                }
-            elseif ( isset ( $_GET['bmlt_settings_id'] ) && intVal ( $_GET['bmlt_settings_id'] ) )
-                {
-                $this->my_option_id = intVal ( $_GET['bmlt_settings_id'] );
+                $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
                 }
             else
                 {
@@ -1021,10 +1022,8 @@ class BMLTPlugin
                 $this->my_option_id = $options['id'];
                 }
             
-            if ( !preg_match ( '/bmlt_settings_id/', $this->my_params ) )
-                {
-                $this->my_params .= '&bmlt_settings_id='.$this->my_option_id;
-                }
+            $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
+		    $this->load_params ( );
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
