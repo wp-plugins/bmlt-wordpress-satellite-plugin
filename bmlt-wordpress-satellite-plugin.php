@@ -1178,8 +1178,6 @@ class BMLTPlugin
                 
                 $plink = get_permalink ( get_the_ID() );
                 
-                $menu = '';
-                
 				if ( isset ( $this->my_http_vars['search_form'] ) )
                     {
                     $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
