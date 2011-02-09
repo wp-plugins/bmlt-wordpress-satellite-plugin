@@ -124,6 +124,8 @@ class BMLTPlugin
     ****************************************************************************************/
     
     var $my_driver = null;                                                  ///< This will contain an instance of the BMLT satellite driver class.
+    var $my_params = null;                                                  ///< This will contain the $_GET and $_POST query variables.
+    var $my_option_id = null;                                               ///< This will be used to hold a page-chosen option ID.
     
     /************************************************************************************//**
     *                                   FUNCTIONS/METHODS                                   *
@@ -739,7 +741,7 @@ class BMLTPlugin
     /************************************************************************************//**
     *                               THE WORDPRESS CALLBACKS                                 *
     ****************************************************************************************/
-        
+    
     /************************************************************************************//**
     *   \brief Called before anything else is run.                                          *
     *                                                                                       *
@@ -749,17 +751,6 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-        
-        if ( !$settings_id )
-            {
-            $options = $this->getBMLTOptions ( 1 );
-            $settings_id = $options['id'];
-            }
-        
-        $options = $this->getBMLTOptions_by_id ( $settings_id );
-
-        $my_params = '';
 		$my_http_vars = array_merge_recursive ( $_GET, $_POST );
         foreach ( $my_http_vars as $key => $value )
             {
@@ -773,18 +764,18 @@ class BMLTPlugin
                             {
                             $val = join ( ',', $val );
                             }
-                        $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
+                        $this->my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
                         }
                     $key = null;
                     }
                 
                 if ( $key )
                     {
-                    $my_params .= '&'.urlencode ( $key );
+                    $this->my_params .= '&'.urlencode ( $key );
                     
                     if ( $value )
                         {
-                        $my_params .= "=". urlencode ( $value );
+                        $this->my_params .= "=". urlencode ( $value );
                         }
                     }
                 }
@@ -792,8 +783,18 @@ class BMLTPlugin
 		
 		if ( isset ( $my_http_vars['redirect_ajax'] ) && $my_http_vars['redirect_ajax'] )
 			{
+            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            
+            if ( !$settings_id )
+                {
+                $options = $this->getBMLTOptions ( 1 );
+                $settings_id = $options['id'];
+                }
+            
+            $options = $this->getBMLTOptions_by_id ( $settings_id );
+
 			$root_server = $options['root_server']."client_interface/xhtml/index.php";
-			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX".$my_params ) );
+			die ( bmlt_satellite_controller::call_curl ( "$root_server?switcher=RedirectAJAX".$this->my_params ) );
 			}
         elseif ( isset ( $my_http_vars['direct_simple'] ) )
             {
@@ -932,7 +933,6 @@ class BMLTPlugin
         if ( function_exists ( 'plugins_url' ) )
             {
             $head_content = "<!-- Added by the BMLTPlugin -->";
-            $head_content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';  // Load the Google Maps stuff for our map.
             $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
             $url = '';
@@ -965,63 +965,29 @@ class BMLTPlugin
             
             $head_content .= 'javascript.js"></script>';
             
+            $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
             
-            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-            
-            if ( !$settings_id )
+            if ( !$this->my_option_id )
                 {
                 $options = $this->getBMLTOptions ( 1 );
-                $settings_id = $options['id'];
+                $this->my_option_id = $options['id'];
                 }
             
-            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
             $root_server_root = $options['root_server'];
 
             if ( $root_server_root )
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
-                $my_params = '';
-                $my_http_vars = array_merge_recursive ( $_GET, $_POST );
-                foreach ( $my_http_vars as $key => $value )
-                    {
-                    if ( $key != 'switcher' )	// We don't propagate switcher.
-                        {
-                        if ( is_array ( $value ) )
-                            {
-                            foreach ( $value as $val )
-                                {
-                                if ( is_array ( $val ) )
-                                    {
-                                    $val = join ( ',', $val );
-                                    }
-                                $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
-                                }
-                            $key = null;
-                            }
-                        
-                        if ( $key )
-                            {
-                            $my_params .= '&'.urlencode ( $key );
-                            
-                            if ( $value )
-                                {
-                                $my_params .= "=". urlencode ( $value );
-                                }
-                            }
-                        }
-                    }
                 
-                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$my_params );
+                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
 					
                 $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
                 $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
                 $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
-                
-                if ( $additional_css )
-                    {
-                    $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
-                    }
+                $additional_css .= 'table#bmlt_container div#c_comdef_search_specification_map_div { height: 640px }';
+                $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
                 }
             }
         else
@@ -1039,7 +1005,7 @@ class BMLTPlugin
         {
         $this->standard_head ( );   // We start with the standard stuff.
         
-        $head_content = "";
+        $head_content = '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';  // Load the Google Maps stuff for our map.
         
         if ( function_exists ( 'plugins_url' ) )
             {
@@ -1117,15 +1083,7 @@ class BMLTPlugin
             {
             $display = '';
             
-            $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-            
-            if ( !$settings_id )
-                {
-                $options = $this->getBMLTOptions ( 1 );
-                $settings_id = $options['id'];
-                }
-            
-            $options = $this->getBMLTOptions_by_id ( $settings_id );
+            $options = $this->getBMLTOptions ( 1 );
             
             $root_server_root = $options['root_server'];
 
@@ -1147,38 +1105,6 @@ class BMLTPlugin
                         }
                     $menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
                     }
-                
-                $my_params = '';
-                
-                $my_http_vars = array_merge_recursive ( $_GET, $_POST );
-                foreach ( $my_http_vars as $key => $value )
-                    {
-                    if ( $key != 'switcher' )	// We don't propagate switcher.
-                        {
-                        if ( is_array ( $value ) )
-                            {
-                            foreach ( $value as $val )
-                                {
-                                if ( is_array ( $val ) )
-                                    {
-                                    $val = join ( ',', $val );
-                                    }
-                                $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
-                                }
-                            $key = null;
-                            }
-                        
-                        if ( $key )
-                            {
-                            $my_params .= '&'.urlencode ( $key );
-                            
-                            if ( $value )
-                                {
-                                $my_params .= "=". urlencode ( $value );
-                                }
-                            }
-                        }
-                    }
                
                 if ( isset ( $my_http_vars['single_meeting_id'] ) && $my_http_vars['single_meeting_id'] )
                     {
@@ -1186,13 +1112,13 @@ class BMLTPlugin
                     }
                 elseif ( isset ( $my_http_vars['do_search'] ) )
                     {
-                    $uri = "$root_server?switcher=GetSearchResults".$my_params;
+                    $uri = "$root_server?switcher=GetSearchResults".$this->my_params;
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
                 else
                     {
                     $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
-                    $uri = "$root_server?switcher=GetSimpleSearchForm$my_params$map_center";
+                    $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
                 
@@ -1229,14 +1155,6 @@ class BMLTPlugin
             $display .= '';
             if ( $text )
                 {
-                $settings_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
-                
-                if ( !$settings_id )
-                    {
-                    $options = $this->getBMLTOptions ( 1 );
-                    $settings_id = $options['id'];
-                    }
-                
                 $text_ar = explode ( "\n", $text );
                 
                 if ( is_array ( $text_ar ) && count ( $text_ar ) )
@@ -1254,7 +1172,7 @@ class BMLTPlugin
                         $line['prompt'] = trim($text_ar[$lines++]);
                         if ( $line['parameters'] && $line['prompt'] )
                             {
-                            $uri = get_bloginfo('home').'/index.php?direct_simple='.htmlspecialchars ( $settings_id ).'&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $uri = get_bloginfo('home').'/index.php?direct_simple='.htmlspecialchars ( $this->my_option_id ).'&amp;search_parameters='.urlencode ( $line['parameters'] );
                             $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
                             }
                         }
