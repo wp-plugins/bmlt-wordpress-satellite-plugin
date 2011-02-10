@@ -1,8 +1,8 @@
 TO-DO:
 
 BUGS:
-    Single meeting does not display in old version
     CSS issues with location of throbber and More Details
+    Display of headers in old more details is being affected by the template.
     NoScript is insufficient
     
 INCOMPLETE:

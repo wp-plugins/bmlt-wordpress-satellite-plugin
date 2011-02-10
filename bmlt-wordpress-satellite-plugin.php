@@ -113,6 +113,8 @@ class BMLTPlugin
 	static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
 	static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
 	static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
+	static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
+	static  $local_gm_link_tooltip = 'Follow This Link to be Taken to A Google Maps Location for This Meeting.';    ///< The tooltip shown for the Google Maps link.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
@@ -874,7 +876,15 @@ class BMLTPlugin
 			}
         elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
             {
-            $url = $options['root_server'].'/client_interface/simple/index.php?direct_simple&switcher=GetSearchResults&'.$this->my_http_vars['search_parameters'];
+			$root_server = $options['root_server']."client_interface/simple/index.php";
+			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params );
+			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+			if ( $this->my_http_vars['single_uri'] )
+				{
+				$result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+				$result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
+				}
+			die ( $result );
             die ( bmlt_satellite_controller::call_curl ( $url ) );
             }
 		elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
@@ -1273,7 +1283,8 @@ class BMLTPlugin
                     }
                 elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
                     {
-                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intval ( $this->my_http_vars['single_meeting_id'] ) );
+                    $uri = "$root_server?switcher=GetOneMeeting&single_meeting_id=".$this->my_params;
+                    $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
                 elseif ( isset ( $this->my_http_vars['do_search'] ) )
                     {
