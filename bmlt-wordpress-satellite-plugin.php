@@ -49,8 +49,6 @@ class BMLTPlugin
     *       $default_support_old_browsers                                                   *
     *       $default_initial_view                                                           *
     *       $default_sb_array                                                               *
-    *       $default_push_down_more_details                                                 *
-    *       $default_additional_css                                                         *
     *       $default_language                                                               *
     ****************************************************************************************/
     
@@ -64,7 +62,10 @@ class BMLTPlugin
     static  $default_map_zoom = 8;                                                  ///< This is the default basic search map zoom level
     static  $default_new_search = '';                                               ///< If this is set to something, then a new search uses the exact URI.
     static  $default_gkey = '';                                                     ///< This is only necessary for older versions.
-        
+    static  $default_push_down_more_details = true;     ///< If this is set to true, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
+    static  $default_additional_css = '';               ///< This is additional CSS that is inserted inline into the <head> section.
+    static  $default_initial_view = '';                 ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
+	                                
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
     ****************************************************************************************/
@@ -105,12 +106,18 @@ class BMLTPlugin
     static  $local_options_test_server_failure = 'This Root Server URL is not Valid';               ///< This is a prefix for the version, on failure.
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.'; ///< This is the tooltip text for the "test server" button.
     static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';     ///< The Label for the map.
-    static  $local_options_gkey_caveat = 'This is only necessary for old-style BMLT implementations';  ///< This lets people know that this is not necessary for newer installs.
+    static  $local_options_gkey_caveat = 'These are only necessary for old-style BMLT implementations';  ///< This lets people know that this is not necessary for newer installs.
+	static  $local_options_initial_view = array (                           ///< The list of choices for presentation in the popup.
+	                                            '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
+	                                            );
+	static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
+	static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
+	static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
     static  $local_clear_search = 'Clear Search Results';                   ///< Used for the "Clear" item in the quick search popup.
-    static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu.
+    static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu in the old-style BMLT search.
     
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
@@ -235,7 +242,7 @@ class BMLTPlugin
         {
         if ( function_exists ( '__' ) )
             {
-            $in_string = htmlspecialchars ( __( $in_string ) );
+            $in_string = htmlspecialchars ( __( $in_string, 'BMLTPlugin' ) );
             }
         else
             {
@@ -286,8 +293,11 @@ class BMLTPlugin
                                     'map_center_longitude' => self::$default_map_center_longitude,
                                     'map_zoom' => self::$default_map_zoom,
                                     'bmlt_new_search_url' => self::$default_new_search,
-                                    'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time()),   // This gives the option a unique slug
                                     'gmaps_api_key' => self::$default_gkey,
+ 								    'bmlt_initial_view' => self::$default_initial_view,
+                                    'push_down_more_details' => self::$default_push_down_more_details,
+                                    'additional_css' => self::$default_additional_css,
+                                    'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                                     'setting_name' => ''
                                     );
             
@@ -684,7 +694,7 @@ class BMLTPlugin
             {
 
             $ret .= '<div class="BMLTPlugin_option_sheet" id="BMLTPlugin_option_sheet_'.$in_options_index.'_div" style="display:'.htmlspecialchars ( $display_mode ).'">';
-                $ret .= '<h2 class="BMLTPlugin_option_id_h2">'.self::process_text ( self::$local_options_settings_id_prompt ).htmlspecialchars ( intVal ( $options['id'] ) ).'</h2>';
+                $ret .= '<h2 class="BMLTPlugin_option_id_h2">'.self::process_text ( self::$local_options_settings_id_prompt ).htmlspecialchars ( intval ( $options['id'] ) ).'</h2>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_name_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_name_label ).'</label>';
@@ -718,15 +728,49 @@ class BMLTPlugin
                     $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
-                    $ret .= '<div class="BMLTPlugin_gmap_caveat_div">'.self::process_text ( self::$local_options_gkey_caveat ).'</div>';
-                    $id = 'BMLTPlugin_option_sheet_gkey_'.$in_options_index;
-                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_gkey_label ).'</label>';
-                        $string = (isset ( $options['gmaps_api_key'] ) && $options['gmaps_api_key'] ? $options['gmaps_api_key'] : self::process_text ( self::$local_options_no_gkey_string ) );
-                    $ret .= '<input class="BMLTPlugin_option_sheet_line_gkey_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
-                    $ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',false)"';
-                    $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',true)"';
-                    $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+                    $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
+                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_more_styles_label ).'</label>';
+                    $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()">';
+                    $ret .= htmlspecialchars ( $options['additional_css'] );
+                    $ret .= '</textarea>';
                 $ret .= '</div>';
+                $ret .= '<fieldset class="BMLTPlugin_option_sheet_old_settings_fieldset">';
+                    $ret .= '<legend class="BMLTPlugin_gmap_caveat_legend">'.self::process_text ( self::$local_options_gkey_caveat ).'</legend>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_gkey_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_gkey_label ).'</label>';
+                            $string = (isset ( $options['gmaps_api_key'] ) && $options['gmaps_api_key'] ? $options['gmaps_api_key'] : self::process_text ( self::$local_options_no_gkey_string ) );
+                        $ret .= '<input class="BMLTPlugin_option_sheet_line_gkey_text" id="'.htmlspecialchars ( $id ).'" type="text" value="'.htmlspecialchars ( $string ).'"';
+                        $ret .= ' onfocus="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',false)"';
+                        $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_gkey_string).'\',true)"';
+                        $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_initial_view_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_initial_view_prompt ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            foreach ( self::$local_options_initial_view as $value => $prompt )
+                                {
+                                $ret .= '<option value="'.htmlspecialchars ( $value ).'"';
+                                if ( $value == $options['bmlt_initial_view'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.self::process_text ( $prompt ).'</option>';
+                                }
+                        $ret .= '</select>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_special_check_div">';
+                        $id = 'BMLTPlugin_option_sheet_push_down_'.$in_options_index;
+                        $ret .= '<input class="BMLTPlugin_special_check" type="checkbox" id="'.htmlspecialchars ( $id ).'" onclick="BMLTPlugin_DirtifyOptionSheet()"';
+                            if ( $options['push_down_more_details'] == '1' )
+                                {
+                                $ret .= ' checked="checked"';
+                                }
+                        $ret .= ' />';
+                        $ret .= '<label class="BMLTPlugin_special_check_label" for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_push_down_checkbox_label ).'</label>';
+                    $ret .= '</div>';
+                $ret .= '</fieldset>';
             $ret .= '</div>';
             }
         else
@@ -804,13 +848,13 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        if ( isset ( $this->my_http_vars['direct_simple'] ) && intVal ( $this->my_http_vars['direct_simple'] ) )
+        if ( isset ( $this->my_http_vars['direct_simple'] ) && intval ( $this->my_http_vars['direct_simple'] ) )
             {
-            $settings_id = intVal ( $this->my_http_vars['direct_simple'] );
+            $settings_id = intval ( $this->my_http_vars['direct_simple'] );
             }
-        elseif ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
+        elseif ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
             {
-            $settings_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
+            $settings_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
             }
         
         if ( !$settings_id )
@@ -909,7 +953,7 @@ class BMLTPlugin
                                 }
                             else
                                 {
-                                $options['root_server'] = '';
+                                $options['root_server'] = self::$default_rootserver;
                                 }
                             }
                         
@@ -921,7 +965,19 @@ class BMLTPlugin
                                 }
                             else
                                 {
-                                $options['bmlt_new_search_url'] = '';
+                                $options['bmlt_new_search_url'] = self::$default_new_search;
+                                }
+                            }
+                        
+                        if ( isset ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
+                            {
+                            if ( trim ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
+                                {
+                                $options['bmlt_initial_view'] = trim ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] );
+                                }
+                            else
+                                {
+                                $options['bmlt_initial_view'] = self::$default_initial_view;
                                 }
                             }
                         
@@ -933,8 +989,25 @@ class BMLTPlugin
                                 }
                             else
                                 {
-                                $options['gmaps_api_key'] = '';
+                                $options['gmaps_api_key'] = self::$default_gkey;
                                 }
+                            }
+                        
+                        if ( isset ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
+                            {
+                            if ( trim ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
+                                {
+                                $options['additional_css'] = trim ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] );
+                                }
+                            else
+                                {
+                                $options['additional_css'] = self::$default_additional_css;
+                                }
+                            }
+                        
+                        if ( isset ( $_GET['BMLTPlugin_option_sheet_push_down_'.$i] ) )
+                            {
+                            $options['push_down_more_details'] = $_GET['BMLTPlugin_option_sheet_push_down_'.$i];
                             }
                         
                         if ( isset ( $_GET['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] ) )
@@ -947,7 +1020,7 @@ class BMLTPlugin
                             $options['map_center_longitude'] = floatVal ( $_GET['BMLTPlugin_option_longitude_'.$i] );
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_zoom_'.$i] ) && intVal ( $_GET['BMLTPlugin_option_zoom_'.$i] ) )
+                        if ( isset ( $_GET['BMLTPlugin_option_zoom_'.$i] ) && intval ( $_GET['BMLTPlugin_option_zoom_'.$i] ) )
                             {
                             $options['map_zoom'] = floatVal ( $_GET['BMLTPlugin_option_zoom_'.$i] );
                             }
@@ -976,9 +1049,9 @@ class BMLTPlugin
             {
             $head_content = "<!-- Added by the BMLTPlugin -->";
 
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
                 {
-                $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
+                $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
                 }
             else
                 {
@@ -991,9 +1064,11 @@ class BMLTPlugin
                 $this->my_option_id = $options['id'];
                 }
             
-		    $this->load_params ( );
-            
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            
+		    $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
+            
+		    $this->load_params ( );
             
             $root_server_root = $options['root_server'];
 
@@ -1002,13 +1077,25 @@ class BMLTPlugin
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
                 
                 $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-					
-                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
-                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
-                $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
-                $additional_css .= 'table#bmlt_container div#c_comdef_search_specification_map_div { height: 640px }';
-                $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+				
+                if ( $options['push_down_more_details'] )
+                    {
+                    $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
+                    $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
+                    $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
+                    }
+                
+				if ( $options['additional_css'] )
+				    {
+				    $additional_css .= $options['additional_css'];
+				    }
+				
+				if ( $additional_css )
+				    {
+                    $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+                    }
                 }
+            
             $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
             $url = '';
@@ -1108,9 +1195,9 @@ class BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
-        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intVal ( $this->my_http_vars['bmlt_settings_id'] ) )
+        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
             {
-            $this->my_option_id = intVal ( $this->my_http_vars['bmlt_settings_id'] );
+            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
             }
         else
             {
@@ -1186,7 +1273,7 @@ class BMLTPlugin
                     }
                 elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
                     {
-                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intVal ( $this->my_http_vars['single_meeting_id'] ) );
+                    $the_new_content = bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetOneMeeting&single_meeting_id=".intval ( $this->my_http_vars['single_meeting_id'] ) );
                     }
                 elseif ( isset ( $this->my_http_vars['do_search'] ) )
                     {
@@ -1480,13 +1567,13 @@ class BMLTPlugin
                         $html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
                         $html .= "var c_g_BMLTPlugin_success_message = '".self::process_text ( self::$local_options_save_success )."';";
                         $html .= "var c_g_BMLTPlugin_failure_message = '".self::process_text ( self::$local_options_save_failure )."';";
-                        $html .= "var c_g_BMLTPlugin_success_time = ".intVal ( self::$local_options_success_time ).";";
-                        $html .= "var c_g_BMLTPlugin_failure_time = ".intVal ( self::$local_options_failure_time ).";";
+                        $html .= "var c_g_BMLTPlugin_success_time = ".intval ( self::$local_options_success_time ).";";
+                        $html .= "var c_g_BMLTPlugin_failure_time = ".intval ( self::$local_options_failure_time ).";";
                         $html .= "var c_g_BMLTPlugin_unsaved_prompt = '".self::process_text ( self::$local_options_unsaved_message )."';";
                         $html .= "var c_g_BMLTPlugin_test_server_success = '".self::process_text ( self::$local_options_test_server_success )."';";
                         $html .= "var c_g_BMLTPlugin_test_server_failure = '".self::process_text ( self::$local_options_test_server_failure )."';";
                         $html .= "var c_g_BMLTPlugin_coords = new Array();";
-                        $html .= "var g_BMLTPlugin_TimeToFade = ".intVal ( self::$local_options_success_time ).";";
+                        $html .= "var g_BMLTPlugin_TimeToFade = ".intval ( self::$local_options_success_time ).";";
                         $html .= "var g_BMLTPlugin_no_gkey_string = '".self::process_text (self::$local_options_no_gkey_string)."';";
                         if ( is_array ( $options_coords ) && count ( $options_coords ) )
                             {

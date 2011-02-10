@@ -133,12 +133,29 @@ function BMLTPlugin_SaveOptions()
         var gmaps_key = document.getElementById ( 'BMLTPlugin_option_sheet_gkey_'+option_index ).value.toString();
          
         url += '&BMLTPlugin_option_sheet_gkey_'+option_index+'=';
-    
+        
         if ( gmaps_key && (gmaps_key != g_BMLTPlugin_no_gkey_string) )
             {
             url += encodeURIComponent ( gmaps_key );
             };
        
+        var initial_view = document.getElementById ( 'BMLTPlugin_option_sheet_initial_view_'+option_index ).value.toString();
+         
+        url += '&BMLTPlugin_option_sheet_initial_view_'+option_index+'='+initial_view;
+       
+        var push_down = (document.getElementById ( 'BMLTPlugin_option_sheet_push_down_'+option_index ).checked ? '1' : '0');
+         
+        url += '&BMLTPlugin_option_sheet_push_down_'+option_index+'='+push_down;
+        
+        var additional_css = document.getElementById ( 'BMLTPlugin_option_sheet_additional_css_'+option_index ).value.toString();
+         
+        url += '&BMLTPlugin_option_sheet_additional_css_'+option_index+'=';
+        
+        if ( additional_css )
+            {
+            url += encodeURIComponent ( additional_css );
+            };
+    
         url += '&BMLTPlugin_option_latitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lat;
         url += '&BMLTPlugin_option_longitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lng;
         url += '&BMLTPlugin_option_zoom_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].zoom;
