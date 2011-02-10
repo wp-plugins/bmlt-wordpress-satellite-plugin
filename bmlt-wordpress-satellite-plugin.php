@@ -11,6 +11,7 @@
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
 *   \version 2.0.0                                                                          *
 *                                                                                           *
+*   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
@@ -62,16 +63,14 @@ class BMLTPlugin
     static  $default_map_zoom = 8;                                                  ///< This is the default basic search map zoom level
     static  $default_new_search = '';                                               ///< If this is set to something, then a new search uses the exact URI.
     static  $default_gkey = '';                                                     ///< This is only necessary for older versions.
-    static  $default_push_down_more_details = true;     ///< If this is set to true, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
+    static  $default_push_down_more_details = '1';      ///< If this is set to 1, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
     static  $default_additional_css = '';               ///< This is additional CSS that is inserted inline into the <head> section.
     static  $default_initial_view = '';                 ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
-	                                
+    static  $default_support_mobile = '1';              ///< If this is 1, support for redirection of mobile clients is provided.
+    
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
     ****************************************************************************************/
-    
-    /// These are used internal to the class, but can be localized
-    static  $local_noscript = 'This will not work, because you do not have JavaScript active.';             ///< The string displayed in a <noscript> element.
 
     /// These are all for the admin pages.
     static  $local_options_title = 'Basic Meeting List Toolbox Options';    ///< This is the title that is displayed over the options.
@@ -91,7 +90,6 @@ class BMLTPlugin
     static  $local_options_access_failure = 'You are not allowed to perform this operation.';               ///< This is displayed if a user attempts a no-no.
     static  $local_options_unsaved_message = 'You have unsaved changes. Are you sure you want to leave without saving them?';   ///< This is displayed if a user attempts to leave a page without saving the options.
     static  $local_options_settings_id_prompt = 'The ID for this Setting is ';                              ///< This is so that users can see the ID for the setting.
-	static  $local_no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a> to do the search.</noscript>';
     
     /// These are all for the admin page option sheets.
     static  $local_options_name_label = 'Setting Name:';                    ///< The Label for the setting name item.
@@ -108,38 +106,117 @@ class BMLTPlugin
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.'; ///< This is the tooltip text for the "test server" button.
     static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';     ///< The Label for the map.
     static  $local_options_gkey_caveat = 'These are only necessary for old-style BMLT implementations';  ///< This lets people know that this is not necessary for newer installs.
-	static  $local_options_initial_view = array (                           ///< The list of choices for presentation in the popup.
-	                                            '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
-	                                            );
-	static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
-	static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
-	static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
-	static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
-	static  $local_gm_link_tooltip = 'Follow This Link to be Taken to A Google Maps Location for This Meeting.';    ///< The tooltip shown for the Google Maps link.
+    static  $local_options_initial_view = array (                           ///< The list of choices for presentation in the popup.
+                                                '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
+                                                );
+    static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
+    static  $local_options_support_mobile_checkbox_label = 'Support Mobile Clients with Fast Mobile Lookup.'; ///< The label for the "Mobile Support" checkbox.
+    static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
+    static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
+    static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
+    static  $local_gm_link_tooltip = 'Follow This Link to be Taken to A Google Maps Location for This Meeting.';    ///< The tooltip shown for the Google Maps link.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
     static  $local_clear_search = 'Clear Search Results';                   ///< Used for the "Clear" item in the quick search popup.
     static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu in the old-style BMLT search.
-    
+                                    
+    /************************************************************************************//**
+    *                      STATIC DATA MEMBERS (SPECIAL LOCALIZABLE)                        *
+    ****************************************************************************************/
+
+    /// This is the only localizable string that is not processed. This is because it contains HTML. However, it is also a "hidden" string that is only displayed when the browser does not support JS.
+    static  $local_no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a> to do the search.</noscript>'; ///< This is the noscript presented for the old-style meeting search. It directs the user to the root server, which will support non-JS browsers.
+     
+    /// This one is processed.
+    static  $local_noscript = 'This will not work, because you do not have JavaScript active.';             ///< The string displayed in a <noscript> element.
+   
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
     ****************************************************************************************/
     
     static  $local_options_success_time = 2000;                             ///< The number of milliseconds a success message is displayed.
     static  $local_options_failure_time = 5000;                             ///< The number of milliseconds a failure message is displayed.
+    
+    /************************************************************************************//**
+    *                              STATIC DATA MEMBERS (MOBILE)                             *
+    *                                                                                       *
+    *   We use an adaptation of the standalone Fast Mobile Lookup, here. These originated   *
+    *   as defines, but are now static data members.                                        *
+    ****************************************************************************************/
+
+    static  $path_mobile_throbber_loc = 'images/small_throbber.gif';    ///< The "Busy Throbber" that is displayed during searches.
+
+    /// This defines a "grace time," so that meetings later today will include the current time, plus the "grace time," so it isn't so anal.
+    static  $mobile_grace_time = 15;	///< This is in minutes.
+
+    /// This is set to either 'M' (Miles) or 'K' (Kilometers), for the distance display.
+    static  $distance_units = 'M';
+                                    
+    /************************************************************************************//**
+    *                       STATIC DATA MEMBERS (MOBILE LOCALIZABLE)                        *
+    ****************************************************************************************/
+
+    /// The units for distance.
+    static  $local_mobile_kilometers = 'Kilometers';
+    static  $local_mobile_miles = 'Miles';
+    static  $local_mobile_distance = 'Distance';  ///< Distance (the string)
+
+    /// The page titles.
+    static  $local_mobile_results_page_title = 'Quick Meeting Search Results';
+    static  $local_mobile_results_form_title = 'Find Nearby Meetings Quickly';
+
+    /// The fast GPS lookup links.
+    static  $local_GPS_banner = 'Select A Fast Meeting Lookup';
+    static  $local_GPS_banner_subtext = 'Bookmark these links for even faster searches in the future.';
+    static  $local_search_all = 'Search for all meetings near my present location.';
+    static  $local_search_today = 'Later Today';
+    static  $local_search_tomorrow = 'Tomorrow';
+
+    /// The search for an address form.
+    static  $local_list_check = 'If you are experiencing difficulty with the interactive map, or wish to have the results returned as a list, check this box and enter an address.';
+    static  $local_search_address_single = 'Search for Meetings Near An Address';
+
+    /// Used instead of "near my present location."
+    static  $local_search_all_address = 'Search for all meetings near this address.';
+    static  $local_search_submit_button = 'Search For Meetings';
+
+    /// This is what is entered into the text box.
+    static  $local_enter_an_address = 'Enter An Address';
+
+    /// Error messages.
+    static  $local_mobile_fail_no_meetings = 'No Meetings Found!';
+    static  $local_server_fail = 'The search failed because the server encountered an error!';
+    static  $local_cant_find_address = 'Cannot Determine the Location From the Address Information!';
+    static  $local_cannot_determine_location = 'Cannot Determine Your Current Location!';
+    static  $local_enter_address_alert = 'Please enter an address!';
+
+    /// The text for the "Map to Meeting" links
+    static  $local_map_link = 'Map to Meeting';
+
+    /// Only used for WML pages
+    static  $local_next_card = 'Next Meeting >>';
+    static  $local_prev_card = '<< Previous Meeting';
+    
+    /// Used for the info and list windows.
+    static  $local_formats = 'Formats';
+    static  $local_noon = 'Noon';
+    static  $local_midnight = 'Midnight';
+
+    /// This array has the weekdays, spelled out. Since weekdays start at 1 (Sunday), we consider 0 to be an error.
+    static	$local_weekdays = array ( 'ERROR', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
 
     /************************************************************************************//**
-    *                                   DYNAMIC DATA MEMBERS                                *
+    *                                  DYNAMIC DATA MEMBERS                                 *
     ****************************************************************************************/
     
-    var $my_driver = null;                                                  ///< This will contain an instance of the BMLT satellite driver class.
-    var $my_params = null;                                                  ///< This will contain the $_GET and $_POST query variables.
-    var $my_option_id = null;                                               ///< This will be used to hold a page-chosen option ID.
-    var $my_http_vars = null;                                               ///< This will hold all of the query arguments.
+    var $my_driver = null;              ///< This will contain an instance of the BMLT satellite driver class.
+    var $my_params = null;              ///< This will contain the $this->my_http_vars and $_POST query variables.
+    var $my_option_id = null;           ///< This will be used to hold a page-chosen option ID.
+    var $my_http_vars = null;           ///< This will hold all of the query arguments.
     
     /************************************************************************************//**
-    *                                   FUNCTIONS/METHODS                                   *
+    *                                    FUNCTIONS/METHODS                                  *
     ****************************************************************************************/
     
     /************************************************************************************//**
@@ -151,6 +228,63 @@ class BMLTPlugin
         {
         return self::$g_s_there_can_only_be_one;
         }
+    
+    /****************************************************************************************//**
+    *   \brief Checks the UA of the caller, to see if it should return XHTML Strict or WML.     *
+    *                                                                                           *
+    *   NOTE: This is very, very basic. It is not meant to be a studly check, like WURFL.       *
+    *                                                                                           *
+    *   \returns A string. The supported type ('xhtml', 'xhtml_mp' or 'wml')                    *
+    ********************************************************************************************/
+    static function mobile_sniff_ua($in_http_vars   ///< The query variables.
+                                    )
+    {
+        function get_language_support()
+        {
+            if ( isset ( $in_http_vars['WML'] ) && ($in_http_vars['WML'] == 1) )
+                {
+                $language = 'wml';
+                }
+            elseif ( isset ( $in_http_vars['WML'] ) && ($in_http_vars['WML'] == 2) )
+                {
+                $language = 'xhtml_mp';
+                }
+            else
+                {
+                if (!isset($_SERVER['HTTP_ACCEPT']))
+                    {
+                    return false;
+                    }
+            
+                $http_accept = explode (',', $_SERVER['HTTP_ACCEPT']);
+            
+                $accept = array();
+            
+                foreach ($http_accept as $type)
+                    {
+                    $type = strtolower(trim(preg_replace('/\;.*$/', '', preg_replace ('/\s+/', '', $type))));
+            
+                    $accept[$type] = true;
+                    }
+            
+                $language = 'xhtml';
+            
+                if (isset($accept['text/vnd.wap.wml']))
+                    {
+                    $language = 'wml';
+            
+                    if (isset($accept['application/xhtml+xml']) || isset($accept['application/vnd.wap.xhtml+xml']))
+                        {
+                        $language = 'xhtml_mp';
+                        }
+                    }
+                }
+            
+            return $language;
+        }
+    
+        return get_language_support();
+    }
     
     /************************************************************************************//**
     *   \brief Constructor. Enforces the SINGLETON, and sets up the callbacks.              *
@@ -291,17 +425,19 @@ class BMLTPlugin
         
         if ( function_exists ( 'get_option' ) )
             {
+            // These are the defaults. If the saved option has a different value, it replaces the ones in here.
             $BMLTOptions = array (  'root_server' => self::$default_rootserver,
                                     'map_center_latitude' => self::$default_map_center_latitude,
                                     'map_center_longitude' => self::$default_map_center_longitude,
                                     'map_zoom' => self::$default_map_zoom,
                                     'bmlt_new_search_url' => self::$default_new_search,
                                     'gmaps_api_key' => self::$default_gkey,
- 								    'bmlt_initial_view' => self::$default_initial_view,
+                                    'bmlt_initial_view' => self::$default_initial_view,
                                     'push_down_more_details' => self::$default_push_down_more_details,
                                     'additional_css' => self::$default_additional_css,
                                     'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
-                                    'setting_name' => ''
+                                    'setting_name' => '',
+                                    'support_mobile' => self::$default_support_mobile
                                     );
             
             // Make sure we aren't resetting to default.
@@ -730,6 +866,16 @@ class BMLTPlugin
                     $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_new_search_string).'\',true)"';
                     $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
                 $ret .= '</div>';
+                $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_special_check_div">';
+                    $id = 'BMLTPlugin_option_sheet_support_mobile_'.$in_options_index;
+                    $ret .= '<input class="BMLTPlugin_special_check" type="checkbox" id="'.htmlspecialchars ( $id ).'" onclick="BMLTPlugin_DirtifyOptionSheet()"';
+                        if ( $options['support_mobile'] == '1' )
+                            {
+                            $ret .= ' checked="checked"';
+                            }
+                    $ret .= ' />';
+                    $ret .= '<label class="BMLTPlugin_special_check_label" for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_support_mobile_checkbox_label ).'</label>';
+                $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_more_styles_label ).'</label>';
@@ -806,11 +952,11 @@ class BMLTPlugin
     ****************************************************************************************/
     function load_params ( )
         {
-		$this->my_params = '';
+        $this->my_params = '';
 
         foreach ( $this->my_http_vars as $key => $value )
             {
-			if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )	// We don't propagate switcher.
+            if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher.
                 {
                 if ( is_array ( $value ) )
                     {
@@ -868,58 +1014,98 @@ class BMLTPlugin
         
         $options = $this->getBMLTOptions_by_id ( $settings_id );
 
-		$this->load_params ( );
+        $this->load_params ( );
 
-		if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
-			{
-			$url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
-			die ( bmlt_satellite_controller::call_curl ( $url ) );
-			}
-        elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
+        if ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
             {
-			$root_server = $options['root_server']."client_interface/simple/index.php";
-			$result = bmlt_satellite_controller::call_curl ( "$root_server?direct_simple".$this->my_params );
-			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
-			if ( $this->my_http_vars['single_uri'] )
-				{
-				$result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
-				$result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
-				}
-			die ( $result );
-            die ( bmlt_satellite_controller::call_curl ( $url ) );
-            }
-		elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
-			{
-			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
-			header ( "Location: $uri" );
-			die();
-			}
-		elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
-			{
-			$uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
-			header ( "Location: $uri" );
-			die();
-			}
-        elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
-            {
-            $ret = '0';
-            
-            if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+            $ret = $this->BMLTPlugin_fast_mobile_lookup ();
+            $url = '';
+            if ( plugins_url() )
                 {
-                $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
-                
-                $test = new bmlt_satellite_controller ( $uri );
-                
-                if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
-                    {
-                    if ( !$test->get_m_error_message() )
-                        {
-                        $ret = trim($test->get_server_version());
-                        }
-                    }
+                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+                }
+            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+                {
+                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+                }
+
+            ob_end_clean(); // Just in case we are in an OB
+            
+            $handler = null;
+            
+            if ( zlib_get_coding_type() === false )
+                {
+                $handler = "ob_gzhandler";
                 }
             
-            die ( $ret );
+            ob_start($handler);
+                echo $ret;
+            ob_end_flush();
+            die ( );
+            }
+        elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile_ajax_router'] ) )
+            {
+            $uri = BMLTPlugin_get_server_uri ().$this->my_http_vars['request'];
+            ob_end_clean(); // Just in case we are in an OB
+            die ( bmlt_satellite_controller::call_curl ( $uri ) );
+            }
+        else
+            {
+            if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
+                {
+                $url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
+                ob_end_clean(); // Just in case we are in an OB
+                die ( bmlt_satellite_controller::call_curl ( $url ) );
+                }
+            elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
+                {
+                $root_server = $options['root_server']."client_interface/simple/index.php";
+                $result = bmlt_satellite_controller::call_curl ( "$root_server?direct_simple".$this->my_params );
+                $result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+                if ( $this->my_http_vars['single_uri'] )
+                    {
+                    $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+                    $result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
+                    }
+                ob_end_clean(); // Just in case we are in an OB
+                die ( $result );
+                }
+            elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
+                {
+                $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
+                ob_end_clean(); // Just in case we are in an OB
+                header ( "Location: $uri" );
+                die();
+                }
+            elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
+                {
+                $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
+                ob_end_clean(); // Just in case we are in an OB
+                header ( "Location: $uri" );
+                die();
+                }
+            elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
+                {
+                $ret = '0';
+                
+                if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+                    {
+                    $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
+                    
+                    $test = new bmlt_satellite_controller ( $uri );
+                    
+                    if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
+                        {
+                        if ( !$test->get_m_error_message() )
+                            {
+                            $ret = trim($test->get_server_version());
+                            }
+                        }
+                    }
+                
+                ob_end_clean(); // Just in case we are in an OB
+                die ( $ret );
+                }
             }
         }
         
@@ -928,11 +1114,11 @@ class BMLTPlugin
     ****************************************************************************************/
     function admin_init ( )
         {
-        if ( isset ( $_GET['BMLTPlugin_Save_Settings_AJAX_Call'] ) )
+        if ( isset ( $this->my_http_vars['BMLTPlugin_Save_Settings_AJAX_Call'] ) )
             {
             $ret = 0;
             
-            if ( isset ( $_GET['BMLTPlugin_set_options'] ) )
+            if ( isset ( $this->my_http_vars['BMLTPlugin_set_options'] ) )
                 {
                 $ret = 1;
                 
@@ -944,11 +1130,11 @@ class BMLTPlugin
                     
                     if ( is_array ( $options ) && count ( $options ) )
                         {
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_name_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_name_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_name_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_name_'.$i] ) )
                                 {
-                                $options['setting_name'] = trim ( $_GET['BMLTPlugin_option_sheet_name_'.$i] );
+                                $options['setting_name'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_name_'.$i] );
                                 }
                             else
                                 {
@@ -956,11 +1142,11 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_root_server_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_root_server_'.$i] ) )
                                 {
-                                $options['root_server'] = trim ( $_GET['BMLTPlugin_option_sheet_root_server_'.$i] );
+                                $options['root_server'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_root_server_'.$i] );
                                 }
                             else
                                 {
@@ -968,11 +1154,11 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_new_search_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_new_search_'.$i] ) )
                                 {
-                                $options['bmlt_new_search_url'] = trim ( $_GET['BMLTPlugin_option_sheet_new_search_'.$i] );
+                                $options['bmlt_new_search_url'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_new_search_'.$i] );
                                 }
                             else
                                 {
@@ -980,11 +1166,11 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_initial_view_'.$i] ) )
                                 {
-                                $options['bmlt_initial_view'] = trim ( $_GET['BMLTPlugin_option_sheet_initial_view_'.$i] );
+                                $options['bmlt_initial_view'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_initial_view_'.$i] );
                                 }
                             else
                                 {
@@ -992,11 +1178,11 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_gkey_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_gkey_'.$i] ) )
                                 {
-                                $options['gmaps_api_key'] = trim ( $_GET['BMLTPlugin_option_sheet_gkey_'.$i] );
+                                $options['gmaps_api_key'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_gkey_'.$i] );
                                 }
                             else
                                 {
@@ -1004,11 +1190,11 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
                             {
-                            if ( trim ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_additional_css_'.$i] ) )
                                 {
-                                $options['additional_css'] = trim ( $_GET['BMLTPlugin_option_sheet_additional_css_'.$i] );
+                                $options['additional_css'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_additional_css_'.$i] );
                                 }
                             else
                                 {
@@ -1016,24 +1202,29 @@ class BMLTPlugin
                                 }
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_sheet_push_down_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_push_down_'.$i] ) )
                             {
-                            $options['push_down_more_details'] = $_GET['BMLTPlugin_option_sheet_push_down_'.$i];
+                            $options['push_down_more_details'] = $this->my_http_vars['BMLTPlugin_option_sheet_push_down_'.$i];
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_support_mobile_'.$i] ) )
                             {
-                            $options['map_center_latitude'] = floatVal ( $_GET['BMLTPlugin_option_latitude_'.$i] );
+                            $options['support_mobile'] = $this->my_http_vars['BMLTPlugin_option_sheet_support_mobile_'.$i];
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_longitude_'.$i] ) && floatVal ( $_GET['BMLTPlugin_option_longitude_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] ) )
                             {
-                            $options['map_center_longitude'] = floatVal ( $_GET['BMLTPlugin_option_longitude_'.$i] );
+                            $options['map_center_latitude'] = floatVal ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] );
                             }
                         
-                        if ( isset ( $_GET['BMLTPlugin_option_zoom_'.$i] ) && intval ( $_GET['BMLTPlugin_option_zoom_'.$i] ) )
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_longitude_'.$i] ) && floatVal ( $this->my_http_vars['BMLTPlugin_option_longitude_'.$i] ) )
                             {
-                            $options['map_zoom'] = floatVal ( $_GET['BMLTPlugin_option_zoom_'.$i] );
+                            $options['map_center_longitude'] = floatVal ( $this->my_http_vars['BMLTPlugin_option_longitude_'.$i] );
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] ) && intval ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] ) )
+                            {
+                            $options['map_zoom'] = floatVal ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] );
                             }
                         
                         if ( !$this->setBMLTOptions ( $options, $i ) )
@@ -1045,6 +1236,7 @@ class BMLTPlugin
                     }
                 }
             
+            ob_end_clean(); // Just in case we are in an OB
             die ( strVal ( $ret ) );
             }
         }
@@ -1077,9 +1269,9 @@ class BMLTPlugin
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
-		    $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
+            $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
             
-		    $this->load_params ( );
+            $this->load_params ( );
             
             $root_server_root = $options['root_server'];
 
@@ -1088,7 +1280,7 @@ class BMLTPlugin
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
                 
                 $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-				
+                
                 if ( $options['push_down_more_details'] )
                     {
                     $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
@@ -1096,13 +1288,13 @@ class BMLTPlugin
                     $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
                     }
                 
-				if ( $options['additional_css'] )
-				    {
-				    $additional_css .= $options['additional_css'];
-				    }
-				
-				if ( $additional_css )
-				    {
+                if ( $options['additional_css'] )
+                    {
+                    $additional_css .= $options['additional_css'];
+                    }
+                
+                if ( $additional_css )
+                    {
                     $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
                     }
                 }
@@ -1206,16 +1398,19 @@ class BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
+        // This is how we figure out which options we'll be using.
+        
+        // If a bmlt_settings_id query variable was presented, that trumps everything else
         if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
             {
             $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
             }
-        else
+        else    // We see if the bmlt_settings custom field was set. Only one setting is allowed per page/post.
             {
-            $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+            $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
             }
         
-        if ( !$this->my_option_id )
+        if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
             {
             $options = $this->getBMLTOptions ( 1 );
             $this->my_option_id = $options['id'];
@@ -1267,7 +1462,7 @@ class BMLTPlugin
                 
                 $menu = '';
                     
-                if ( $pid && !isset ( $_GET['search_form'] ) )
+                if ( $pid && !isset ( $this->my_http_vars['search_form'] ) )
                     {
                     if ( $options['bmlt_new_search_url'] )
                         {
@@ -1280,7 +1475,7 @@ class BMLTPlugin
                 
                 $plink = get_permalink ( get_the_ID() );
                 
-				if ( isset ( $this->my_http_vars['search_form'] ) )
+                if ( isset ( $this->my_http_vars['search_form'] ) )
                     {
                     $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
                     $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
@@ -1297,7 +1492,7 @@ class BMLTPlugin
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
  
-				$the_new_content = str_replace ( '###ROOT_SERVER###', $root_server_root, self::$local_no_js_warning ).$the_new_content;
+                $the_new_content = str_replace ( '###ROOT_SERVER###', $root_server_root, self::$local_no_js_warning ).$the_new_content;
                 $the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
                 // We only allow one instance per page.
                 $count = 0;
@@ -1454,7 +1649,7 @@ class BMLTPlugin
         
         $timing = self::$local_options_success_time;    // Success is a shorter fade, but failure is longer.
         $ret = '<div id="BMLTPlugin_Message_bar_div" class="BMLTPlugin_Message_bar_div">';
-            if ( isset ( $_GET['BMLTPlugin_create_option'] ) )
+            if ( isset ( $this->my_http_vars['BMLTPlugin_create_option'] ) )
                 {
                 $out_option_number = $this->make_new_options ( );
                 if ( $out_option_number )
@@ -1480,9 +1675,9 @@ class BMLTPlugin
                     $ret .= '</h2>';
                     }
                 }
-            elseif ( isset ( $_GET['BMLTPlugin_delete_option'] ) )
+            elseif ( isset ( $this->my_http_vars['BMLTPlugin_delete_option'] ) )
                 {
-                $option_index = intval ( $_GET['BMLTPlugin_delete_option'] );
+                $option_index = intval ( $this->my_http_vars['BMLTPlugin_delete_option'] );
         
                 if ( $this->delete_options ( $option_index ) )
                     {
@@ -1521,7 +1716,7 @@ class BMLTPlugin
             $html .= '<div id="BMLTPlugin_options_container" style="display:none">';    // This is displayed using JavaScript.
                 $html .= '<h1 class="BMLTPlugin_Admin_h1">'.self::process_text ( self::$local_options_title ).'</h1>';
                 $html .= $process_html;
-                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get" onsubmit="function(){return false}">';
+                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
                     $html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
                         $html .= '<legend id="BMLTPlugin_legend" class="BMLTPlugin_legend">';
                             $count = $this->get_num_options();
@@ -1587,7 +1782,7 @@ class BMLTPlugin
                     $html .= '</fieldset>';
                 $html .= '</form>';
                 $html .= '<div class="BMLTPlugin_toolbar_line_bottom">';
-                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get" onsubmit="function(){return false}">';
+                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
                     if ( $count > 1 )
                         {
                         $html .= '<div class="BMLTPlugin_toolbar_button_line_left">';
@@ -1602,8 +1797,8 @@ class BMLTPlugin
                         $html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.self::process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptions()" />';
                     $html .= '</div>';
                     $html .= '</form>';
-                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $_GET['page']).'" method="get">';
-                    $html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $_GET['page'] ).'" />';
+                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get">';
+                    $html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $this->my_http_vars['page'] ).'" />';
                     $html .= '<input type="submit" id="BMLTPlugin_toolbar_button_new" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.self::process_text ( self::$local_options_add_new ).'" />';
                     $html .= '</form>';
                 $html .= '</div>';
@@ -1669,6 +1864,944 @@ class BMLTPlugin
         
         echo $html;
         }
+    
+    /************************************************************************************//**
+    *                              FAST MOBILE LOOKUP ROUTINES                              *
+    *                                                                                       *
+    *   Our mobile support is based on the fast mobile client. It has been adapted to fit   *
+    *   into a WordPress environment.                                                       *
+    ****************************************************************************************/
+
+    /************************************************************************************//**
+    *   \brief Checks the UA of the caller, to see if it should return XHTML Strict or WML. *
+    *                                                                                       *
+    *   NOTE: This is very, very basic. It is not meant to be a studly check, like WURFL.   *
+    *                                                                                       *
+    *   \returns A string. The DOCTYPE to be displayed.                                     *
+    ****************************************************************************************/
+    static function BMLTPlugin_select_doctype(  $in_http_vars   ///< The query variables
+                                            )
+    {
+        $ret = '';
+        $language = self::mobile_sniff_ua($in_http_vars);
+        
+        function isDeviceWML1()
+        {
+            return $language == 'wml';
+        }
+    
+        function isDeviceWML2()
+        {
+            return $language == 'xhtml_mp';
+        }
+            
+        function isMobileDevice()
+        {
+            return $language != 'xhtml';
+        }
+        
+        // If we aren't deliberately forcing an emulation, we figure it out for ourselves.
+        if ( !isset ( $in_http_vars['WML'] ) )
+            {
+            if ( isDeviceWML1() )
+                {
+                $in_http_vars['WML'] = 1;
+                }
+            elseif ( isDeviceWML2() )
+                {
+                $in_http_vars['WML'] = 2;
+                }
+            elseif ( isMobileDevice() )
+                {
+                $in_http_vars['WML'] = 1;
+                }
+            }
+        
+        // We may specify a mobile XHTML (WML 2) manually.
+        if ( isset ( $in_http_vars['WML'] ) )
+            {
+            if ( $in_http_vars['WML'] == 2 )    // Use the XHTML MP header
+                {
+                $ret = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd">';
+                }
+            else    // Default is WAP
+                {
+                $ret = '<'; // This is because some servers are dumb enough to interpret the embedded prolog as PHP delimiters.
+                $ret .= '?xml version="1.0"?';
+                $ret .= '><!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">';
+                }
+            }
+        else
+            {
+            // We return a fully-qualified XHTML 1.0 Strict page.
+            $ret = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">';
+            }
+        
+        if ( !isset ( $in_http_vars['WML'] ) || ($in_http_vars['WML'] != 1) )
+            {
+            $ret .= '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"';
+            if ( !isset ( $in_http_vars['WML'] ) )
+                {
+                $ret .= ' lang="en"';
+                }
+            $ret .= '>';
+            }
+        else
+            {
+            $ret .= '<wml>';
+            }
+        
+        $ret .= '<head>';
+    
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Output the necessary Javascript. This is only called for a "pure javascript" *
+    *   do_search invocation (smartphone interactive map).                                  *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_fast_mobile_lookup_javascript_stuff( $in_sensor = true  ///< A Boolean. If false, then we will invoke the API with the sensor set false. Default is true.
+                                                            )
+    {
+        $ret = '';
+        $sensor = $in_sensor ? 'true' : 'false';
+
+        // Include the Google Maps API V3 files.
+        $ret .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor='.$sensor.'"></script>';
+        
+        // Declare the various globals and display strings. This is how we pass strings to the JavaScript, as opposed to the clunky way we do it in the root server.
+        $ret .= '<script type="text/javascript">';
+        $ret .= 'var c_g_cannot_determine_location = \''.self::process_text ( self::$local_cannot_determine_location ).'\';';
+        $ret .= 'var c_g_no_meetings_found = \''.self::process_text ( self::$local_mobile_fail_no_meetings ).'\';';
+        $ret .= 'var c_g_server_error = \''.self::process_text ( self::$local_server_fail ).'\';';
+        $ret .= 'var c_g_address_lookup_fail = \''.self::process_text ( self::$local_cant_find_address ).'\';';
+        $ret .= 'var c_g_map_link_text = \''.self::process_text ( self::$local_map_link ).'\';';
+        $ret .= 'var c_g_weekdays = [';
+        $ret .= "'".self::process_text ( join ( "','", self::$local_weekdays ) )."'";
+        $ret .= '];';
+        $ret .= 'var c_g_formats = \''.self::process_text ( self::$local_formats ).'\';';
+        $ret .= 'var c_g_Noon = \''.self::process_text ( self::$local_noon ).'\';';
+        $ret .= 'var c_g_Midnight = \''.self::process_text ( self::$local_midnight ).'\';';
+        $ret .= 'var c_g_debug_mode = '.( defined ( 'DEBUG_MODE' ) ? 'true' : 'false' ).';';
+        $h = null;
+        $m = null;
+        list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
+        $ret .= 'var c_g_hour = '.intval ( $h ).';';
+        $ret .= 'var c_g_min = '.intval ( $m ).';';
+        $ret .= 'var c_g_distance_prompt = \''.self::process_text ( self::$local_mobile_distance ).'\';';
+        $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
+        $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) ).'\';';
+        $ret .= '</script>';
+        
+         $url = '';
+        if ( plugins_url() )
+            {
+            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+            }
+        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+            {
+            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+            }
+       
+        if ( defined ( 'DEBUG_MODE' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
+            {
+            $ret .= '<script src="'.$url.'fast_mobile_lookup.js" type="text/javascript"></script>';
+            }
+        else
+            {
+            $ret .= '<script src="'.$url.'js_stripper.php?filename=fast_mobile_lookup.js" type="text/javascript"></script>';
+            }
+
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Output whatever header stuff is necessary for the available UA               *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_fast_mobile_lookup_header_stuff()
+    {
+        $ret = '';
+        $url = '';
+        if ( plugins_url() )
+            {
+            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+            }
+        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+            {
+            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+            }
+            
+        $stylesheet_uri = $url.'fast_mobile_lookup.css'; ///< This is the standard CSS file.
+        /// There can be a custom CSS file.
+    
+        $ret .= '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';    // WML 1 only cares about the charset and cache.
+        $ret .= '<meta http-equiv="Cache-Control" content="max-age=300"  />';               // Cache for 5 minutes.
+        $ret .= '<meta http-equiv="Cache-Control" content="no-transform"  />';              // No Transforms.
+
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // If full XHTML
+            {
+            // Various meta tags we need.
+            $ret .= '<meta http-equiv="Content-Script-Type" content="text/javascript" />';      // Set the types for inline styles and scripts.
+            $ret .= '<meta http-equiv="Content-Style-Type" content="text/css" />';
+            $ret .= '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />'; // Make sure iPhone screens stay humble.
+            
+            if ( defined ( 'DEBUG_MODE' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
+                {
+                $ret .= '<link rel="stylesheet" media="all" href="'.htmlspecialchars($stylesheet_uri).'" type="text/css" />';
+                }
+            else
+                {
+                $ret .= '<link rel="stylesheet" media="all" href="style_stripper.php?filename='.htmlspecialchars($stylesheet_uri).'" type="text/css" />';
+                }
+            
+            // If we have a shortcut icon, set it here.
+            if ( defined ('_SHORTCUT_LOC_' ) )
+                {
+                $ret .= '<link rel="SHORTCUT ICON" href="'.self::process_text ( _SHORTCUT_LOC_ ).'" />';
+                }
+            
+            // Set the appropriate page title.
+            if ( isset ( $this->my_http_vars['do_search'] ) )
+                {
+                $ret .= '<title>'.self::process_text ( $local_mobile_results_page_title ).'</title>';
+                }
+            else
+                {
+                $ret .= '<title>'.self::process_text ( $local_mobile_results_form_title ).'</title>';
+                }
+            }
+        
+        $ret .= '</head>';
+
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Returns the XHTML/WML for the Map Search form. These are the three "fast     *
+    *   lookup" links displayed at the top (Note display:none" in the style).               *
+    *   This is to be revealed by JavaScript.                                               *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_draw_map_search_form ()
+    {
+        $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
+            $ret .= '<h1 class="banner_h1">'.self::process_text ( self::$local_GPS_banner ).'</h1>';
+            $ret .= '<h2 class="banner_h2">'.self::process_text ( self::$local_GPS_banner_subtext ).'</h2>';
+            $ret .= '<div class="link_one_line"><a accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search">'.self::process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search&amp;qualifier=today">'.self::process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search&amp;qualifier=tomorrow">'.self::process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<hr class="meeting_divider_hr" />';
+        $ret .= '</div>';
+        
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Returns the XHTML/WML for the Address Entry form                             *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_draw_address_search_form ()
+    {
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret = '<form class="address_input_form" method="get" action="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'"';
+            if ( !isset ( $this->my_http_vars['WML'] ) )
+                {
+                // This fills the form with a "seed" text (standard accessibility practice). We do it this way, so we don't clutter the form if no JavaScript is available.
+                $ret .= ' onsubmit="if((document.getElementById(\'address_input\').value==\'';
+                $ret .= self::process_text ( self::$local_enter_an_address );
+                $ret .= '\')||!document.getElementById(\'address_input\').value){alert(\''.self::process_text ( self::$local_enter_address_alert ).'\');document.getElementById(\'address_input\').focus();return false}else{if(document.getElementById(\'hidden_until_js\').style.display==\'block\'){document.getElementById(\'do_search\').value=\'1\'}}"';
+                }
+            $ret .= '>';
+            $ret .= '<div class="search_address">';
+            // The default, is we return a list. This is changed by JavaScript.
+            $ret .= '<input type="hidden" name="BMLTPlugin_mobile" />';
+            $ret .= '<input type="hidden" name="do_search" id="do_search" value="the hard way" />';
+            $ret .= '<h1 class="banner_h2">'.self::process_text ( self::$local_search_address_single ).'</h1>';
+            if ( !isset ( $this->my_http_vars['WML'] ) )  // This is here to prevent WAI warnings.
+                {
+                $ret .= '<label for="address_input" style="display:none">'.self::process_text ( self::$local_enter_address_alert ).'</label>';
+                }
+            if ( isset ( $this->my_http_vars['WML'] ) )
+                {
+                $ret .= '<input type="hidden" name="WML" value="2" />';
+                }
+            }
+        else
+            {
+            $ret = '<p>';   // WML rides the short bus.
+            }
+        
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret .= '<div class="address_top" id="address_input_line_wrapper">';
+            $ret .= '<div class="link_one_line input_line_div" id="address_input_line_div">';
+            if ( !isset ( $this->my_http_vars['WML'] ) )
+                {
+                $ret .= '<div class="link_one_line" id="hidden_until_js2" style="display:none">';
+                $ret .= '<input type="checkbox" id="force_list_checkbox"';
+                $ret .= ' onchange="if(this.checked){document.getElementById ( \'hidden_until_js\' ).style.display = \'none\';document.getElementById(\'address_input\').focus();}else{document.getElementById ( \'hidden_until_js\' ).style.display = \'block\'}" /><label for="force_list_checkbox"';
+                $ret .= '> '.self::process_text ( self::$local_list_check ).'</label>';
+                $ret .= '</div>';
+                }
+            $ret .= '</div>';
+            }
+            
+        $ret .= '<input type="text" name="address"';
+        
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret .= ' id="address_input" class="address_input" size="64" value=""';
+            if ( !isset ( $this->my_http_vars['WML'] ) )
+                {
+                $ret .= ' onfocus="if(!this.value||(this.value==\''.self::process_text ( self::$local_enter_an_address ).'\'))this.value=\'\'"';
+                $ret .= ' onkeydown="if(!this.value||(this.value==\''.self::process_text ( self::$local_enter_an_address ).'\'))this.value=\'\'"';
+                $ret .= ' onblur="if(!this.value)this.value=\''.self::process_text ( self::$local_enter_an_address ).'\'"';
+                }
+            }
+        else
+            {
+            $ret .= ' size="32" format="*m"';
+            }
+        
+        $ret .= ' />';
+        
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret .= '</div>';
+            }
+        else
+            {
+            $ret .= '</p>';
+            }
+        
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret .= '<div class="link_form_elements">';
+            $ret .= '<div class="link_one_line">';
+            $ret .= '<input checked="checked" id="search_all_days" type="radio" name="qualifier" value="" />';
+            $ret .= '<label for="search_all_days"> '.self::process_text ( self::$local_search_all_address ).'</label>';
+            $ret .= '</div>';
+            $ret .= '<div class="link_one_line">';
+            $ret .= '<input id="search_today" type="radio" name="qualifier" value="today" />';
+            $ret .= '<label for="search_today"> '.self::process_text ( self::$local_search_today ).'</label>';
+            $ret .= '</div>';
+            $ret .= '<div class="link_one_line">';
+            $ret .= '<input id="search_tomorrow" type="radio" name="qualifier" value="tomorrow" />';
+            $ret .= '<label for="search_tomorrow"> '.self::process_text ( self::$local_search_tomorrow ).'</label>';
+            $ret .= '</div>';
+            $ret .= '</div>';
+            $ret .= '<div class="link_one_line_submit">';
+            if ( !isset ( $this->my_http_vars['WML'] ) )  // This silly thing is to prevent WAI warnings.
+                {
+                $ret .= '<label for="submit_button" style="display:none">'.self::process_text ( _SEARCH_SUBMIT_ ).'</label>';
+                }
+            $ret .= '<input id="submit_button" type="submit" value="'.self::process_text ( $local_search_submit_button ).'"';
+            if ( !isset ( $this->my_http_vars['WML'] ) )
+                {
+                $ret .= ' onclick="if((document.getElementById(\'address_input\').value==\'';
+                $ret .= self::process_text ( self::$local_enter_an_address );
+                $ret .= '\')||!document.getElementById(\'address_input\').value){alert(\''.self::process_text ( self::$local_enter_address_alert ).'\');document.getElementById(\'address_input\').focus();return false}else{if(document.getElementById(\'hidden_until_js\').style.display==\'block\'){document.getElementById(\'do_search\').value=\'1\'}}"';
+                }
+            $ret .= ' />';
+            $ret .= '</div>';
+            $ret .= '</div>';
+            $ret .= '</form>';
+            }
+        else
+            {
+            $ret .= '<p>';
+            $ret .= '<select name="qualifier" value="">';
+            $ret .= '<option value="">'.self::process_text ( self::$local_search_all_address ).'</option>';
+            $ret .= '<option value="today">'.self::process_text ( self::$local_search_today ).'</option>';
+            $ret .= '<option value="tomorrow">'.self::process_text ( self::$local_search_tomorrow ).'</option>';
+            $ret .= '</select>';
+            $ret .= '<anchor>';
+            $ret .= '<go href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'" method="get">';
+            $ret .= '<postfield name="address" value="$(address)"/>';
+            $ret .= '<postfield name="qualifier" value="$(qualifier)"/>';
+            $ret .= '<postfield name="do_search" value="the hard way" />';
+            $ret .= '<postfield name="WML" value="1" />';
+            $ret .= '<postfield name="BMLTPlugin_mobile" value="1" />';
+            $ret .= '</go>';
+            $ret .= self::process_text ( $local_search_submit_button );
+            $ret .= '</anchor>';
+            $ret .= '</p>';
+            }
+        
+        return $ret;
+    }
+
+    /************************************************************************************//**
+    *   \brief Renders one WML card                                                         *
+    *                                                                                       *
+    *   \returns A string. The WML 1.1 to be displayed.                                     *
+    ****************************************************************************************/
+
+    function BMLTPlugin_render_card (   $ret,                   ///< The current XHTML tally (so we can count it).
+                                        $index,                 ///< The page index of the meeting.
+                                        $count,                 ///< The total number of meetings.
+                                        $meeting                ///< The meeting data.
+                                    )
+                            
+    {
+        $ret .= '<card id="card_'.$index.'" title="'.htmlspecialchars($meeting['meeting_name']).'">';
+        
+        if ( $count > 1 )
+            {
+            $next_card = null;
+            $prev_card = null;
+            $myself = null;
+            $vars = array();
+            
+            unset ( $_REQUEST['access_card'] );
+            
+            foreach ( $_REQUEST as $name => $val )
+                {
+                $text = urlencode ( $name ).'='.urlencode ( $val );
+                array_push ( $vars, $text );
+                }
+            
+            $myself = htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?'.join ( '&amp;', $vars ).'&amp;access_card=';
+        
+            if ( $index < $count )
+                {
+                $next_card = $myself.strval($index + 1);
+                }
+            
+            if ( $index > 1 )
+                {
+                $prev_card = $myself.strval($index - 1);
+                }
+
+            $ret .= '<p><table columns="3"><tr>';
+            $ret .= '<td>';
+            if ( $prev_card )
+                {
+                $ret .= '<small><anchor>'.self::process_text(self::$local_prev_card).'<go href="'.$prev_card.'"/></anchor></small>';
+                }
+            $ret .= '</td><td>&nbsp;</td><td>';
+            if ( $next_card )
+                {
+                $ret .= '<small><anchor>'.self::process_text(self::$local_next_card).'<go href="'.$next_card.'"/></anchor></small>';
+                }
+            
+            $ret .= '</td></tr></table></p>';
+            }
+    
+        $ret .= '<p><big><strong>'.htmlspecialchars($meeting['meeting_name']).'</strong></big></p>';
+        $ret .= '<p>'.self::process_text ( self::$local_weekdays[$meeting['weekday_tinyint']] ).' '.htmlspecialchars ( date ( 'g:i A', strtotime ( $meeting['start_time'] ) ) ).'</p>';
+        if ( $meeting['location_text'] )
+            {
+            $ret .= '<p><b>'.htmlspecialchars ( $meeting['location_text'] ).'</b></p>';
+            }
+        
+        $ret .= '<p>';
+        if ( $meeting['location_street'] )
+            {
+            $ret .= htmlspecialchars ( $meeting['location_street'] );
+            }
+        
+        if ( $meeting['location_neighborhood'] )
+            {
+            $ret .= ' ('.htmlspecialchars ( $meeting['location_neighborhood'] ).')';
+            }
+        $ret .= '</p>';
+        
+        if ( $meeting['location_municipality'] )
+            {
+            $ret .= '<p>'.htmlspecialchars ( $meeting['location_municipality'] );
+        
+            if ( $meeting['location_province'] )
+                {
+                $ret .= ', '.htmlspecialchars ( $meeting['location_province'] );
+                }
+            
+            if ( $meeting['location_postal_code_1'] )
+                {
+                $ret .= ' '.htmlspecialchars ( $meeting['location_postal_code_1'] );
+                }
+            $ret .= '</p>';
+            }
+        
+        $distance = null;
+        
+        if ( $meeting['distance_in_km'] )
+            {
+            $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
+            
+            $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) );
+
+            $ret .= '<p><b>'.self::process_text ( self::$local_mobile_distance ).':</b> '.htmlspecialchars ( $distance ).'</p>';
+            }
+        
+        $ret .= '<p><b>'.self::process_text ( self::$local_formats ).':</b> '.htmlspecialchars ( $meeting['formats'] ).'</p>';
+        
+        $ret .= '</card>';
+        
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Sorting Callback                                                             *
+    *                                                                                       *
+    *   This will sort meetings by weekday, then by distance, so the first meeting of any   *
+    *   given weekday is the closest one, etc.                                              *
+    *                                                                                       *
+    *   \returns -1 if a < b, 1, otherwise.                                                 *
+    ****************************************************************************************/
+    function BMLTPlugin_sort_meetings_callback (    $in_a_meeting,  ///< These are meeting data arrays. The elements we'll be checking will be 'weekday_tinyint' and 'distance_in_XX'.
+                                                    $in_b_meeting
+                                                    )
+    {
+        $ret = 0;
+        
+        if ( $in_a_meeting['weekday_tinyint'] != $in_b_meeting['weekday_tinyint'] )
+            {
+            $ret = ($in_a_meeting['weekday_tinyint'] < $in_b_meeting['weekday_tinyint']) ? -1 : 1;
+            }
+        else
+            {
+            $dist_a = intval ( round ((self::$distance_units == 'M') ? $in_a_meeting['distance_in_miles'] : $in_a_meeting['distance_in_km'], 1) * 10 );
+            $dist_b = intval ( round ((self::$distance_units == 'M') ? $in_b_meeting['distance_in_miles'] : $in_b_meeting['distance_in_km'], 1) * 10 );
+
+            if ( $dist_a != $dist_b )
+                {
+                $ret = ($dist_a < $dist_b) ? -1 : 1;
+                }
+            else
+                {
+                $time_a = preg_replace ( '|:|', '', $in_a_meeting['start_time']);
+                $time_b = preg_replace ( '|:|', '', $in_b_meeting['start_time']);
+                $ret = ($time_a < $time_b) ? -1 : 1;
+                }
+            }
+        
+        return $ret;
+    }
+    
+    /************************************************************************************//**
+    *   \brief Runs the lookup.                                                             *
+    *                                                                                       *
+    *   NOTE: if in_no_header is true, then the WML cards will have no navigation           *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_fast_mobile_lookup()
+    {
+        $address = trim ( $this->my_http_vars['address'] );
+
+        $ret = self::BMLTPlugin_select_doctype($this->my_http_vars);
+        $ret .= $this->BMLTPlugin_fast_mobile_lookup_header_stuff();   // Add styles and/or JS, depending on the UA.
+        
+        // If we are running XHTML, then JavaScript works. Let's see if we can figure out where we are...
+        // If the client can handle JavaScript, then the whole thing can be done with JS, and there's no need for the driver.
+        // Also, if JS does not work, the form will ask us to do it "the hard way" (i.e. on the server).
+        if ( $address && isset ( $this->my_http_vars['do_search'] ) && (($this->my_http_vars['do_search'] == 'the hard way') || (isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 1))) )
+            {
+            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML requires a body element.
+                {
+                $ret .= '<body>';
+                }
+            
+            require_once ( 'bmlt_satellite_controller.class.php' );
+            
+            /****************************************************************************//**
+            *   \brief Instantiates the server instance we'll be using for this test.       *
+            *                                                                               *
+            *   \returns A string. The XHTML to be displayed.                               *
+            ********************************************************************************/
+            function fast_mobile_lookup_instantiate_server()
+                {
+                $ret = null;
+                
+                $uri = BMLTPlugin_get_server_uri ();
+                $ret = new bmlt_satellite_controller ( $uri );
+                if ( $ret instanceof bmlt_satellite_controller )
+                    {
+                    $error = $ret->get_m_error_message();
+                    
+                    if ( $error )
+                        {
+                        ob_end_clean(); // Just in case we are in an OB
+                        die ( '<h1>ERROR (fast_mobile_lookup_instantiate_server: '.htmlspecialchars ( $error ).')</h1>' );
+                        }
+                    }
+                
+                return $ret;
+                }
+            
+            // The first thing that we do is create the connection to the server.
+            $search_server = fast_mobile_lookup_instantiate_server();
+            
+            if ( $search_server instanceof bmlt_satellite_controller )  // Belt & suspenders...
+                {
+                $qualifier = strtolower ( trim ( $this->my_http_vars['qualifier'] ) );
+                
+                // Do the search.
+                
+                if ( $address )
+                    {
+                    $search_server->set_current_transaction_parameter ( 'SearchString', $address );
+                    $error_message = $search_server->get_m_error_message();
+                    if ( $error_message )
+                        {
+                        $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                        }
+                    else
+                        {
+                        $search_server->set_current_transaction_parameter ( 'StringSearchIsAnAddress', true );
+                        $error_message = $search_server->get_m_error_message();
+                        if ( $error_message )
+                            {
+                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                            }
+                        else
+                            {
+                            if ( $qualifier )
+                                {
+                                $weekdays = '';
+                                $h = 0;
+                                $m = 0;
+                                $today = intval(date ( "w" )) + 1;
+                                // We set the current time, minus the grace time. This allows us to be running late, yet still have the meeting listed.
+                                list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
+                                if ( $qualifier == 'today' )
+                                    {
+                                    $weekdays = strval ($today);
+                                    }
+                                else
+                                    {
+                                    $weekdays = strval ( ($today < 7) ? $today + 1 : 1 );
+                                    }
+                                $search_server->set_current_transaction_parameter ( 'weekdays', array($weekdays) );
+                                $error_message = $search_server->get_m_error_message();
+                                if ( $error_message )
+                                    {
+                                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                    }
+                                else
+                                    {
+                                    if ( $h || $m )
+                                        {
+                                        $search_server->set_current_transaction_parameter ( 'StartsAfterH', $h );
+                                        $error_message = $search_server->get_m_error_message();
+                                        if ( $error_message )
+                                            {
+                                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                            }
+                                        else
+                                            {
+                                            $search_server->set_current_transaction_parameter ( 'StartsAfterM', $m );
+                                            $error_message = $search_server->get_m_error_message();
+                                            if ( $error_message )
+                                                {
+                                                $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            if ( $error_message )
+                                {
+                                $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                }
+                            else
+                                {
+                                $search_server->set_current_transaction_parameter ( 'SearchStringRadius', -10 );
+                                $error_message = $search_server->get_m_error_message();
+                                if ( $error_message )
+                                    {
+                                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                    }
+                                else    // The search is set up. Throw the switch, Igor! ...yeth...mawther....
+                                    {
+                                    $search_server->set_current_transaction_parameter ( 'SearchStringRadius', -10 );
+                                    $error_message = $search_server->get_m_error_message();
+                                    if ( $error_message )
+                                        {
+                                        $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                        }
+                                    else    // The search is set up. Throw the switch, Igor! ...yeth...mawther....
+                                        {
+                                        $search_result = $search_server->meeting_search();
+                                        $error_message = $search_server->get_m_error_message();
+                                        if ( $error_message )
+                                            {
+                                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                            }
+                                        elseif ( isset ( $search_result ) && is_array ( $search_result ) && isset ( $search_result['meetings'] ) )
+                                            {
+                                            // Yes! We have valid search data!
+                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                                {
+                                                $ret .= '<div class="multi_meeting_div">';
+                                                }
+                                            
+                                            $index = 1;
+                                            $count = count ( $search_result['meetings'] );
+                                            usort ( $search_result['meetings'], 'BMLTPlugin_sort_meetings_callback' );
+                                            if ( isset ( $_REQUEST['access_card'] ) && intval ( $_REQUEST['access_card'] ) )
+                                                {
+                                                $index = intval ( $_REQUEST['access_card'] );
+                                                }
+                                                
+                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                                {
+                                                $index = 1;
+                                                foreach ( $search_result['meetings'] as $meeting )
+                                                    {
+                                                    $ret .= '<div class="single_meeting_div">';
+                                                    $ret .= '<h1 class="meeting_name_h2">'.htmlspecialchars($meeting['meeting_name']).'</h1>';
+                                                    $ret .= '<p class="time_day_p">'.self::process_text ( self::$local_weekdays[$meeting['weekday_tinyint']] ).' ';
+                                                    $time = explode ( ':', $meeting['start_time'] );
+                                                    $am_pm = ' AM';
+                                                    $distance = null;
+                                                    
+                                                    if ( $meeting['distance_in_km'] )
+                                                        {
+                                                        $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
+                                                        
+                                                        $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) );
+                                                        }
+
+                                                    $time[0] = intval ( $time[0] );
+                                                    $time[1] = intval ( $time[1] );
+                                                    
+                                                    if ( ($time[0] == 23) && ($time[1] > 50) )
+                                                        {
+                                                        $ret .= self::process_text ( self::$local_midnight );
+                                                        }
+                                                    elseif ( ($time[0] == 12) && ($time[1] == 0) )
+                                                        {
+                                                        $ret .= self::process_text ( self::$local_noon );
+                                                        }
+                                                    else
+                                                        {
+                                                        if ( ($time[0] > 12) || (($time[0] == 12) && ($time[1] > 0)) )
+                                                            {
+                                                            $am_pm = ' PM';
+                                                            }
+                                                        
+                                                        if ( $time[0] > 12 )
+                                                            {
+                                                            $time[0] -= 12;
+                                                            }
+                                                    
+                                                        if ( $time[1] < 10 )
+                                                            {
+                                                            $time[1] = "0$time[1]";
+                                                            }
+                                                        
+                                                        $ret .= htmlspecialchars ( $time[0].':'.$time[1].$am_pm );
+                                                        }
+                                                    
+                                                    $ret .= '</p>';
+                                                    if ( $meeting['location_text'] )
+                                                        {
+                                                        $ret .= '<p class="locations_text_p">'.htmlspecialchars ( $meeting['location_text'] ).'</p>';
+                                                        }
+                                                    
+                                                    $ret .= '<p class="street_p">';
+                                                    if ( $meeting['location_street'] )
+                                                        {
+                                                        $ret .= htmlspecialchars ( $meeting['location_street'] );
+                                                        }
+                                                    
+                                                    if ( $meeting['location_neighborhood'] )
+                                                        {
+                                                        $ret .= '<span class="neighborhood_span"> ('.htmlspecialchars ( $meeting['location_neighborhood'] ).')</span>';
+                                                        }
+                                                    $ret .= '</p>';
+                                                    
+                                                    if ( $meeting['location_municipality'] )
+                                                        {
+                                                        $ret .= '<p class="town_p">'.htmlspecialchars ( $meeting['location_municipality'] );
+                                                    
+                                                        if ( $meeting['location_province'] )
+                                                            {
+                                                            $ret .= '<span class="state_span">, '.htmlspecialchars ( $meeting['location_province'] ).'</span>';
+                                                            }
+                                                        
+                                                        if ( $meeting['location_postal_code_1'] )
+                                                            {
+                                                            $ret .= '<span class="zip_span"> '.htmlspecialchars ( $meeting['location_postal_code_1'] ).'</span>';
+                                                            }
+                                                        $ret .= '</p>';
+                                                        if ( !isset ( $this->my_http_vars['WML'] ) )
+                                                            {
+                                                            $ret .= '<p id="maplink_'.intval($meeting['id_bigint']).'" style="display:none">';
+                                                            $url = '';
+    
+                                                            $comma = false;
+                                                            if ( $meeting['meeting_name'] )
+                                                                {
+                                                                $url .= urlencode($meeting['meeting_name']);
+                                                                $comma = true;
+                                                                }
+                                                                
+                                                            if ( $meeting['location_text'] )
+                                                                {
+                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_text']);
+                                                                $comma = true;
+                                                                }
+                                                            
+                                                            if ( $meeting['location_street'] )
+                                                                {
+                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_street']);
+                                                                $comma = true;
+                                                                }
+                                                            
+                                                            if ( $meeting['location_municipality'] )
+                                                                {
+                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_municipality']);
+                                                                $comma = true;
+                                                                }
+                                                                
+                                                            if ( $meeting['location_province'] )
+                                                                {
+                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_province']);
+                                                                }
+                                                            
+                                                            $url = 'http://maps.google.com/maps?q='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']) . '+(%22'.str_replace ( "%28", '-', str_replace ( "%29", '-', $url )).'%22)';
+                                                            $url .= '&ll='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']);
+                                                            $ret .= '<a accesskey="'.$index.'" href="'.htmlspecialchars ( $url ).'" title="'.htmlspecialchars($meeting['meeting_name']).'">'.self::process_text ( self::$local_map_link ).'</a>';
+                                                            $ret .= '<script type="text/javascript">document.getElementById(\'maplink_'.intval($meeting['id_bigint']).'\').style.display=\'block\';var c_BMLTPlugin_settings_id = '.htmlspecialchars ( $this->my_http_vars['bmlt_settings_id'] ).';var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'/\';</script>';
+
+                                                            $ret .= '</p>';
+                                                            }
+                                                        }
+                                                    
+                                                    if ( $distance )
+                                                        {
+                                                        $ret .= '<p class="distance_p"><strong>'.self::process_text ( self::$local_mobile_distance ).':</strong> '.htmlspecialchars ( $distance ).'</p>';
+                                                        }
+                                                        
+                                                    $ret .= '<p class="formats_p"><strong>'.self::process_text ( self::$local_formats ).':</strong> '.htmlspecialchars ( $meeting['formats'] ).'</p>';
+                                                    $ret .= '</div>';
+                                                    if ( $index++ < $count )
+                                                        {
+                                                        if ( !isset ( $this->my_http_vars['WML'] ) )
+                                                            {
+                                                            $ret .= '<hr class="meeting_divider_hr" />';
+                                                            }
+                                                        else
+                                                            {
+                                                            $ret .= '<hr />';
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            else    // WML 1 (yuch) We do this, because we need to limit the size of the pages to fit simple phones.
+                                                {
+                                                $meetings = $search_result['meetings'];
+                                                $indexed_array = array_values($meetings);
+                                                $ret = $this->BMLTPlugin_render_card ( $ret, $index, $count, $indexed_array[$index - 1], false );
+                                                }
+                                            
+                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                                {
+                                                $ret .= '</div>';
+                                                }
+                                            }
+                                        else
+                                            {
+                                            $ret .= '<h1 class="failed_search_h1';
+                                            if ( isset ( $this->my_http_vars['WML'] ) && $this->my_http_vars['WML'] )   // We use a normally-positioned element in WML.
+                                                {
+                                                $ret .= '_wml';
+                                                }
+                                            $ret .= '">'.self::process_text(self::$local_mobile_fail_no_meetings).'</h1>';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                else
+                    {
+                    $ret .= '<h1 class="failed_search_h1">'.self::process_text(self::$local_enter_address_alert).'</h1>';
+                    }
+                }
+            else
+                {
+                $ret .= '<h1>ERROR! No server connection!</h1>';
+                }
+            }
+        elseif ( isset ( $this->my_http_vars['do_search'] ) && !((($this->my_http_vars['do_search'] == 'the hard way') || (isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 1)))) )
+            {
+            $ret .= '<body id="search_results_body"';
+            if ( !isset ( $this->my_http_vars['WML'] ) )
+                {
+                $ret .= ' onload="WhereAmI (\''.htmlspecialchars ( strtolower ( trim ( $this->my_http_vars['qualifier'] ) ) ).'\',\''.htmlspecialchars ( trim ( $this->my_http_vars['address'] ) ).'\')"';
+                }
+            $ret .= '>';
+
+            $ret .= $this->BMLTPlugin_fast_mobile_lookup_javascript_stuff();
+
+            $ret .= '<div id="location_finder" class="results_map_div">';
+                $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( self::$path_mobile_throbber_loc ).'" alt="AJAX Throbber" /></div>';
+            $ret .= '</div>';
+            }
+        else
+            {
+            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+                {
+                $ret .= '<body id="search_form_body"';
+                if ( !isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $ret .= ' onload="if( (typeof ( navigator ) == \'object\' &amp;&amp; typeof ( navigator.geolocation ) == \'object\') || (window.blackberry &amp;&amp; blackberry.location.GPSSupported) || (typeof ( google ) == \'object\' &amp;&amp; typeof ( google.gears ) == \'object\') ){document.getElementById ( \'hidden_until_js\' ).style.display = \'block\';document.getElementById ( \'hidden_until_js2\' ).style.display = \'block\';};document.getElementById(\'address_input\').value=\''.self::process_text ( self::$local_enter_an_address ).'\'"';
+                    }
+                $ret .= '>';
+                $ret .= '<div class="search_div"';
+                if ( !isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $ret .= ' cellpadding="0" cellspacing="0" border="0"';
+                    }
+                $ret .= '>';
+                $ret .= '<div class="GPS_lookup_row_div"><div>';
+                if ( !isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $ret .= $this->BMLTPlugin_draw_map_search_form ();
+                    }
+                $ret .= '</div></div>';
+                $ret .= '<div><div>';
+                $ret .= $this->BMLTPlugin_draw_address_search_form();
+                $ret .= '</div></div></div>';
+                }
+            else
+                {
+                $ret .= '<card title="'.self::process_text(_FORM_TITLE_).'">';
+                $ret .= $this->BMLTPlugin_draw_address_search_form();
+                $ret .= '</card>';
+                }
+            }
+        
+        if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
+            {
+            $ret .= '</body>';  // Wrap up the page.
+            $ret .= '</html>';
+            if ( isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 2) )
+                {
+                $ret = "<"."?xml version='1.0' encoding='UTF-8' ?".">".$ret;
+                header ( 'Content-type: application/xhtml+xml' );
+                }
+            }
+        else
+            {
+            $ret .= '</wml>';
+            header ( 'Content-type: text/vnd.wap.wml' );
+            }
+        
+        return $ret;
+    }
 };
 
 /****************************************************************************************//**

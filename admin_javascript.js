@@ -146,6 +146,10 @@ function BMLTPlugin_SaveOptions()
         var push_down = (document.getElementById ( 'BMLTPlugin_option_sheet_push_down_'+option_index ).checked ? '1' : '0');
          
         url += '&BMLTPlugin_option_sheet_push_down_'+option_index+'='+push_down;
+       
+        var support_mobile = (document.getElementById ( 'BMLTPlugin_option_sheet_support_mobile_'+option_index ).checked ? '1' : '0');
+         
+        url += '&BMLTPlugin_option_sheet_support_mobile_'+option_index+'='+support_mobile;
         
         var additional_css = document.getElementById ( 'BMLTPlugin_option_sheet_additional_css_'+option_index ).value.toString();
          
