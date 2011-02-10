@@ -1,0 +1,11 @@
+TO-DO:
+
+BUGS:
+    Single meeting does not display in old version
+    CSS issues with location of throbber and More Details
+    NoScript is insufficient
+    
+INCOMPLETE:
+    Need to add simple search
+    Need to add mobile support
+    Need to add some basic CSS for popup menu search
