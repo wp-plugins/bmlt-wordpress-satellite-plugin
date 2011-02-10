@@ -3,9 +3,7 @@ TO-DO:
 BUGS:
     CSS issues with location of throbber and More Details
     Display of headers in old more details is being affected by the template.
-    NoScript is insufficient
     
 INCOMPLETE:
-    Need to add simple search
     Need to add mobile support
     Need to add some basic CSS for popup menu search

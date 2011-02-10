@@ -91,6 +91,7 @@ class BMLTPlugin
     static  $local_options_access_failure = 'You are not allowed to perform this operation.';               ///< This is displayed if a user attempts a no-no.
     static  $local_options_unsaved_message = 'You have unsaved changes. Are you sure you want to leave without saving them?';   ///< This is displayed if a user attempts to leave a page without saving the options.
     static  $local_options_settings_id_prompt = 'The ID for this Setting is ';                              ///< This is so that users can see the ID for the setting.
+	static  $local_no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a> to do the search.</noscript>';
     
     /// These are all for the admin page option sheets.
     static  $local_options_name_label = 'Setting Name:';                    ///< The Label for the setting name item.
@@ -809,7 +810,7 @@ class BMLTPlugin
 
         foreach ( $this->my_http_vars as $key => $value )
             {
-            if ( $key != 'switcher' )	// We don't propagate switcher.
+			if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )	// We don't propagate switcher.
                 {
                 if ( is_array ( $value ) )
                     {
@@ -877,7 +878,7 @@ class BMLTPlugin
         elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
             {
 			$root_server = $options['root_server']."client_interface/simple/index.php";
-			$result = self::call_curl ( "$root_server?direct_simple".$this->my_params );
+			$result = bmlt_satellite_controller::call_curl ( "$root_server?direct_simple".$this->my_params );
 			$result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
 			if ( $this->my_http_vars['single_uri'] )
 				{
@@ -1222,15 +1223,19 @@ class BMLTPlugin
         
         $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
         $this->load_params();
+        
+        // Simple searches can be mixed in with other content.
+        $in_the_content = $this->display_simple_search ( $in_the_content, $count );
+
         $count = 0;
 
-        $in_the_content = $this->display_simple_search ( $in_the_content, $count );
+        $in_the_content = $this->display_old_popup_search ( $in_the_content, $count );
         
         if ( !$count )
             {
             $in_the_content = $this->display_old_search ( $in_the_content, $count );
             }
-        
+
         return $in_the_content;
         }
         
@@ -1292,16 +1297,16 @@ class BMLTPlugin
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
  
+				$the_new_content = str_replace ( '###ROOT_SERVER###', $root_server_root, self::$local_no_js_warning ).$the_new_content;
                 $the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
-    
                 // We only allow one instance per page.
                 $count = 0;
-                
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/", $the_new_content, $in_content, 1, $count );
+
+                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1, $count );
                 
                 if ( !$count )
                     {
-                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/", $the_new_content, $in_content, 1 );
+                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
                     }
                 }
             }
@@ -1311,13 +1316,50 @@ class BMLTPlugin
         
     /************************************************************************************//**
     *   \brief This is a function that filters the content, and replaces a portion with the *
-    *   "simple" search, if provided by the 'bmlt_simple_searches' custom field.            *
+    *   "simple" search                                                                     *
     *                                                                                       *
     *   \returns a string, containing the content.                                          *
     ****************************************************************************************/
-    function display_simple_search ($in_content,      ///< This is the content to be filtered.
-                                    &$out_count       ///< This is set to 1, if a substitution was made.
+    function display_simple_search ($in_content      ///< This is the content to be filtered.
                                     )
+        {
+        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+        
+        $root_server_root = $options['root_server'];
+
+        if ( $root_server_root )
+            {
+            $matches = array();
+            while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $the_content, $matches ) )
+                {
+                // This stupid thing is because WP is nice enough to mess up the ampersands.
+                $uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+                $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+                $in_content = preg_replace('|(\<p[^>]*?>)?\<!\-\-\s?BMLT_SIMPLE.*?\-\-\>(\<\/p[^>]*?>)?|i', $the_new_content, $in_content, 1 );
+                }
+            
+            $matches = array();
+            while ( preg_match ( '|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]>|i', $the_content, $matches ) )
+                {
+                // This stupid thing is because WP is nice enough to mess up the ampersands.
+                $uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+                $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+                $in_content = preg_replace('|(\<p[^>]*?>)?\[\[\s?BMLT_SIMPLE.*?\]\](\<\/p[^>]*?>)?|i', $the_new_content, $in_content, 1 );
+                }
+            }
+        
+        return $in_content;
+        }
+        
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "popup" search, if provided by the 'bmlt_simple_searches' custom field.             *
+    *                                                                                       *
+    *   \returns a string, containing the content.                                          *
+    ****************************************************************************************/
+    function display_old_popup_search ( $in_content,      ///< This is the content to be filtered.
+                                        &$out_count       ///< This is set to 1, if a substitution was made.
+                                        )
         {
         if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
             {
@@ -1372,11 +1414,11 @@ class BMLTPlugin
             // We only allow one instance per page.
             $count = 0;
             
-            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/", $display, $in_content, 1, $count );
+            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $display, $in_content, 1, $count );
             
             if ( !$count )
                 {
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/", $display, $in_content, 1 );
+                $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $display, $in_content, 1 );
                 }
             }
         
