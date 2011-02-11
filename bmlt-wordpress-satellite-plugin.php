@@ -236,54 +236,49 @@ class BMLTPlugin
     *                                                                                           *
     *   \returns A string. The supported type ('xhtml', 'xhtml_mp' or 'wml')                    *
     ********************************************************************************************/
-    static function mobile_sniff_ua($in_http_vars   ///< The query variables.
+    static function mobile_sniff_ua (   $in_http_vars   ///< The query variables.
                                     )
     {
-        function get_language_support()
-        {
-            if ( isset ( $in_http_vars['WML'] ) && ($in_http_vars['WML'] == 1) )
+        if ( isset ( $in_http_vars['WML'] ) && (intval ( $in_http_vars['WML'] ) == 1) )
+            {
+            $language = 'wml';
+            }
+        elseif ( isset ( $in_http_vars['WML'] ) && (intval ( $in_http_vars['WML'] ) == 2) )
+            {
+            $language = 'xhtml_mp';
+            }
+        else
+            {
+            if (!isset($_SERVER['HTTP_ACCEPT']))
+                {
+                return false;
+                }
+        
+            $http_accept = explode (',', $_SERVER['HTTP_ACCEPT']);
+        
+            $accept = array();
+        
+            foreach ($http_accept as $type)
+                {
+                $type = strtolower(trim(preg_replace('/\;.*$/', '', preg_replace ('/\s+/', '', $type))));
+        
+                $accept[$type] = true;
+                }
+        
+            $language = 'xhtml';
+        
+            if (isset($accept['text/vnd.wap.wml']))
                 {
                 $language = 'wml';
-                }
-            elseif ( isset ( $in_http_vars['WML'] ) && ($in_http_vars['WML'] == 2) )
-                {
-                $language = 'xhtml_mp';
-                }
-            else
-                {
-                if (!isset($_SERVER['HTTP_ACCEPT']))
+        
+                if (isset($accept['application/xhtml+xml']) || isset($accept['application/vnd.wap.xhtml+xml']))
                     {
-                    return false;
-                    }
-            
-                $http_accept = explode (',', $_SERVER['HTTP_ACCEPT']);
-            
-                $accept = array();
-            
-                foreach ($http_accept as $type)
-                    {
-                    $type = strtolower(trim(preg_replace('/\;.*$/', '', preg_replace ('/\s+/', '', $type))));
-            
-                    $accept[$type] = true;
-                    }
-            
-                $language = 'xhtml';
-            
-                if (isset($accept['text/vnd.wap.wml']))
-                    {
-                    $language = 'wml';
-            
-                    if (isset($accept['application/xhtml+xml']) || isset($accept['application/vnd.wap.xhtml+xml']))
-                        {
-                        $language = 'xhtml_mp';
-                        }
+                    $language = 'xhtml_mp';
                     }
                 }
-            
-            return $language;
-        }
-    
-        return get_language_support();
+            }
+        
+        return $language;
     }
     
     /************************************************************************************//**
@@ -331,6 +326,7 @@ class BMLTPlugin
                     add_action ( 'init', array ( self::get_plugin_object(), 'init' ) );
                     add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_init' ) );
                     add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
+                    add_action ( 'wp', array ( self::get_plugin_object(), 'wp_handler' ) );
                     }
                 else
                     {
@@ -1401,6 +1397,30 @@ class BMLTPlugin
     *                                                                                       *
     *   \returns a string, containing the "massaged" content.                               *
     ****************************************************************************************/
+    function wp_handler ( )
+        {
+        $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+        
+        if ( $this->my_option_id )
+            {
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            if ( $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+                {
+                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
+                if ( isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
+                    header ( "location: $mobile_url" );
+                    }
+                }
+            }
+        }
+    
+    /************************************************************************************//**
+    *   \brief Massages the page content.                                                   *
+    *                                                                                       *
+    *   \returns a string, containing the "massaged" content.                               *
+    ****************************************************************************************/
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
@@ -1414,6 +1434,15 @@ class BMLTPlugin
         else    // We see if the bmlt_settings custom field was set. Only one setting is allowed per page/post.
             {
             $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+
+            if ( $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+                {
+                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
+                if ( isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
+                    }
+                }
             }
         
         if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
@@ -1422,9 +1451,10 @@ class BMLTPlugin
             $this->my_option_id = $options['id'];
             }
         
+        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
         $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
         $this->load_params();
-        
+
         // Simple searches can be mixed in with other content.
         $in_the_content = $this->display_simple_search ( $in_the_content, $count );
 
