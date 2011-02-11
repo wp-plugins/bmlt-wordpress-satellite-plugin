@@ -19,7 +19,7 @@ Version: 2.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( '_DEBUG_MODE__', 1 );
+define ( '_DEBUG_MODE_', 1 );
 
 // Include the satellite driver class.
 require_once ( 'bmlt_satellite_controller.class.php' );
@@ -999,24 +999,30 @@ class BMLTPlugin
         {
         if ( isset ( $this->my_http_vars['direct_simple'] ) && intval ( $this->my_http_vars['direct_simple'] ) )
             {
-            $settings_id = intval ( $this->my_http_vars['direct_simple'] );
+            $this->my_option_id = intval ( $this->my_http_vars['direct_simple'] );
             }
         elseif ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
             {
-            $settings_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
             }
         
-        if ( !$settings_id )
+        if ( !$this->my_option_id )
             {
             $options = $this->getBMLTOptions ( 1 );
-            $settings_id = $options['id'];
+            $this->my_option_id = $options['id'];
             }
         
-        $options = $this->getBMLTOptions_by_id ( $settings_id );
+        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
 
         $this->load_params ( );
 
-        if ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
+        if ( isset ( $this->my_http_vars['BMLTPlugin_mobile_ajax_router'] ) )
+            {
+            $uri = $options['root_server'].'/'.$this->my_http_vars['request'];
+            ob_end_clean(); // Just in case we are in an OB
+            die ( bmlt_satellite_controller::call_curl ( $uri ) );
+            }
+        elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
             {
             $ret = $this->BMLTPlugin_fast_mobile_lookup ();
             $url = '';
@@ -1045,7 +1051,7 @@ class BMLTPlugin
             }
         elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile_ajax_router'] ) )
             {
-            $uri = BMLTPlugin_get_server_uri ().$this->my_http_vars['request'];
+            $uri = $options['root_server'].'/'.$this->my_http_vars['request'];
             ob_end_clean(); // Just in case we are in an OB
             die ( bmlt_satellite_controller::call_curl ( $uri ) );
             }
@@ -1313,7 +1319,7 @@ class BMLTPlugin
             
             $head_content .= htmlspecialchars ( $url );
             
-            if ( !defined ('_DEBUG_MODE__' ) )
+            if ( !defined ('_DEBUG_MODE_' ) )
                 {
                 $head_content .= 'style_stripper.php?filename=';
                 }
@@ -1324,7 +1330,7 @@ class BMLTPlugin
             
             $head_content .= htmlspecialchars ( $url );
             
-            if ( !defined ('_DEBUG_MODE__' ) )
+            if ( !defined ('_DEBUG_MODE_' ) )
                 {
                 $head_content .= 'js_stripper.php?filename=';
                 }
@@ -1364,7 +1370,7 @@ class BMLTPlugin
             
             $head_content .= htmlspecialchars ( $url );
             
-            if ( !defined ('_DEBUG_MODE__' ) )
+            if ( !defined ('_DEBUG_MODE_' ) )
                 {
                 $head_content .= 'style_stripper.php?filename=';
                 }
@@ -1375,7 +1381,7 @@ class BMLTPlugin
             
             $head_content .= htmlspecialchars ( $url );
             
-            if ( !defined ('_DEBUG_MODE__' ) )
+            if ( !defined ('_DEBUG_MODE_' ) )
                 {
                 $head_content .= 'js_stripper.php?filename=';
                 }
@@ -1587,18 +1593,7 @@ class BMLTPlugin
                     $display .= '<option disabled="disabled" value="">'.self::process_text ( self::$local_clear_search ).'</option>';
                     $display .= '</select></div></form>';
                     
-                     if ( plugins_url() )
-                        {
-                        $img_url = plugins_url()."/bmlt-wordpress-satellite-plugin/images";
-                        }
-                    elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                        {
-                        $img_url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/images";
-                        }
-                    $img_url = htmlspecialchars ( $img_url );
-                    
                     $display .= '<script type="text/javascript">';
-                    $display .= "var c_g_BMLTPlugin_images = '$img_url';";
                     $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
                     $display .= '</script>';
@@ -1993,6 +1988,19 @@ class BMLTPlugin
         $ret .= 'var c_g_distance_prompt = \''.self::process_text ( self::$local_mobile_distance ).'\';';
         $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
         $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) ).'\';';
+        $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?\';';
+                    
+         if ( plugins_url() )
+            {
+            $img_url = plugins_url()."/bmlt-wordpress-satellite-plugin/google_map_images";
+            }
+        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+            {
+            $img_url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/google_map_images";
+            }
+        $img_url = htmlspecialchars ( $img_url );
+        
+        $ret .= "var c_g_BMLTPlugin_images = '$img_url';";
         $ret .= '</script>';
         
          $url = '';
@@ -2005,7 +2013,7 @@ class BMLTPlugin
             $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
             }
        
-        if ( defined ( 'DEBUG_MODE' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
+        if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
             {
             $ret .= '<script src="'.$url.'fast_mobile_lookup.js" type="text/javascript"></script>';
             }
@@ -2049,7 +2057,7 @@ class BMLTPlugin
             $ret .= '<meta http-equiv="Content-Style-Type" content="text/css" />';
             $ret .= '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />'; // Make sure iPhone screens stay humble.
             
-            if ( defined ( 'DEBUG_MODE' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
+            if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
                 {
                 $ret .= '<link rel="stylesheet" media="all" href="'.htmlspecialchars($stylesheet_uri).'" type="text/css" />';
                 }
@@ -2092,9 +2100,9 @@ class BMLTPlugin
         $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
             $ret .= '<h1 class="banner_h1">'.self::process_text ( self::$local_GPS_banner ).'</h1>';
             $ret .= '<h2 class="banner_h2">'.self::process_text ( self::$local_GPS_banner_subtext ).'</h2>';
-            $ret .= '<div class="link_one_line"><a accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search">'.self::process_text ( self::$local_search_all ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search&amp;qualifier=today">'.self::process_text ( self::$local_search_today ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&do_search&amp;qualifier=tomorrow">'.self::process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_tomorrow ).'</a></div>';
             $ret .= '<hr class="meeting_divider_hr" />';
         $ret .= '</div>';
         
@@ -2122,6 +2130,7 @@ class BMLTPlugin
             $ret .= '<div class="search_address">';
             // The default, is we return a list. This is changed by JavaScript.
             $ret .= '<input type="hidden" name="BMLTPlugin_mobile" />';
+            $ret .= '<input type="hidden" name="bmlt_settings_id" value="'.intval($this->my_http_vars['bmlt_settings_id']).'" />';
             $ret .= '<input type="hidden" name="do_search" id="do_search" value="the hard way" />';
             $ret .= '<h1 class="banner_h2">'.self::process_text ( self::$local_search_address_single ).'</h1>';
             if ( !isset ( $this->my_http_vars['WML'] ) )  // This is here to prevent WAI warnings.
@@ -2202,7 +2211,7 @@ class BMLTPlugin
                 {
                 $ret .= '<label for="submit_button" style="display:none">'.self::process_text ( _SEARCH_SUBMIT_ ).'</label>';
                 }
-            $ret .= '<input id="submit_button" type="submit" value="'.self::process_text ( $local_search_submit_button ).'"';
+            $ret .= '<input id="submit_button" type="submit" value="'.self::process_text ( self::$local_search_submit_button ).'"';
             if ( !isset ( $this->my_http_vars['WML'] ) )
                 {
                 $ret .= ' onclick="if((document.getElementById(\'address_input\').value==\'';
@@ -2229,6 +2238,7 @@ class BMLTPlugin
             $ret .= '<postfield name="do_search" value="the hard way" />';
             $ret .= '<postfield name="WML" value="1" />';
             $ret .= '<postfield name="BMLTPlugin_mobile" value="1" />';
+            $ret .= '<postfield name="bmlt_settings_id" value="'.intval($this->my_http_vars['bmlt_settings_id']).'" />';
             $ret .= '</go>';
             $ret .= self::process_text ( $local_search_submit_button );
             $ret .= '</anchor>';
@@ -2389,350 +2399,312 @@ class BMLTPlugin
     /************************************************************************************//**
     *   \brief Runs the lookup.                                                             *
     *                                                                                       *
-    *   NOTE: if in_no_header is true, then the WML cards will have no navigation           *
-    *                                                                                       *
     *   \returns A string. The XHTML to be displayed.                                       *
     ****************************************************************************************/
     function BMLTPlugin_fast_mobile_lookup()
     {
-        $address = trim ( $this->my_http_vars['address'] );
-
         $ret = self::BMLTPlugin_select_doctype($this->my_http_vars);
         $ret .= $this->BMLTPlugin_fast_mobile_lookup_header_stuff();   // Add styles and/or JS, depending on the UA.
         
         // If we are running XHTML, then JavaScript works. Let's see if we can figure out where we are...
         // If the client can handle JavaScript, then the whole thing can be done with JS, and there's no need for the driver.
         // Also, if JS does not work, the form will ask us to do it "the hard way" (i.e. on the server).
-        if ( $address && isset ( $this->my_http_vars['do_search'] ) && (($this->my_http_vars['do_search'] == 'the hard way') || (isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 1))) )
+        if ( $this->my_http_vars['address'] && isset ( $this->my_http_vars['do_search'] ) && (($this->my_http_vars['do_search'] == 'the hard way') || (isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 1))) )
             {
             if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML requires a body element.
                 {
                 $ret .= '<body>';
                 }
             
-            require_once ( 'bmlt_satellite_controller.class.php' );
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            $this->my_driver->set_m_root_uri ( $options['root_server'] );
+            $error = $this->my_driver->get_m_error_message();
             
-            /****************************************************************************//**
-            *   \brief Instantiates the server instance we'll be using for this test.       *
-            *                                                                               *
-            *   \returns A string. The XHTML to be displayed.                               *
-            ********************************************************************************/
-            function fast_mobile_lookup_instantiate_server()
+            if ( $error )
                 {
-                $ret = null;
-                
-                $uri = BMLTPlugin_get_server_uri ();
-                $ret = new bmlt_satellite_controller ( $uri );
-                if ( $ret instanceof bmlt_satellite_controller )
-                    {
-                    $error = $ret->get_m_error_message();
-                    
-                    if ( $error )
-                        {
-                        ob_end_clean(); // Just in case we are in an OB
-                        die ( '<h1>ERROR (fast_mobile_lookup_instantiate_server: '.htmlspecialchars ( $error ).')</h1>' );
-                        }
-                    }
-                
-                return $ret;
+                ob_end_clean(); // Just in case we are in an OB
+                die ( '<h1>ERROR (BMLTPlugin_fast_mobile_lookup: '.htmlspecialchars ( $error ).')</h1>' );
                 }
             
-            // The first thing that we do is create the connection to the server.
-            $search_server = fast_mobile_lookup_instantiate_server();
+            $qualifier = strtolower ( trim ( $this->my_http_vars['qualifier'] ) );
             
-            if ( $search_server instanceof bmlt_satellite_controller )  // Belt & suspenders...
+            // Do the search.
+            
+            if ( $this->my_http_vars['address'] )
                 {
-                $qualifier = strtolower ( trim ( $this->my_http_vars['qualifier'] ) );
-                
-                // Do the search.
-                
-                if ( $address )
+                $this->my_driver->set_current_transaction_parameter ( 'SearchString', $this->my_http_vars['address'] );
+                $error_message = $this->my_driver->get_m_error_message();
+                if ( $error_message )
                     {
-                    $search_server->set_current_transaction_parameter ( 'SearchString', $address );
-                    $error_message = $search_server->get_m_error_message();
+                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                    }
+                else
+                    {
+                    $this->my_driver->set_current_transaction_parameter ( 'StringSearchIsAnAddress', true );
+                    $error_message = $this->my_driver->get_m_error_message();
                     if ( $error_message )
                         {
                         $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
                         }
                     else
                         {
-                        $search_server->set_current_transaction_parameter ( 'StringSearchIsAnAddress', true );
-                        $error_message = $search_server->get_m_error_message();
-                        if ( $error_message )
+                        if ( $qualifier )
                             {
-                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                            }
-                        else
-                            {
-                            if ( $qualifier )
+                            $weekdays = '';
+                            $h = 0;
+                            $m = 0;
+                            $today = intval(date ( "w" )) + 1;
+                            // We set the current time, minus the grace time. This allows us to be running late, yet still have the meeting listed.
+                            list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
+                            if ( $qualifier == 'today' )
                                 {
-                                $weekdays = '';
-                                $h = 0;
-                                $m = 0;
-                                $today = intval(date ( "w" )) + 1;
-                                // We set the current time, minus the grace time. This allows us to be running late, yet still have the meeting listed.
-                                list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
-                                if ( $qualifier == 'today' )
-                                    {
-                                    $weekdays = strval ($today);
-                                    }
-                                else
-                                    {
-                                    $weekdays = strval ( ($today < 7) ? $today + 1 : 1 );
-                                    }
-                                $search_server->set_current_transaction_parameter ( 'weekdays', array($weekdays) );
-                                $error_message = $search_server->get_m_error_message();
-                                if ( $error_message )
-                                    {
-                                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                                    }
-                                else
-                                    {
-                                    if ( $h || $m )
-                                        {
-                                        $search_server->set_current_transaction_parameter ( 'StartsAfterH', $h );
-                                        $error_message = $search_server->get_m_error_message();
-                                        if ( $error_message )
-                                            {
-                                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                                            }
-                                        else
-                                            {
-                                            $search_server->set_current_transaction_parameter ( 'StartsAfterM', $m );
-                                            $error_message = $search_server->get_m_error_message();
-                                            if ( $error_message )
-                                                {
-                                                $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                                                }
-                                            }
-                                        }
-                                    }
+                                $weekdays = strval ($today);
                                 }
+                            else
+                                {
+                                $weekdays = strval ( ($today < 7) ? $today + 1 : 1 );
+                                }
+                            $this->my_driver->set_current_transaction_parameter ( 'weekdays', array($weekdays) );
+                            $error_message = $this->my_driver->get_m_error_message();
                             if ( $error_message )
                                 {
                                 $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
                                 }
                             else
                                 {
-                                $search_server->set_current_transaction_parameter ( 'SearchStringRadius', -10 );
-                                $error_message = $search_server->get_m_error_message();
-                                if ( $error_message )
+                                if ( $h || $m )
                                     {
-                                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                                    }
-                                else    // The search is set up. Throw the switch, Igor! ...yeth...mawther....
-                                    {
-                                    $search_server->set_current_transaction_parameter ( 'SearchStringRadius', -10 );
-                                    $error_message = $search_server->get_m_error_message();
+                                    $this->my_driver->set_current_transaction_parameter ( 'StartsAfterH', $h );
+                                    $error_message = $this->my_driver->get_m_error_message();
                                     if ( $error_message )
                                         {
                                         $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
                                         }
-                                    else    // The search is set up. Throw the switch, Igor! ...yeth...mawther....
+                                    else
                                         {
-                                        $search_result = $search_server->meeting_search();
-                                        $error_message = $search_server->get_m_error_message();
+                                        $this->my_driver->set_current_transaction_parameter ( 'StartsAfterM', $m );
+                                        $error_message = $this->my_driver->get_m_error_message();
                                         if ( $error_message )
                                             {
                                             $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
-                                            }
-                                        elseif ( isset ( $search_result ) && is_array ( $search_result ) && isset ( $search_result['meetings'] ) )
-                                            {
-                                            // Yes! We have valid search data!
-                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
-                                                {
-                                                $ret .= '<div class="multi_meeting_div">';
-                                                }
-                                            
-                                            $index = 1;
-                                            $count = count ( $search_result['meetings'] );
-                                            usort ( $search_result['meetings'], 'BMLTPlugin_sort_meetings_callback' );
-                                            if ( isset ( $_REQUEST['access_card'] ) && intval ( $_REQUEST['access_card'] ) )
-                                                {
-                                                $index = intval ( $_REQUEST['access_card'] );
-                                                }
-                                                
-                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
-                                                {
-                                                $index = 1;
-                                                foreach ( $search_result['meetings'] as $meeting )
-                                                    {
-                                                    $ret .= '<div class="single_meeting_div">';
-                                                    $ret .= '<h1 class="meeting_name_h2">'.htmlspecialchars($meeting['meeting_name']).'</h1>';
-                                                    $ret .= '<p class="time_day_p">'.self::process_text ( self::$local_weekdays[$meeting['weekday_tinyint']] ).' ';
-                                                    $time = explode ( ':', $meeting['start_time'] );
-                                                    $am_pm = ' AM';
-                                                    $distance = null;
-                                                    
-                                                    if ( $meeting['distance_in_km'] )
-                                                        {
-                                                        $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
-                                                        
-                                                        $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) );
-                                                        }
-
-                                                    $time[0] = intval ( $time[0] );
-                                                    $time[1] = intval ( $time[1] );
-                                                    
-                                                    if ( ($time[0] == 23) && ($time[1] > 50) )
-                                                        {
-                                                        $ret .= self::process_text ( self::$local_midnight );
-                                                        }
-                                                    elseif ( ($time[0] == 12) && ($time[1] == 0) )
-                                                        {
-                                                        $ret .= self::process_text ( self::$local_noon );
-                                                        }
-                                                    else
-                                                        {
-                                                        if ( ($time[0] > 12) || (($time[0] == 12) && ($time[1] > 0)) )
-                                                            {
-                                                            $am_pm = ' PM';
-                                                            }
-                                                        
-                                                        if ( $time[0] > 12 )
-                                                            {
-                                                            $time[0] -= 12;
-                                                            }
-                                                    
-                                                        if ( $time[1] < 10 )
-                                                            {
-                                                            $time[1] = "0$time[1]";
-                                                            }
-                                                        
-                                                        $ret .= htmlspecialchars ( $time[0].':'.$time[1].$am_pm );
-                                                        }
-                                                    
-                                                    $ret .= '</p>';
-                                                    if ( $meeting['location_text'] )
-                                                        {
-                                                        $ret .= '<p class="locations_text_p">'.htmlspecialchars ( $meeting['location_text'] ).'</p>';
-                                                        }
-                                                    
-                                                    $ret .= '<p class="street_p">';
-                                                    if ( $meeting['location_street'] )
-                                                        {
-                                                        $ret .= htmlspecialchars ( $meeting['location_street'] );
-                                                        }
-                                                    
-                                                    if ( $meeting['location_neighborhood'] )
-                                                        {
-                                                        $ret .= '<span class="neighborhood_span"> ('.htmlspecialchars ( $meeting['location_neighborhood'] ).')</span>';
-                                                        }
-                                                    $ret .= '</p>';
-                                                    
-                                                    if ( $meeting['location_municipality'] )
-                                                        {
-                                                        $ret .= '<p class="town_p">'.htmlspecialchars ( $meeting['location_municipality'] );
-                                                    
-                                                        if ( $meeting['location_province'] )
-                                                            {
-                                                            $ret .= '<span class="state_span">, '.htmlspecialchars ( $meeting['location_province'] ).'</span>';
-                                                            }
-                                                        
-                                                        if ( $meeting['location_postal_code_1'] )
-                                                            {
-                                                            $ret .= '<span class="zip_span"> '.htmlspecialchars ( $meeting['location_postal_code_1'] ).'</span>';
-                                                            }
-                                                        $ret .= '</p>';
-                                                        if ( !isset ( $this->my_http_vars['WML'] ) )
-                                                            {
-                                                            $ret .= '<p id="maplink_'.intval($meeting['id_bigint']).'" style="display:none">';
-                                                            $url = '';
-    
-                                                            $comma = false;
-                                                            if ( $meeting['meeting_name'] )
-                                                                {
-                                                                $url .= urlencode($meeting['meeting_name']);
-                                                                $comma = true;
-                                                                }
-                                                                
-                                                            if ( $meeting['location_text'] )
-                                                                {
-                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_text']);
-                                                                $comma = true;
-                                                                }
-                                                            
-                                                            if ( $meeting['location_street'] )
-                                                                {
-                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_street']);
-                                                                $comma = true;
-                                                                }
-                                                            
-                                                            if ( $meeting['location_municipality'] )
-                                                                {
-                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_municipality']);
-                                                                $comma = true;
-                                                                }
-                                                                
-                                                            if ( $meeting['location_province'] )
-                                                                {
-                                                                $url .= ($comma ? ',+' : '').urlencode($meeting['location_province']);
-                                                                }
-                                                            
-                                                            $url = 'http://maps.google.com/maps?q='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']) . '+(%22'.str_replace ( "%28", '-', str_replace ( "%29", '-', $url )).'%22)';
-                                                            $url .= '&ll='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']);
-                                                            $ret .= '<a accesskey="'.$index.'" href="'.htmlspecialchars ( $url ).'" title="'.htmlspecialchars($meeting['meeting_name']).'">'.self::process_text ( self::$local_map_link ).'</a>';
-                                                            $ret .= '<script type="text/javascript">document.getElementById(\'maplink_'.intval($meeting['id_bigint']).'\').style.display=\'block\';var c_BMLTPlugin_settings_id = '.htmlspecialchars ( $this->my_http_vars['bmlt_settings_id'] ).';var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'/\';</script>';
-
-                                                            $ret .= '</p>';
-                                                            }
-                                                        }
-                                                    
-                                                    if ( $distance )
-                                                        {
-                                                        $ret .= '<p class="distance_p"><strong>'.self::process_text ( self::$local_mobile_distance ).':</strong> '.htmlspecialchars ( $distance ).'</p>';
-                                                        }
-                                                        
-                                                    $ret .= '<p class="formats_p"><strong>'.self::process_text ( self::$local_formats ).':</strong> '.htmlspecialchars ( $meeting['formats'] ).'</p>';
-                                                    $ret .= '</div>';
-                                                    if ( $index++ < $count )
-                                                        {
-                                                        if ( !isset ( $this->my_http_vars['WML'] ) )
-                                                            {
-                                                            $ret .= '<hr class="meeting_divider_hr" />';
-                                                            }
-                                                        else
-                                                            {
-                                                            $ret .= '<hr />';
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            else    // WML 1 (yuch) We do this, because we need to limit the size of the pages to fit simple phones.
-                                                {
-                                                $meetings = $search_result['meetings'];
-                                                $indexed_array = array_values($meetings);
-                                                $ret = $this->BMLTPlugin_render_card ( $ret, $index, $count, $indexed_array[$index - 1], false );
-                                                }
-                                            
-                                            if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
-                                                {
-                                                $ret .= '</div>';
-                                                }
-                                            }
-                                        else
-                                            {
-                                            $ret .= '<h1 class="failed_search_h1';
-                                            if ( isset ( $this->my_http_vars['WML'] ) && $this->my_http_vars['WML'] )   // We use a normally-positioned element in WML.
-                                                {
-                                                $ret .= '_wml';
-                                                }
-                                            $ret .= '">'.self::process_text(self::$local_mobile_fail_no_meetings).'</h1>';
                                             }
                                         }
                                     }
                                 }
                             }
+                        
+                        if ( $error_message )
+                            {
+                            $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                            }
+                        else
+                            {
+                            $this->my_driver->set_current_transaction_parameter ( 'SearchStringRadius', -10 );
+                            $error_message = $this->my_driver->get_m_error_message();
+                            if ( $error_message )
+                                {
+                                $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                }
+                            else    // The search is set up. Throw the switch, Igor! ...yeth...mawther....
+                                {
+                                $search_result = $this->my_driver->meeting_search();
+
+                                $error_message = $this->my_driver->get_m_error_message();
+                                if ( $error_message )
+                                    {
+                                    $ret .= self::process_text ( self::$local_server_fail ).' "'.htmlspecialchars ( $error_message ).'"';
+                                    }
+                                elseif ( isset ( $search_result ) && is_array ( $search_result ) && isset ( $search_result['meetings'] ) )
+                                    {
+                                    // Yes! We have valid search data!
+                                    if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                        {
+                                        $ret .= '<div class="multi_meeting_div">';
+                                        }
+                                    
+                                    $index = 1;
+                                    $count = count ( $search_result['meetings'] );
+                                    usort ( $search_result['meetings'], 'BMLTPlugin_sort_meetings_callback' );
+                                    if ( isset ( $_REQUEST['access_card'] ) && intval ( $_REQUEST['access_card'] ) )
+                                        {
+                                        $index = intval ( $_REQUEST['access_card'] );
+                                        }
+                                        
+                                    if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                        {
+                                        $index = 1;
+                                        foreach ( $search_result['meetings'] as $meeting )
+                                            {
+                                            $ret .= '<div class="single_meeting_div">';
+                                            $ret .= '<h1 class="meeting_name_h2">'.htmlspecialchars($meeting['meeting_name']).'</h1>';
+                                            $ret .= '<p class="time_day_p">'.self::process_text ( self::$local_weekdays[$meeting['weekday_tinyint']] ).' ';
+                                            $time = explode ( ':', $meeting['start_time'] );
+                                            $am_pm = ' AM';
+                                            $distance = null;
+                                            
+                                            if ( $meeting['distance_in_km'] )
+                                                {
+                                                $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
+                                                
+                                                $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) );
+                                                }
+
+                                            $time[0] = intval ( $time[0] );
+                                            $time[1] = intval ( $time[1] );
+                                            
+                                            if ( ($time[0] == 23) && ($time[1] > 50) )
+                                                {
+                                                $ret .= self::process_text ( self::$local_midnight );
+                                                }
+                                            elseif ( ($time[0] == 12) && ($time[1] == 0) )
+                                                {
+                                                $ret .= self::process_text ( self::$local_noon );
+                                                }
+                                            else
+                                                {
+                                                if ( ($time[0] > 12) || (($time[0] == 12) && ($time[1] > 0)) )
+                                                    {
+                                                    $am_pm = ' PM';
+                                                    }
+                                                
+                                                if ( $time[0] > 12 )
+                                                    {
+                                                    $time[0] -= 12;
+                                                    }
+                                            
+                                                if ( $time[1] < 10 )
+                                                    {
+                                                    $time[1] = "0$time[1]";
+                                                    }
+                                                
+                                                $ret .= htmlspecialchars ( $time[0].':'.$time[1].$am_pm );
+                                                }
+                                            
+                                            $ret .= '</p>';
+                                            if ( $meeting['location_text'] )
+                                                {
+                                                $ret .= '<p class="locations_text_p">'.htmlspecialchars ( $meeting['location_text'] ).'</p>';
+                                                }
+                                            
+                                            $ret .= '<p class="street_p">';
+                                            if ( $meeting['location_street'] )
+                                                {
+                                                $ret .= htmlspecialchars ( $meeting['location_street'] );
+                                                }
+                                            
+                                            if ( $meeting['location_neighborhood'] )
+                                                {
+                                                $ret .= '<span class="neighborhood_span"> ('.htmlspecialchars ( $meeting['location_neighborhood'] ).')</span>';
+                                                }
+                                            $ret .= '</p>';
+                                            
+                                            if ( $meeting['location_municipality'] )
+                                                {
+                                                $ret .= '<p class="town_p">'.htmlspecialchars ( $meeting['location_municipality'] );
+                                            
+                                                if ( $meeting['location_province'] )
+                                                    {
+                                                    $ret .= '<span class="state_span">, '.htmlspecialchars ( $meeting['location_province'] ).'</span>';
+                                                    }
+                                                
+                                                if ( $meeting['location_postal_code_1'] )
+                                                    {
+                                                    $ret .= '<span class="zip_span"> '.htmlspecialchars ( $meeting['location_postal_code_1'] ).'</span>';
+                                                    }
+                                                $ret .= '</p>';
+                                                if ( !isset ( $this->my_http_vars['WML'] ) )
+                                                    {
+                                                    $ret .= '<p id="maplink_'.intval($meeting['id_bigint']).'" style="display:none">';
+                                                    $url = '';
+
+                                                    $comma = false;
+                                                    if ( $meeting['meeting_name'] )
+                                                        {
+                                                        $url .= urlencode($meeting['meeting_name']);
+                                                        $comma = true;
+                                                        }
+                                                        
+                                                    if ( $meeting['location_text'] )
+                                                        {
+                                                        $url .= ($comma ? ',+' : '').urlencode($meeting['location_text']);
+                                                        $comma = true;
+                                                        }
+                                                    
+                                                    if ( $meeting['location_street'] )
+                                                        {
+                                                        $url .= ($comma ? ',+' : '').urlencode($meeting['location_street']);
+                                                        $comma = true;
+                                                        }
+                                                    
+                                                    if ( $meeting['location_municipality'] )
+                                                        {
+                                                        $url .= ($comma ? ',+' : '').urlencode($meeting['location_municipality']);
+                                                        $comma = true;
+                                                        }
+                                                        
+                                                    if ( $meeting['location_province'] )
+                                                        {
+                                                        $url .= ($comma ? ',+' : '').urlencode($meeting['location_province']);
+                                                        }
+                                                    
+                                                    $url = 'http://maps.google.com/maps?q='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']) . '+(%22'.str_replace ( "%28", '-', str_replace ( "%29", '-', $url )).'%22)';
+                                                    $url .= '&ll='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']);
+                                                    $ret .= '<a accesskey="'.$index.'" href="'.htmlspecialchars ( $url ).'" title="'.htmlspecialchars($meeting['meeting_name']).'">'.self::process_text ( self::$local_map_link ).'</a>';
+                                                    $ret .= '<script type="text/javascript">document.getElementById(\'maplink_'.intval($meeting['id_bigint']).'\').style.display=\'block\';var c_BMLTPlugin_settings_id = '.htmlspecialchars ( $this->my_http_vars['bmlt_settings_id'] ).';</script>';
+
+                                                    $ret .= '</p>';
+                                                    }
+                                                }
+                                            
+                                            if ( $distance )
+                                                {
+                                                $ret .= '<p class="distance_p"><strong>'.self::process_text ( self::$local_mobile_distance ).':</strong> '.htmlspecialchars ( $distance ).'</p>';
+                                                }
+                                                
+                                            $ret .= '<p class="formats_p"><strong>'.self::process_text ( self::$local_formats ).':</strong> '.htmlspecialchars ( $meeting['formats'] ).'</p>';
+                                            $ret .= '</div>';
+                                            if ( $index++ < $count )
+                                                {
+                                                if ( !isset ( $this->my_http_vars['WML'] ) )
+                                                    {
+                                                    $ret .= '<hr class="meeting_divider_hr" />';
+                                                    }
+                                                else
+                                                    {
+                                                    $ret .= '<hr />';
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    else    // WML 1 (yuch) We do this, because we need to limit the size of the pages to fit simple phones.
+                                        {
+                                        $meetings = $search_result['meetings'];
+                                        $indexed_array = array_values($meetings);
+                                        $ret = $this->BMLTPlugin_render_card ( $ret, $index, $count, $indexed_array[$index - 1], false );
+                                        }
+                                    
+                                    if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )   // Regular XHTML
+                                        {
+                                        $ret .= '</div>';
+                                        }
+                                    }
+                                else
+                                    {
+                                    $ret .= '<h1 class="failed_search_h1';
+                                    if ( isset ( $this->my_http_vars['WML'] ) && $this->my_http_vars['WML'] )   // We use a normally-positioned element in WML.
+                                        {
+                                        $ret .= '_wml';
+                                        }
+                                    $ret .= '">'.self::process_text(self::$local_mobile_fail_no_meetings).'</h1>';
+                                    }
+                                }
+                            }
                         }
-                    }
-                else
-                    {
-                    $ret .= '<h1 class="failed_search_h1">'.self::process_text(self::$local_enter_address_alert).'</h1>';
                     }
                 }
             else
                 {
-                $ret .= '<h1>ERROR! No server connection!</h1>';
+                $ret .= '<h1 class="failed_search_h1">'.self::process_text(self::$local_enter_address_alert).'</h1>';
                 }
             }
         elseif ( isset ( $this->my_http_vars['do_search'] ) && !((($this->my_http_vars['do_search'] == 'the hard way') || (isset ( $this->my_http_vars['WML'] ) && ($this->my_http_vars['WML'] == 1)))) )
@@ -2747,7 +2719,17 @@ class BMLTPlugin
             $ret .= $this->BMLTPlugin_fast_mobile_lookup_javascript_stuff();
 
             $ret .= '<div id="location_finder" class="results_map_div">';
-                $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( self::$path_mobile_throbber_loc ).'" alt="AJAX Throbber" /></div>';
+                $url = '';
+                if ( plugins_url() )
+                    {
+                    $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+                    }
+                elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+                    {
+                    $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+                    }
+            
+                $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( $url.self::$path_mobile_throbber_loc ).'" alt="AJAX Throbber" /></div>';
             $ret .= '</div>';
             }
         else
