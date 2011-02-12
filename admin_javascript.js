@@ -9,6 +9,7 @@ var g_BMLTPlugin_admin_main_map = null;         ///< This will hold the map inst
 var g_BMLTPlugin_admin_marker = null;           ///< This holds the marker object.
 var g_BMLTPlugin_AjaxRequest = null;            ///< Used to stop server checks from stepping on each other.
 var g_BMLTPlugin_oldBeforeUnload = null;        ///< We replace the window's beforeUnload with our prompt.
+var g_BMLTPlugin_hold_the_pickles = false;      ///< This is set to avoid dirtifying the sheet.
 
 /****************************************************************************************//**
 *   \brief Returns the selected option index.                                               *
@@ -414,10 +415,11 @@ function BMLTPlugin_admin_load_map ( )
     
         g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);
         google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "click", function (in_event) { g_BMLTPlugin_admin_marker.setPosition(in_event.latLng); BMLTPlugin_admin_MovedMarker(); } );
-        google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "zoom_changed", function () { c_g_BMLTPlugin_coords[BMLTPlugin_GetSelectedOptionIndex()-1].zoom = g_BMLTPlugin_admin_main_map.getZoom(); } );
+        google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "zoom_changed", function () {c_g_BMLTPlugin_coords[BMLTPlugin_GetSelectedOptionIndex()-1].zoom = g_BMLTPlugin_admin_main_map.getZoom();if(!g_BMLTPlugin_hold_the_pickles){BMLTPlugin_DirtifyOptionSheet();}else{g_BMLTPlugin_hold_the_pickles=false;};} );
         }
     else
         {
+        g_BMLTPlugin_hold_the_pickles = true;
         g_BMLTPlugin_admin_main_map.panTo ( new google.maps.LatLng ( latitude, longitude ) );
         g_BMLTPlugin_admin_main_map.setZoom ( zoom );
         };

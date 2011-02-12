@@ -1,15 +1,30 @@
-table#bmlt_container
+table#bmlt_container,
+table#bmlt_container .embedded_map_div,
+table#bmlt_container td.BMLTPlugin_container_td,
+table#bmlt_container td.BMLTPlugin_container_tr,
+table#bmlt_container td.BMLTPlugin_container_tbody,
+table#bmlt_container div.c_comdef_search_results_single_div,
+table#bmlt_container .c_comdef_search_specification_form_container_div,
+table#bmlt_container .bmlt_search_spec_table,
+table#bmlt_container .c_comdef_search_specification_map_div
 {
-    font-family: Geneva, Arial Sans-Serif;
-    font-size: small;
-    padding:1px;
-	width:100%;
-	line-spacing:normal;
+    width: 100%;
+    margin:0;
+    padding:0;
+    border:none;
 }
 
 table#bmlt_container *
 {
     margin:auto;
+}
+
+table#bmlt_container
+{
+    font-family: Geneva, Arial Sans-Serif;
+    font-size: small;
+    padding:1px;
+	line-spacing:normal;
 }
 
 table#bmlt_container h1,
@@ -85,6 +100,18 @@ table#bmlt_container label.bmlt_result_type_label
 }
 
 /* These are the theme-specific settings. */
+
+div#bmlt_container_div
+{
+    border: 1px solid #600;
+}
+
+table#bmlt_container .c_comdef_search_specification_map_div,
+table#bmlt_container .embedded_map_div
+{
+    border-top: 1px solid #600;
+    border-bottom: 1px solid #600;
+}
 
 table#bmlt_container .bmlt_spec_tab,        /* This is the class for the Search Form tab <a> elements. */
 table#bmlt_container .marker_more_info_a,   /* This is the "More Info" bar (link) at the bottom of the marker info window in Map View. */

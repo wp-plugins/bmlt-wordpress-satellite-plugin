@@ -117,6 +117,7 @@ class BMLTPlugin
     static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
     static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
     static  $local_gm_link_tooltip = 'Follow This Link to be Taken to A Google Maps Location for This Meeting.';    ///< The tooltip shown for the Google Maps link.
+    static  $local_not_enough_for_old_style = 'In order to display the "classic" BMLT window, you need to have both a root server and a Google Maps API key in the corresponding setting.'; ///< Displayed if there is no GMAP API key.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
@@ -1150,28 +1151,6 @@ class BMLTPlugin
                 header ( "Location: $uri" );
                 die();
                 }
-            elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
-                {
-                $ret = '0';
-                
-                if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
-                    {
-                    $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
-                    
-                    $test = new bmlt_satellite_controller ( $uri );
-                    
-                    if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
-                        {
-                        if ( !$test->get_m_error_message() )
-                            {
-                            $ret = trim($test->get_server_version());
-                            }
-                        }
-                    }
-                
-                ob_end_clean(); // Just in case we are in an OB
-                die ( $ret );
-                }
             }
         }
         
@@ -1317,6 +1296,28 @@ class BMLTPlugin
             ob_end_clean(); // Just in case we are in an OB
             die ( strVal ( $ret ) );
             }
+        elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
+            {
+            $ret = '0';
+            
+            if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
+                {
+                $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
+                
+                $test = new bmlt_satellite_controller ( $uri );
+                
+                if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
+                    {
+                    if ( !$test->get_m_error_message() )
+                        {
+                        $ret = trim($test->get_server_version());
+                        }
+                    }
+                }
+            
+            ob_end_clean(); // Just in case we are in an OB
+            die ( $ret );
+            }
         }
         
     /************************************************************************************//**
@@ -1328,8 +1329,8 @@ class BMLTPlugin
         
         if ( function_exists ( 'plugins_url' ) )
             {
-            $head_content = "<!-- Added by the BMLTPlugin -->";
-            // This is how we figure out which options we'll be using.
+ 			$head_content = "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
+           // This is how we figure out which options we'll be using.
             
             if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
                 {
@@ -1364,7 +1365,7 @@ class BMLTPlugin
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
                 
-                if ( $this->my_http_vars['gmap_key'] )
+                if ( $options['gmaps_api_key'] )
                     {
                     $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
                     }
@@ -1538,7 +1539,7 @@ class BMLTPlugin
             
             $root_server_root = $options['root_server'];
 
-            if ( $root_server_root )
+            if ( $root_server_root && $options['gmaps_api_key'] )
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
     
@@ -1575,7 +1576,7 @@ class BMLTPlugin
                     }
  
                 $the_new_content = str_replace ( '###ROOT_SERVER###', $root_server_root, self::$local_no_js_warning ).$the_new_content;
-                $the_new_content = '<table id="bmlt_container" class="bmlt_container_table"><tbody><tr><td>'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table>';
+                $the_new_content = '<div id="bmlt_container_div" class="bmlt_container_div"><table id="bmlt_container" cellspacing="0" cellpadding="0" class="bmlt_container_table"><tbody class="BMLTPlugin_container_tbody"><tr class="BMLTPlugin_container_tr"><td class="BMLTPlugin_container_td">'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table></div>';
                 // We only allow one instance per page.
                 $count = 0;
 
@@ -1591,6 +1592,18 @@ class BMLTPlugin
                 $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
                 
 	            $in_content = str_replace ( $options['root_server'].'/client_interface/xhtml/../../themes/default/html/images/Throbber.gif', "$url/themes/".$options['theme']."/images/Throbber.gif", $in_content);
+                }
+            else
+                {
+                $the_new_content = self::process_text ( self::$local_not_enough_for_old_style );
+                $count = 0;
+
+                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1, $count );
+                
+                if ( !$count )
+                    {
+                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
+                    }
                 }
             }
         
@@ -1741,10 +1754,10 @@ class BMLTPlugin
                     $new_options = $this->getBMLTOptions ( $out_option_number );
                     $def_options = $this->getBMLTOptions ( 1 );
                     
-                    $new_options['root_server'] = $def_options['root_server'];
-                    $new_options['map_center_latitude'] = $def_options['map_center_latitude'];
-                    $new_options['map_center_longitude'] = $def_options['map_center_longitude'];
-                    $new_options['map_zoom'] = $def_options['map_zoom'];
+                    $new_options = $def_options;
+                    unset ( $new_options['setting_name'] );
+                    unset ( $new_options['id'] );
+                    unset ( $new_options['theme'] );
                     $this->setBMLTOptions ( $new_options, $out_option_number );
                     
                     $ret .= '<h2 id="BMLTPlugin_Fader" class="BMLTPlugin_Message_bar_success">';
