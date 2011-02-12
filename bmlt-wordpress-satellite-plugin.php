@@ -357,7 +357,6 @@ class BMLTPlugin
                 
                 if ( function_exists ( 'add_action' ) )
                     {
-                    add_action ( 'init', array ( self::get_plugin_object(), 'init' ) );
                     add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_init' ) );
                     add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
                     add_action ( 'wp', array ( self::get_plugin_object(), 'wp_handler' ) );
@@ -932,7 +931,7 @@ class BMLTPlugin
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_more_styles_label ).'</label>';
-                    $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()">';
+                    $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
                     $ret .= htmlspecialchars ( $options['additional_css'] );
                     $ret .= '</textarea>';
                 $ret .= '</div>';
@@ -1062,7 +1061,7 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+        $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
         
         if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
             {
@@ -1334,7 +1333,7 @@ class BMLTPlugin
             
             if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
                 {
-                 $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+                 $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
                 }
             
             if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
@@ -1353,6 +1352,8 @@ class BMLTPlugin
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
+		    $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
+            
             $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
             
             $this->load_params ( );
@@ -1363,7 +1364,10 @@ class BMLTPlugin
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
                 
-                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+                if ( $this->my_http_vars['gmap_key'] )
+                    {
+                    $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+                    }
                 
                 if ( $options['push_down_more_details'] )
                     {
@@ -1489,6 +1493,8 @@ class BMLTPlugin
                 header ( "location: $mobile_url" );
                 }
             }
+        
+        $this->init();
         }
     
     /************************************************************************************//**
@@ -1924,7 +1930,7 @@ class BMLTPlugin
                                 }
                             }
                         $url = self::get_plugin_path();
-                        $url = htmlspecialchars ( $url );
+                        $url = htmlspecialchars ( $url.'google_map_images' );
                         $html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
                         $html .= 'BMLTPlugin_admin_load_map();';
                     $html .= '</script>';

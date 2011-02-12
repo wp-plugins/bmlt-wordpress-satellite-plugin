@@ -1,13 +1,23 @@
 table#bmlt_container
 {
-    font-family: Geneva, Arial San-Serif;
+    font-family: Geneva, Arial Sans-Serif;
     font-size: small;
     padding:1px;
+	width:100%;
+	line-spacing:normal;
 }
 
 table#bmlt_container *
 {
     margin:auto;
+}
+
+table#bmlt_container h1,
+table#bmlt_container h2,
+table#bmlt_container h3,
+table#bmlt_container h4
+{
+    font-family: Geneva, Arial Sans-Serif;
 }
 
 table#bmlt_container div#c_comdef_search_specification_map_div
@@ -169,8 +179,8 @@ table#bmlt_container .marker_info_window_div    /* This is the info window secti
 table#bmlt_container .c_comdef_search_specification_container_div .throbber_div,          /* These are the window that surrounds the "throbber" */
 table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div
 {
-    top: 50%;
-    left:50%;
+    top: 50% !important;
+    left:50% !important;
     margin-top:-40px;
     margin-left:-40px;
     width: 80px;
