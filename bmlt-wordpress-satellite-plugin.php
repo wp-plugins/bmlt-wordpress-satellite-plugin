@@ -19,7 +19,7 @@ Version: 2.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-// define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 // Include the satellite driver class.
 require_once ( 'bmlt_satellite_controller.class.php' );
@@ -146,8 +146,6 @@ class BMLTPlugin
     *   We use an adaptation of the standalone Fast Mobile Lookup, here. These originated   *
     *   as defines, but are now static data members.                                        *
     ****************************************************************************************/
-
-    static  $path_mobile_throbber_loc = 'images/small_throbber.gif';    ///< The "Busy Throbber" that is displayed during searches.
 
     /// This defines a "grace time," so that meetings later today will include the current time, plus the "grace time," so it isn't so anal.
     static  $mobile_grace_time = 15;	///< This is in minutes.
@@ -1389,7 +1387,7 @@ class BMLTPlugin
             
             $url = self::get_plugin_path();
             
-            $head_content .= htmlspecialchars ( $url.'/themes/'.$options['theme'].'/' );
+            $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
             
             if ( !defined ('_DEBUG_MODE_' ) )
                 {
@@ -1584,7 +1582,7 @@ class BMLTPlugin
                 
                 $url = self::get_plugin_path();
                 
-                $head_content .= htmlspecialchars ( $url.'/themes/'.$options['theme'].'/' );
+                $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
                 
 	            $in_content = str_replace ( $options['root_server'].'/client_interface/xhtml/../../themes/default/html/images/Throbber.gif', "$url/themes/".$options['theme']."/images/Throbber.gif", $in_content);
                 }
@@ -1675,10 +1673,10 @@ class BMLTPlugin
                     $display .= '<script type="text/javascript">';
                     $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
+
+                    $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
                     $url = self::get_plugin_path();
-                    $img_url = "$url/google_map_images";
-            
-                    $img_url = htmlspecialchars ( $img_url );
+                    $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
                     
                     $display .= "var c_g_BMLTPlugin_images = '$img_url';";
                     $display .= '</script>';
@@ -2109,9 +2107,13 @@ class BMLTPlugin
             $ret .= '<meta http-equiv="Content-Style-Type" content="text/css" />';
             $ret .= '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />'; // Make sure iPhone screens stay humble.
             
+            $url = self::get_plugin_path();
+            
+            $url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
+            
             if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
                 {
-                $ret .= '<link rel="stylesheet" media="all" href="fast_mobile_lookup.css" type="text/css" />';
+                $ret .= '<link rel="stylesheet" media="all" href="'.$url.'fast_mobile_lookup.css" type="text/css" />';
                 }
             else
                 {
@@ -2771,9 +2773,12 @@ class BMLTPlugin
             $ret .= $this->BMLTPlugin_fast_mobile_lookup_javascript_stuff();
 
             $ret .= '<div id="location_finder" class="results_map_div">';
-                $url = self::get_plugin_path();
             
-                $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( $url.self::$path_mobile_throbber_loc ).'" alt="AJAX Throbber" /></div>';
+            $url = self::get_plugin_path();
+            
+            $throbber_loc .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/Throbber.gif' );
+            
+            $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( $throbber_loc ).'" alt="AJAX Throbber" /></div>';
             $ret .= '</div>';
             }
         else

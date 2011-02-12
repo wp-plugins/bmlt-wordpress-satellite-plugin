@@ -88,7 +88,7 @@ function BMLTPlugin_simple_div_filler ( in_uri,
         }
     else
         {
-        document.getElementById('simple_search_container').innerHTML='<img class="bmlt_simple_throbber_img" alt="throbber" src="'+c_g_BMLTPlugin_images+'/small_throbber.gif" />';
+        document.getElementById('simple_search_container').innerHTML='<div class="BMLTPlugin_simple_throbber_container_div"><div class="BMLTPlugin_simple_throbber_div"><img class="bmlt_simple_throbber_img" alt="throbber" src="'+c_g_BMLTPlugin_images+'Throbber.gif" /></div></div>';
         BMLTPlugin_AjaxRequest ( in_uri, BMLTPlugin_simple_div_filler_callback, 'get', in_header );
         };
 };

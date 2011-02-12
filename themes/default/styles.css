@@ -96,7 +96,8 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt,
 table#bmlt_container .c_comdef_search_results_formats_div .label_div,
 table#bmlt_container .c_comdef_search_results_single_div .close_div,
 table#bmlt_container .bmlt_contact_us_form_div,
-table#bmlt_container .bmlt_contact_form_header_h2
+table#bmlt_container .bmlt_contact_form_header_h2,
+.BMLTPlugin_simple_throbber_div
 {
     background-color:#555;
 }
@@ -165,9 +166,13 @@ table#bmlt_container .marker_info_window_div    /* This is the info window secti
     overflow: hidden;
 }
 
-table#bmlt_container .throbber_div,          /* These are the window that surrounds the "throbber" */
+table#bmlt_container .c_comdef_search_specification_container_div .throbber_div,          /* These are the window that surrounds the "throbber" */
 table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div
 {
+    top: 50%;
+    left:50%;
+    margin-top:-40px;
+    margin-left:-40px;
     width: 80px;
     height:80px;
 }
@@ -272,4 +277,19 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
 {
     padding-top:4px;
     padding-bottom:4px;
+}
+
+.BMLTPlugin_simple_throbber_container_div
+{
+    text-align:center;
+    margin-top:8px;
+}
+
+.BMLTPlugin_simple_throbber_div img,
+.BMLTPlugin_simple_throbber_div
+{
+    margin-left:auto;
+    margin-right:auto;
+    width:40px;
+    height:40px;
 }

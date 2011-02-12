@@ -79,8 +79,6 @@ table#bmlt_container label.bmlt_result_type_label
 table#bmlt_container .bmlt_spec_tab,        /* This is the class for the Search Form tab <a> elements. */
 table#bmlt_container .marker_more_info_a,   /* This is the "More Info" bar (link) at the bottom of the marker info window in Map View. */
 table#bmlt_container .marker_info_window_div .marker_line_name .marker_value,    /* This is the meeting name header in the info window */
-table#bmlt_container .throbber_div,          /* These are the window that surrounds the "throbber" */
-table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
 table#bmlt_container .marker_main_info_window_inner_div, /* This is the inside of the main marker info window. */
 table#bmlt_container .marker_main_info_window_div,   /* The surrounding window */
 table#bmlt_container .bmlt_menu_div,    /* The "New Search" divs. */
@@ -100,16 +98,18 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt,
 table#bmlt_container .c_comdef_search_results_formats_div .label_div,
 table#bmlt_container .c_comdef_search_results_single_div .close_div,
 table#bmlt_container .bmlt_contact_us_form_div,
-table#bmlt_container .bmlt_contact_form_header_h2,
-.BMLTPlugin_simple_throbber_div
+table#bmlt_container .bmlt_contact_form_header_h2
 {
-    background-color:#030;
+    background-color:#600;
 }
 
 table#bmlt_container .c_comdef_search_results_alt1,
-table#bmlt_container .c_comdef_search_results_alt1 td
+table#bmlt_container .c_comdef_search_results_alt1 td,
+table#bmlt_container .throbber_div,          /* These are the window that surrounds the "throbber" */
+table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
+.BMLTPlugin_simple_throbber_div
 {
-    background-color:#ff9;
+    background-color:#ccc;
 }
 
 table#bmlt_container .c_comdef_search_results_table,
@@ -131,7 +131,7 @@ table#bmlt_container .marker_more_info_a:visited,
 table#bmlt_container .bmlt_spec_tab,
 table#bmlt_container .bmlt_spec_tab:visited
 {
-    color:#ff9;
+    color:#ccc;
     text-decoration: underline;
 }
 
@@ -140,7 +140,7 @@ table#bmlt_container .marker_more_info_a:active,
 table#bmlt_container .bmlt_spec_tab:hover,
 table#bmlt_container .bmlt_spec_tab:active
 {
-    color:#cc0;
+    color:white;
     text-decoration: none;
 }
 
@@ -165,8 +165,8 @@ table#bmlt_container .marker_value
 
 table#bmlt_container .marker_info_window_div    /* This is the info window section for each meeting. */
 {
-    border-color:#030;
-    background-color:#efe;
+    border-color:#600;
+    background-color:#ccc;
     overflow: hidden;
 }
 
@@ -185,7 +185,7 @@ table#bmlt_container .c_comdef_search_specification_container_div .throbber_div,
 table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
 .BMLTPlugin_simple_throbber_div
 {
-    border:1px solid #cc0;
+    border:1px solid #600;
 }
 
 table#bmlt_container .marker_main_info_window_inner_div label /* This is the label inside of the main marker info window. */
@@ -202,14 +202,14 @@ table#bmlt_container .bmlt_menu_div    /* The "New Search" divs. */
 table#bmlt_container .bmlt_menu_div a,    /* The "New Search" links. */
 table#bmlt_container .bmlt_menu_div a:visited
 {
-    color:#efe;
+    color:#ccc;
     text-decoration: underline;
 }
 
 table#bmlt_container .bmlt_menu_div a:hover,    /* The "New Search" links (rolled over). */
 table#bmlt_container .bmlt_menu_div a:active
 {
-    color:#cc0;
+    color:white;
     text-decoration: none;
 }
 
@@ -224,7 +224,7 @@ table#bmlt_container tbody td
 
 table#bmlt_container tbody td   /* Surround everything with a 1-pixel border */
 {
-    border: 1px solid #030;
+    border: 1px solid #600;
 }
 
 /* Make sure we control the background color. */
@@ -233,24 +233,24 @@ table#bmlt_container #c_comdef_search_specification_form_container_div,
 table#bmlt_container .bmlt_spec_tab_selected,
 table#bmlt_container .format_desc_dd
 {
-    background-color:#efe;
+    background-color:#ccc;
 }
 
 /* These are the fieldsets in the basic and advanced search windows. */
 table#bmlt_container #c_comdef_search_specification_form_container_div fieldset
 {
-    border-color: #030;
+    border-color: #600;
     padding: 4px;
 }
 
 table#bmlt_container .c_comdef_search_specification_form_header_div a.bmlt_spec_tab_selected       /* This is the class for the Search Form tab <a> elements. */
 {
-    border-color: #030;
+    border-color: #600;
 }
 
 table#bmlt_container .c_comdef_search_specification_form_header_div a.bmlt_spec_tab
 {
-    border-bottom-color:#030;
+    border-bottom-color:#600;
 }
 
 table#bmlt_container .c_comdef_search_specification_form_container_div
@@ -281,7 +281,7 @@ table#bmlt_container .bmlt_contact_us_form_div label
 table#bmlt_container .single_header_link,
 table#bmlt_container .single_header_link:visited
 {
-    color:#efe;
+    color:#ccc;
     text-decoration: underline;
     font-weight:bold;
 }
@@ -289,7 +289,7 @@ table#bmlt_container .single_header_link:visited
 table#bmlt_container .single_header_link:hover,
 table#bmlt_container .single_header_link:active
 {
-    color:#cc0;
+    color:white;
     text-decoration: none;
 }
 
