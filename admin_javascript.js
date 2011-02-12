@@ -143,6 +143,10 @@ function BMLTPlugin_SaveOptions()
          
         url += '&BMLTPlugin_option_sheet_initial_view_'+option_index+'='+initial_view;
        
+        var my_theme = document.getElementById ( 'BMLTPlugin_option_sheet_theme_'+option_index ).value.toString();
+         
+        url += '&BMLTPlugin_option_sheet_theme_'+option_index+'='+my_theme;
+       
         var push_down = (document.getElementById ( 'BMLTPlugin_option_sheet_push_down_'+option_index ).checked ? '1' : '0');
          
         url += '&BMLTPlugin_option_sheet_push_down_'+option_index+'='+push_down;

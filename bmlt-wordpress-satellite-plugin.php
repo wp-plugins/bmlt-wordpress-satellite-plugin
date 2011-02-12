@@ -19,7 +19,7 @@ Version: 2.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( '_DEBUG_MODE_', 1 );
+// define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 // Include the satellite driver class.
 require_once ( 'bmlt_satellite_controller.class.php' );
@@ -67,6 +67,7 @@ class BMLTPlugin
     static  $default_additional_css = '';               ///< This is additional CSS that is inserted inline into the <head> section.
     static  $default_initial_view = '';                 ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
     static  $default_support_mobile = '1';              ///< If this is 1, support for redirection of mobile clients is provided.
+    static  $default_theme = 'default';                 ///< This is the default for the "style theme" for the plugin. Different settings can have different themes.
     
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
@@ -110,6 +111,7 @@ class BMLTPlugin
                                                 '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
                                                 );
     static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
+    static  $local_options_theme_prompt = 'Select a Color Theme:';          ///< The label for the theme selection popup.
     static  $local_options_support_mobile_checkbox_label = 'Support Mobile Clients with Fast Mobile Lookup.'; ///< The label for the "Mobile Support" checkbox.
     static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
     static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
@@ -276,10 +278,44 @@ class BMLTPlugin
                     $language = 'xhtml_mp';
                     }
                 }
+            else
+                {
+                if (    preg_match ( '/ipod/i', $_SERVER['HTTP_USER_AGENT'] )
+                    ||  preg_match ( '/ipad/i', $_SERVER['HTTP_USER_AGENT'] )
+                    ||  preg_match ( '/iphone/i', $_SERVER['HTTP_USER_AGENT'] )
+                    ||  preg_match ( '/android/i', $_SERVER['HTTP_USER_AGENT'] )
+                    ||  preg_match ( '/blackberry/i', $_SERVER['HTTP_USER_AGENT'] )
+                    ||  preg_match ( "/opera\s+mini/i", $_SERVER['HTTP_USER_AGENT'] )
+                    ||  isset ( $in_http_vars['simulate_smartphone'] )
+                    )
+                    {
+                    $language = 'smartphone';
+                    }
+                }
             }
         
         return $language;
     }
+    
+    /************************************************************************************//**
+    *   \brief Return an HTTP path to the plugin directory.                                 *
+    *                                                                                       *
+    *   \returns a string, containing the path.                                             *
+    ****************************************************************************************/
+    static function get_plugin_path()
+        {
+        $url = '';
+        if ( plugins_url() )
+            {
+            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+            }
+        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
+            {
+            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+            }
+        
+        return $url;
+        }
     
     /************************************************************************************//**
     *   \brief Constructor. Enforces the SINGLETON, and sets up the callbacks.              *
@@ -433,7 +469,8 @@ class BMLTPlugin
                                     'additional_css' => self::$default_additional_css,
                                     'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                                     'setting_name' => '',
-                                    'support_mobile' => self::$default_support_mobile
+                                    'support_mobile' => self::$default_support_mobile,
+                                    'theme' => self::$default_theme
                                     );
             
             // Make sure we aren't resetting to default.
@@ -862,6 +899,28 @@ class BMLTPlugin
                     $ret .= ' onblur="BMLTPlugin_ClickInText(this.id,\''.self::process_text (self::$local_options_no_new_search_string).'\',true)"';
                     $ret .= ' onchange="BMLTPlugin_DirtifyOptionSheet()" onkeyup="BMLTPlugin_DirtifyOptionSheet()" />';
                 $ret .= '</div>';
+                $dir_res = opendir ( dirname ( __FILE__ ).'/themes' );
+                if ( $dir_res )
+                    {
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_theme_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_theme_prompt ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            while ( false !== ( $file_name = readdir ( $dir_res ) ) )
+                                {
+                                if ( !preg_match ( '/^\./', $file_name ) && is_dir ( dirname ( __FILE__ ).'/themes/'.$file_name ) )
+                                    {
+                                    $ret .= '<option value="'.htmlspecialchars ( $file_name ).'"';
+                                    if ( $file_name == $options['theme'] )
+                                        {
+                                        $ret .= ' selected="selected"';
+                                        }
+                                    $ret .= '>'.htmlspecialchars ( $file_name ).'</option>';
+                                    }
+                                }
+                        $ret .= '</select>';
+                    $ret .= '</div>';
+                    }
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_special_check_div">';
                     $id = 'BMLTPlugin_option_sheet_support_mobile_'.$in_options_index;
                     $ret .= '<input class="BMLTPlugin_special_check" type="checkbox" id="'.htmlspecialchars ( $id ).'" onclick="BMLTPlugin_DirtifyOptionSheet()"';
@@ -871,7 +930,7 @@ class BMLTPlugin
                             }
                     $ret .= ' />';
                     $ret .= '<label class="BMLTPlugin_special_check_label" for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_support_mobile_checkbox_label ).'</label>';
-                $ret .= '</div>';
+                $ret .= '</div>';                
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_more_styles_label ).'</label>';
@@ -944,15 +1003,17 @@ class BMLTPlugin
         }
     
     /************************************************************************************//**
-    *   \brief Loads the parameter list.                                                    *
+    *   \brief Loads a parameter list.                                                      *
+    *                                                                                       *
+    *   \returns a string, containing the joined parameters.                                *
     ****************************************************************************************/
-    function load_params ( )
+    static function get_params ( $in_array )
         {
-        $this->my_params = '';
+        $my_params = '';
 
-        foreach ( $this->my_http_vars as $key => $value )
+        foreach ( $in_array as $key => $value )
             {
-            if ( isset ( $this->my_http_vars['direct_simple'] ) || (!isset ( $this->my_http_vars['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher.
+            if ( isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher.
                 {
                 if ( is_array ( $value ) )
                     {
@@ -962,22 +1023,32 @@ class BMLTPlugin
                             {
                             $val = join ( ',', $val );
                             }
-                        $this->my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
+                        $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
                         }
                     $key = null;
                     }
                 
                 if ( $key )
                     {
-                    $this->my_params .= '&'.urlencode ( $key );
+                    $my_params .= '&'.urlencode ( $key );
                     
                     if ( $value )
                         {
-                        $this->my_params .= "=". urlencode ( $value );
+                        $my_params .= "=". urlencode ( $value );
                         }
                     }
                 }
             }
+        
+        return $my_params;
+        }
+    
+    /************************************************************************************//**
+    *   \brief Loads the parameter list.                                                    *
+    ****************************************************************************************/
+    function load_params ( )
+        {
+        $this->my_params = self::get_params ( $this->my_http_vars );
         }
     
     /************************************************************************************//**
@@ -993,22 +1064,23 @@ class BMLTPlugin
     ****************************************************************************************/
     function init ( )
         {
-        if ( isset ( $this->my_http_vars['direct_simple'] ) && intval ( $this->my_http_vars['direct_simple'] ) )
+        $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+        
+        if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
             {
-            $this->my_option_id = intval ( $this->my_http_vars['direct_simple'] );
-            }
-        elseif ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-            {
-            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                {
+                $option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                }
             }
         
-        if ( !$this->my_option_id )
+        if ( !$option_id ) // All else fails, we use the first setting (default).
             {
             $options = $this->getBMLTOptions ( 1 );
-            $this->my_option_id = $options['id'];
+            $option_id = $options['id'];
             }
         
-        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+        $options = $this->getBMLTOptions_by_id ( $option_id );
 
         $this->load_params ( );
 
@@ -1021,16 +1093,9 @@ class BMLTPlugin
         elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
             {
             $ret = $this->BMLTPlugin_fast_mobile_lookup ();
-            $url = '';
-            if ( plugins_url() )
-                {
-                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                }
-            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                {
-                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                }
 
+            $url = self::get_plugin_path();
+            
             ob_end_clean(); // Just in case we are in an OB
             
             $handler = null;
@@ -1061,8 +1126,10 @@ class BMLTPlugin
                 }
             elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
                 {
-                $root_server = $options['root_server']."client_interface/simple/index.php";
-                $result = bmlt_satellite_controller::call_curl ( "$root_server?direct_simple".$this->my_params );
+                $root_server = $options['root_server']."/client_interface/simple/index.php";
+                $params = urldecode ( $this->my_http_vars['search_parameters'] );
+                $url = "$root_server?switcher=GetSearchResults&".$params;
+                $result = bmlt_satellite_controller::call_curl ( $url );
                 $result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
                 if ( $this->my_http_vars['single_uri'] )
                     {
@@ -1180,6 +1247,18 @@ class BMLTPlugin
                                 }
                             }
                         
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_theme_'.$i] ) )
+                            {
+                            if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_theme_'.$i] ) )
+                                {
+                                $options['theme'] = trim ( $this->my_http_vars['BMLTPlugin_option_sheet_theme_'.$i] );
+                                }
+                            else
+                                {
+                                $options['theme'] = self::$default_theme;
+                                }
+                            }
+                        
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_gkey_'.$i] ) )
                             {
                             if ( trim ( $this->my_http_vars['BMLTPlugin_option_sheet_gkey_'.$i] ) )
@@ -1253,17 +1332,22 @@ class BMLTPlugin
         if ( function_exists ( 'plugins_url' ) )
             {
             $head_content = "<!-- Added by the BMLTPlugin -->";
-
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+            // This is how we figure out which options we'll be using.
+            
+            if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
                 {
-                $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-                }
-            else
-                {
-                $this->my_option_id = intval ( trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) );
+                 $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
                 }
             
-            if ( !$this->my_option_id )
+            if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
+                {
+                if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                    {
+                    $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                    }
+                }
+            
+            if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
                 {
                 $options = $this->getBMLTOptions ( 1 );
                 $this->my_option_id = $options['id'];
@@ -1287,7 +1371,7 @@ class BMLTPlugin
                     {
                     $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
                     $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
-                    $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:auto;margin:0;}';
+                    $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:100%;margin:0;}';
                     }
                 
                 if ( $options['additional_css'] )
@@ -1303,17 +1387,9 @@ class BMLTPlugin
             
             $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
-            $url = '';
-            if ( plugins_url() )
-                {
-                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                }
-            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                {
-                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                }
+            $url = self::get_plugin_path();
             
-            $head_content .= htmlspecialchars ( $url );
+            $head_content .= htmlspecialchars ( $url.'/themes/'.$options['theme'].'/' );
             
             if ( !defined ('_DEBUG_MODE_' ) )
                 {
@@ -1354,15 +1430,7 @@ class BMLTPlugin
             {
             $head_content .= '<link rel="stylesheet" type="text/css" href="';
             
-            $url = '';
-            if ( plugins_url() )
-                {
-                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                }
-            elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                {
-                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                }
+            $url = self::get_plugin_path();
             
             $head_content .= htmlspecialchars ( $url );
             
@@ -1393,13 +1461,18 @@ class BMLTPlugin
         }
         
     /************************************************************************************//**
-    *   \brief Massages the page content.                                                   *
+    *   \brief Handles the WP callback.                                                     *
     *                                                                                       *
-    *   \returns a string, containing the "massaged" content.                               *
+    *   This function is called after the page has loaded its custom fields, so we can      *
+    *   figure out which settings we're using. If the settings support mobiles, and the UA  *
+    *   indicates this is a mobile phone, we redirect the user to our fast mobile handler.  *
     ****************************************************************************************/
     function wp_handler ( )
         {
-        $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
+        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+            {
+            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+            }
         
         if ( $this->my_option_id )
             {
@@ -1410,8 +1483,12 @@ class BMLTPlugin
                 if ( isset ( $this->my_http_vars['WML'] ) )
                     {
                     $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
-                    header ( "location: $mobile_url" );
                     }
+                if ( isset ( $this->my_http_vars['simulate_smartphone'] ) )
+                    {
+                    $mobile_url .= '&simulate_smartphone='.intval ( $this->my_http_vars['simulate_smartphone'] );
+                    }
+                header ( "location: $mobile_url" );
                 }
             }
         }
@@ -1423,40 +1500,9 @@ class BMLTPlugin
     ****************************************************************************************/
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
-        {
-        // This is how we figure out which options we'll be using.
-        
-        // If a bmlt_settings_id query variable was presented, that trumps everything else
-        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-            {
-            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-            }
-        else    // We see if the bmlt_settings custom field was set. Only one setting is allowed per page/post.
-            {
-            $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings', true ) ) ) );
-
-            if ( $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
-                {
-                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
-                if ( isset ( $this->my_http_vars['WML'] ) )
-                    {
-                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
-                    }
-                }
-            }
-        
-        if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
-            {
-            $options = $this->getBMLTOptions ( 1 );
-            $this->my_option_id = $options['id'];
-            }
-        
-        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-        $this->my_http_vars['bmlt_settings_id'] = $this->my_option_id;
-        $this->load_params();
-
+        {        
         // Simple searches can be mixed in with other content.
-        $in_the_content = $this->display_simple_search ( $in_the_content, $count );
+        $in_the_content = $this->display_simple_search ( $in_the_content );
 
         $count = 0;
 
@@ -1506,10 +1552,6 @@ class BMLTPlugin
                         }
                     $menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
                     }
-               
-                $pid = get_page_uri(get_the_ID());
-                
-                $plink = get_permalink ( get_the_ID() );
                 
                 if ( isset ( $this->my_http_vars['search_form'] ) )
                     {
@@ -1539,6 +1581,12 @@ class BMLTPlugin
                     {
                     $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
                     }
+                
+                $url = self::get_plugin_path();
+                
+                $head_content .= htmlspecialchars ( $url.'/themes/'.$options['theme'].'/' );
+                
+	            $in_content = str_replace ( $options['root_server'].'/client_interface/xhtml/../../themes/default/html/images/Throbber.gif', "$url/themes/".$options['theme']."/images/Throbber.gif", $in_content);
                 }
             }
         
@@ -1560,22 +1608,23 @@ class BMLTPlugin
 
         if ( $root_server_root )
             {
+            // This stupid thing is because WP is nice enough to mess up the ampersands.
+            $in_content = str_replace ( '&#038;', '&', $in_content );
             $matches = array();
-            while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $the_content, $matches ) )
+            while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $in_content, $matches ) )
                 {
-                // This stupid thing is because WP is nice enough to mess up the ampersands.
-                $uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+				$uri = $root_server_root."/client_interface/simple/index.php?".$matches[1];
                 $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                $in_content = preg_replace('|(\<p[^>]*?>)?\<!\-\-\s?BMLT_SIMPLE.*?\-\-\>(\<\/p[^>]*?>)?|i', $the_new_content, $in_content, 1 );
+                $in_content = preg_replace('|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $the_new_content, $in_content, 1 );
+                $matches = array();
                 }
             
-            $matches = array();
-            while ( preg_match ( '|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]>|i', $the_content, $matches ) )
+            while ( preg_match ( '|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]|i', $in_content, $matches ) )
                 {
-                // This stupid thing is because WP is nice enough to mess up the ampersands.
-                $uri = $root_server_root."client_interface/simple/index.php?".str_replace ( '&#038;', '&', $matches[1] );
+				$uri = $root_server_root."/client_interface/simple/index.php?".$matches[1];
                 $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                $in_content = preg_replace('|(\<p[^>]*?>)?\[\[\s?BMLT_SIMPLE.*?\]\](\<\/p[^>]*?>)?|i', $the_new_content, $in_content, 1 );
+                $in_content = preg_replace('|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]|i', $the_new_content, $in_content, 1 );
+                $matches = array();
                 }
             }
         
@@ -1615,7 +1664,7 @@ class BMLTPlugin
                         $line['prompt'] = trim($text_ar[$lines++]);
                         if ( $line['parameters'] && $line['prompt'] )
                             {
-                            $uri = get_bloginfo('home').'/index.php?direct_simple='.htmlspecialchars ( $this->my_option_id ).'&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $uri = $_SERVER['PHP_SELF'].'?bmlt_settings_id='.$this->my_option_id.'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
                             $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
                             }
                         }
@@ -1626,6 +1675,12 @@ class BMLTPlugin
                     $display .= '<script type="text/javascript">';
                     $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
+                    $url = self::get_plugin_path();
+                    $img_url = "$url/google_map_images";
+            
+                    $img_url = htmlspecialchars ( $img_url );
+                    
+                    $display .= "var c_g_BMLTPlugin_images = '$img_url';";
                     $display .= '</script>';
                     $display .= '<div id="simple_search_container"></div></div>';
                     }
@@ -1870,15 +1925,7 @@ class BMLTPlugin
                                 $html .= '};';
                                 }
                             }
-                        $url = '';
-                        if ( plugins_url() )
-                            {
-                            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/google_map_images";
-                            }
-                        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                            {
-                            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/google_map_images";
-                            }
+                        $url = self::get_plugin_path();
                         $url = htmlspecialchars ( $url );
                         $html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
                         $html .= 'BMLTPlugin_admin_load_map();';
@@ -1908,21 +1955,21 @@ class BMLTPlugin
                                             )
     {
         $ret = '';
-        $language = self::mobile_sniff_ua($in_http_vars);
         
         function isDeviceWML1()
         {
-            return $language == 'wml';
+            return BMLTPlugin::mobile_sniff_ua($in_http_vars) == 'wml';
         }
     
         function isDeviceWML2()
         {
-            return $language == 'xhtml_mp';
+            return BMLTPlugin::mobile_sniff_ua($in_http_vars) == 'xhtml_mp';
         }
             
         function isMobileDevice()
         {
-            return $language != 'xhtml';
+            $language = BMLTPlugin::mobile_sniff_ua($in_http_vars);
+            return ($language != 'xhtml') && ($language != 'smartphone');
         }
         
         // If we aren't deliberately forcing an emulation, we figure it out for ourselves.
@@ -2019,37 +2066,23 @@ class BMLTPlugin
         $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
         $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) ).'\';';
         $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?\';';
-                    
-         if ( plugins_url() )
-            {
-            $img_url = plugins_url()."/bmlt-wordpress-satellite-plugin/google_map_images";
-            }
-        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-            {
-            $img_url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/google_map_images";
-            }
+        
+        $url = self::get_plugin_path();
+
+        $img_url = "$url/google_map_images";
+
         $img_url = htmlspecialchars ( $img_url );
         
         $ret .= "var c_g_BMLTPlugin_images = '$img_url';";
         $ret .= '</script>';
-        
-         $url = '';
-        if ( plugins_url() )
-            {
-            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-            }
-        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-            {
-            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-            }
        
         if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
             {
-            $ret .= '<script src="'.$url.'fast_mobile_lookup.js" type="text/javascript"></script>';
+            $ret .= '<script src="'.htmlspecialchars ( $url ).'fast_mobile_lookup.js" type="text/javascript"></script>';
             }
         else
             {
-            $ret .= '<script src="'.$url.'js_stripper.php?filename=fast_mobile_lookup.js" type="text/javascript"></script>';
+            $ret .= '<script src="'.htmlspecialchars ( $url ).'js_stripper.php?filename=fast_mobile_lookup.js" type="text/javascript"></script>';
             }
 
         return $ret;
@@ -2063,19 +2096,8 @@ class BMLTPlugin
     function BMLTPlugin_fast_mobile_lookup_header_stuff()
     {
         $ret = '';
-        $url = '';
-        if ( plugins_url() )
-            {
-            $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-            }
-        elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-            {
-            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-            }
+        $url = self::get_plugin_path();
             
-        $stylesheet_uri = $url.'fast_mobile_lookup.css'; ///< This is the standard CSS file.
-        /// There can be a custom CSS file.
-    
         $ret .= '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';    // WML 1 only cares about the charset and cache.
         $ret .= '<meta http-equiv="Cache-Control" content="max-age=300"  />';               // Cache for 5 minutes.
         $ret .= '<meta http-equiv="Cache-Control" content="no-transform"  />';              // No Transforms.
@@ -2089,11 +2111,11 @@ class BMLTPlugin
             
             if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
                 {
-                $ret .= '<link rel="stylesheet" media="all" href="'.htmlspecialchars($stylesheet_uri).'" type="text/css" />';
+                $ret .= '<link rel="stylesheet" media="all" href="fast_mobile_lookup.css" type="text/css" />';
                 }
             else
                 {
-                $ret .= '<link rel="stylesheet" media="all" href="style_stripper.php?filename='.htmlspecialchars($stylesheet_uri).'" type="text/css" />';
+                $ret .= '<link rel="stylesheet" media="all" href="'.htmlspecialchars($url).'style_stripper.php?filename=fast_mobile_lookup.css" type="text/css" />';
                 }
             
             // If we have a shortcut icon, set it here.
@@ -2749,15 +2771,7 @@ class BMLTPlugin
             $ret .= $this->BMLTPlugin_fast_mobile_lookup_javascript_stuff();
 
             $ret .= '<div id="location_finder" class="results_map_div">';
-                $url = '';
-                if ( plugins_url() )
-                    {
-                    $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
-                    }
-                elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
-                    {
-                    $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
-                    }
+                $url = self::get_plugin_path();
             
                 $ret .= '<div class="throbber_div"><img id="throbber" src="'.htmlspecialchars ( $url.self::$path_mobile_throbber_loc ).'" alt="AJAX Throbber" /></div>';
             $ret .= '</div>';
