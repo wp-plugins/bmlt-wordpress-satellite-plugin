@@ -1363,11 +1363,25 @@ class BMLTPlugin
                 $load_head = true;
                 }
             
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
+            // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
+            // Post redirectors are also handled, but at this point, only the page will be checked.
+            $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_mobile', true ) ) ) );
             
-            if ( !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+            if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
                 {
-                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
+                $mobile_options = $this->getBMLTOptions_by_id ( $support_mobile );
+                }
+            else
+                {
+                $support_mobile = null;
+                }
+            
+            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+
+            if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) && isset ( $mobile_options['support_mobile'] ) && $mobile_options['support_mobile'] )
+                {
+                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$support_mobile;
                 if ( isset ( $this->my_http_vars['WML'] ) )
                     {
                     $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
@@ -1376,8 +1390,8 @@ class BMLTPlugin
                     {
                     $mobile_url .= '&simulate_smartphone';
                     }
-                header ( "location: $mobile_url" );
                 ob_end_clean();
+                header ( "location: $mobile_url" );
                 die ( );
                 }
             
@@ -1503,7 +1517,7 @@ class BMLTPlugin
     ****************************************************************************************/
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
-        {        
+        {
         // Simple searches can be mixed in with other content.
         $in_the_content = $this->display_simple_search ( $in_the_content );
 
@@ -1515,7 +1529,7 @@ class BMLTPlugin
             {
             $in_the_content = $this->display_old_search ( $in_the_content, $count );
             }
-
+        
         return $in_the_content;
         }
         

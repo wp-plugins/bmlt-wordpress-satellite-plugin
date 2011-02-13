@@ -24,6 +24,43 @@ body
 {
 	font-family:Helvetica,Arial,San-Serif;
 	text-align:center;
+    background-color:#009;
+}
+
+#search_form_body div.search_div,
+.multi_meeting_div
+{
+	padding:8px;
+	color:white;
+}
+
+#search_form_body div.search_div:a,
+#search_form_body div.search_div:a:visited,
+.multi_meeting_div:a,
+.multi_meeting_div:a:visited
+{
+	color:white;
+	text-decoration:underline;
+}
+
+#search_form_body div.search_div:a:hover,
+#search_form_body div.search_div:a:active,
+.multi_meeting_div:a:hover,
+.multi_meeting_div:a:active
+{
+	color:#eee;
+	text-decoration:none;
+}
+
+.info_window_div
+{
+	position:absolute;
+	top: 0px;
+	left: 0px;
+	margin:0;
+	padding: 0;
+	width: 100%;
+    border: 1px solid #009;
 }
 
 .results_map_div
@@ -135,16 +172,6 @@ input.address_input
 	padding: 0;
 }
 
-.info_window_div
-{
-	position:absolute;
-	top: 0px;
-	left: 0px;
-	margin:0;
-	padding: 0;
-	width: 100%;
-}
-
 .multi_day_info_div fieldset
 {
 	margin-bottom: 4px;
@@ -154,12 +181,6 @@ input.address_input
 {
 	padding: 0;
 	margin:0;
-}
-
-#search_form_body div.search_div,
-.multi_meeting_div
-{
-	padding:8px;
 }
 
 .throbber_div
