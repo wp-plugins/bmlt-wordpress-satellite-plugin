@@ -292,7 +292,6 @@ class BMLTPlugin
                     }
                 }
             }
-        
         return $language;
     }
     
@@ -1052,108 +1051,106 @@ class BMLTPlugin
     /************************************************************************************//**
     *                               THE WORDPRESS CALLBACKS                                 *
     ****************************************************************************************/
-    
+        
     /************************************************************************************//**
-    *   \brief Called before anything else is run.                                          *
+    *   \brief Handles the WP callback.                                                     *
     *                                                                                       *
-    *   This function will check for AJAX rerouters and for mobile rerouters. If it sees a  *
-    *   need for one, it dies the script with the appropriate response. Otherwise, it just  *
-    *   does nothing.                                                                       *
+    *   This function is called after the page has loaded its custom fields, so we can      *
+    *   figure out which settings we're using. If the settings support mobiles, and the UA  *
+    *   indicates this is a mobile phone, we redirect the user to our fast mobile handler.  *
     ****************************************************************************************/
-    function init ( )
+    function wp_handler ( )
         {
-        $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
-        
-        if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
-            {
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-                {
-                $option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-                }
-            }
-        
-        if ( !$option_id ) // All else fails, we use the first setting (default).
-            {
-            $options = $this->getBMLTOptions ( 1 );
-            $option_id = $options['id'];
-            }
-        
-        $options = $this->getBMLTOptions_by_id ( $option_id );
-
-        $this->load_params ( );
-
         if ( isset ( $this->my_http_vars['BMLTPlugin_mobile_ajax_router'] ) )
             {
-            $uri = $options['root_server'].'/'.$this->my_http_vars['request'];
-            ob_end_clean(); // Just in case we are in an OB
-            die ( bmlt_satellite_controller::call_curl ( $uri ) );
-            }
-        elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
-            {
-            $ret = $this->BMLTPlugin_fast_mobile_lookup ();
-
-            $url = self::get_plugin_path();
-            
-            ob_end_clean(); // Just in case we are in an OB
-            
-            $handler = null;
-            
-            if ( zlib_get_coding_type() === false )
-                {
-                $handler = "ob_gzhandler";
-                }
-            
-            ob_start($handler);
-                echo $ret;
-            ob_end_flush();
-            die ( );
-            }
-        elseif ( isset ( $this->my_http_vars['BMLTPlugin_mobile_ajax_router'] ) )
-            {
+            $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
             $uri = $options['root_server'].'/'.$this->my_http_vars['request'];
             ob_end_clean(); // Just in case we are in an OB
             die ( bmlt_satellite_controller::call_curl ( $uri ) );
             }
         else
             {
-            if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
+            if ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
                 {
-                $url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
+                $ret = $this->BMLTPlugin_fast_mobile_lookup ();
+    
+                $url = self::get_plugin_path();
+                
                 ob_end_clean(); // Just in case we are in an OB
-                die ( bmlt_satellite_controller::call_curl ( $url ) );
-                }
-            elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
-                {
-                $root_server = $options['root_server']."/client_interface/simple/index.php";
-                $params = urldecode ( $this->my_http_vars['search_parameters'] );
-                $url = "$root_server?switcher=GetSearchResults&".$params;
-                $result = bmlt_satellite_controller::call_curl ( $url );
-                $result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
-                if ( $this->my_http_vars['single_uri'] )
+                
+                $handler = null;
+                
+                if ( zlib_get_coding_type() === false )
                     {
-                    $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
-                    $result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
+                    $handler = "ob_gzhandler";
                     }
-                ob_end_clean(); // Just in case we are in an OB
-                die ( $result );
+                
+                ob_start($handler);
+                    echo $ret;
+                ob_end_flush();
+                die ( );
                 }
-            elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
+            else
                 {
-                $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
-                ob_end_clean(); // Just in case we are in an OB
-                header ( "Location: $uri" );
-                die();
-                }
-            elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
-                {
-                $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
-                ob_end_clean(); // Just in case we are in an OB
-                header ( "Location: $uri" );
-                die();
+                $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
+                
+                if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
+                    {
+                    if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                        {
+                        $option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                        }
+                    }
+                
+                if ( !$option_id ) // All else fails, we use the first setting (default).
+                    {
+                    $options = $this->getBMLTOptions ( 1 );
+                    $option_id = $options['id'];
+                    }
+                
+                $options = $this->getBMLTOptions_by_id ( $option_id );
+        
+                $this->load_params ( );
+            
+                if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
+                    {
+                    $url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
+                    ob_end_clean(); // Just in case we are in an OB
+                    die ( bmlt_satellite_controller::call_curl ( $url ) );
+                    }
+                elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
+                    {
+                    $root_server = $options['root_server']."/client_interface/simple/index.php";
+                    $params = urldecode ( $this->my_http_vars['search_parameters'] );
+                    $url = "$root_server?switcher=GetSearchResults&".$params;
+                    $result = bmlt_satellite_controller::call_curl ( $url );
+                    $result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+                    if ( $this->my_http_vars['single_uri'] )
+                        {
+                        $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+                        $result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
+                        }
+                    ob_end_clean(); // Just in case we are in an OB
+                    die ( $result );
+                    }
+                elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
+                    {
+                    $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
+                    ob_end_clean(); // Just in case we are in an OB
+                    header ( "Location: $uri" );
+                    die();
+                    }
+                elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
+                    {
+                    $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
+                    ob_end_clean(); // Just in case we are in an OB
+                    header ( "Location: $uri" );
+                    die();
+                    }
                 }
             }
         }
-        
+    
     /************************************************************************************//**
     *   \brief This does any admin actions necessary.                                       *
     ****************************************************************************************/
@@ -1352,7 +1349,7 @@ class BMLTPlugin
                 $this->my_option_id = $options['id'];
                 global $wp_query;
                 $page_obj_id = $wp_query->get_queried_object_id();
-                if ( $page_obj_id )
+                if ( $page_obj_id ) // In the old version, the standard BMLT window could not be shown in posts; only pages.
                     {
                     $page_obj = get_page ( $page_obj_id );
                     if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
@@ -1368,7 +1365,23 @@ class BMLTPlugin
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
-            if ( !$options['gmaps_api_key'] )
+            if ( !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+                {
+                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
+                if ( isset ( $this->my_http_vars['WML'] ) )
+                    {
+                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
+                    }
+                if ( isset ( $this->my_http_vars['simulate_smartphone'] ) )
+                    {
+                    $mobile_url .= '&simulate_smartphone';
+                    }
+                header ( "location: $mobile_url" );
+                ob_end_clean();
+                die ( );
+                }
+            
+            if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
                 {
                 $load_head = false;
                 }
@@ -1481,41 +1494,6 @@ class BMLTPlugin
             }
             
         echo $head_content;
-        }
-        
-    /************************************************************************************//**
-    *   \brief Handles the WP callback.                                                     *
-    *                                                                                       *
-    *   This function is called after the page has loaded its custom fields, so we can      *
-    *   figure out which settings we're using. If the settings support mobiles, and the UA  *
-    *   indicates this is a mobile phone, we redirect the user to our fast mobile handler.  *
-    ****************************************************************************************/
-    function wp_handler ( )
-        {
-        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-            {
-            $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-            }
-        
-        if ( $this->my_option_id )
-            {
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-            if ( $options['support_mobile'] && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
-                {
-                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$this->my_option_id;
-                if ( isset ( $this->my_http_vars['WML'] ) )
-                    {
-                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
-                    }
-                if ( isset ( $this->my_http_vars['simulate_smartphone'] ) )
-                    {
-                    $mobile_url .= '&simulate_smartphone='.intval ( $this->my_http_vars['simulate_smartphone'] );
-                    }
-                header ( "location: $mobile_url" );
-                }
-            }
-        
-        $this->init();
         }
     
     /************************************************************************************//**
@@ -2103,7 +2081,7 @@ class BMLTPlugin
         $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
         $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? self::process_text ( self::$local_mobile_kilometers ) : self::process_text ( self::$local_mobile_miles ) ).'\';';
         $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?\';';
-        
+        $ret .= 'var c_bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].';';        
         $url = self::get_plugin_path();
 
         $img_url = "$url/google_map_images";
@@ -2148,7 +2126,9 @@ class BMLTPlugin
             
             $url = self::get_plugin_path();
             
-            $url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
+            $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
+            
+            $url = htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
             
             if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
                 {
@@ -2498,6 +2478,7 @@ class BMLTPlugin
     {
         $ret = self::BMLTPlugin_select_doctype($this->my_http_vars);
         $ret .= $this->BMLTPlugin_fast_mobile_lookup_header_stuff();   // Add styles and/or JS, depending on the UA.
+        $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
         
         // If we are running XHTML, then JavaScript works. Let's see if we can figure out where we are...
         // If the client can handle JavaScript, then the whole thing can be done with JS, and there's no need for the driver.
@@ -2509,7 +2490,6 @@ class BMLTPlugin
                 $ret .= '<body>';
                 }
             
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             $this->my_driver->set_m_root_uri ( $options['root_server'] );
             $error = $this->my_driver->get_m_error_message();
             
