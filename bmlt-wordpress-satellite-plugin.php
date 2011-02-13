@@ -1360,6 +1360,19 @@ class BMLTPlugin
             $this->load_params ( );
             
             $root_server_root = $options['root_server'];
+            
+            $head_content .= '<link rel="stylesheet" type="text/css" href="';
+            
+            $url = self::get_plugin_path();
+            
+            $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
+            
+            if ( !defined ('_DEBUG_MODE_' ) )
+                {
+                $head_content .= 'style_stripper.php?filename=';
+                }
+            
+            $head_content .= 'styles.css" />';
 
             if ( $root_server_root )
                 {
@@ -1387,19 +1400,6 @@ class BMLTPlugin
                     $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
                     }
                 }
-            
-            $head_content .= '<link rel="stylesheet" type="text/css" href="';
-            
-            $url = self::get_plugin_path();
-            
-            $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
-            
-            if ( !defined ('_DEBUG_MODE_' ) )
-                {
-                $head_content .= 'style_stripper.php?filename=';
-                }
-            
-            $head_content .= 'styles.css" />';
             
             $head_content .= '<script type="text/javascript" src="';
             
