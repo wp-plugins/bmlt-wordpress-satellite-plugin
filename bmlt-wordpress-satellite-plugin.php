@@ -1329,6 +1329,7 @@ class BMLTPlugin
         
         if ( function_exists ( 'plugins_url' ) )
             {
+            $load_head = false;   // This is a throwback. It prevents the GM JS from being loaded if there is no directly specified settings ID.
  			$head_content = "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
            // This is how we figure out which options we'll be using.
             
@@ -1349,9 +1350,28 @@ class BMLTPlugin
                 {
                 $options = $this->getBMLTOptions ( 1 );
                 $this->my_option_id = $options['id'];
+                global $wp_query;
+                $page_obj_id = $wp_query->get_queried_object_id();
+                if ( $page_obj_id )
+                    {
+                    $page_obj = get_page ( $page_obj_id );
+                    if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
+                        {
+                        $load_head = true;
+                        }
+                    }
+                }
+            else
+                {
+                $load_head = true;
                 }
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+            
+            if ( !$options['gmaps_api_key'] )
+                {
+                $load_head = false;
+                }
             
 		    $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
             
@@ -1378,7 +1398,7 @@ class BMLTPlugin
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
                 
-                if ( $options['gmaps_api_key'] )
+                if ( $load_head )
                     {
                     $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
                     }
