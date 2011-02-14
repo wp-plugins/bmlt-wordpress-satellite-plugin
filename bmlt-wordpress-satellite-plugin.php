@@ -66,7 +66,6 @@ class BMLTPlugin
     static  $default_push_down_more_details = '1';      ///< If this is set to 1, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
     static  $default_additional_css = '';               ///< This is additional CSS that is inserted inline into the <head> section.
     static  $default_initial_view = '';                 ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
-    static  $default_support_mobile = '1';              ///< If this is 1, support for redirection of mobile clients is provided.
     static  $default_theme = 'default';                 ///< This is the default for the "style theme" for the plugin. Different settings can have different themes.
     
     /************************************************************************************//**
@@ -112,7 +111,6 @@ class BMLTPlugin
                                                 );
     static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
     static  $local_options_theme_prompt = 'Select a Color Theme:';          ///< The label for the theme selection popup.
-    static  $local_options_support_mobile_checkbox_label = 'Support Mobile Clients with Fast Mobile Lookup.'; ///< The label for the "Mobile Support" checkbox.
     static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
     static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
     static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
@@ -466,7 +464,6 @@ class BMLTPlugin
                                     'additional_css' => self::$default_additional_css,
                                     'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                                     'setting_name' => '',
-                                    'support_mobile' => self::$default_support_mobile,
                                     'theme' => self::$default_theme
                                     );
             
@@ -918,16 +915,6 @@ class BMLTPlugin
                         $ret .= '</select>';
                     $ret .= '</div>';
                     }
-                $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_special_check_div">';
-                    $id = 'BMLTPlugin_option_sheet_support_mobile_'.$in_options_index;
-                    $ret .= '<input class="BMLTPlugin_special_check" type="checkbox" id="'.htmlspecialchars ( $id ).'" onclick="BMLTPlugin_DirtifyOptionSheet()"';
-                        if ( $options['support_mobile'] == '1' )
-                            {
-                            $ret .= ' checked="checked"';
-                            }
-                    $ret .= ' />';
-                    $ret .= '<label class="BMLTPlugin_special_check_label" for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_support_mobile_checkbox_label ).'</label>';
-                $ret .= '</div>';                
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.self::process_text ( self::$local_options_more_styles_label ).'</label>';
@@ -1261,11 +1248,6 @@ class BMLTPlugin
                             $options['push_down_more_details'] = $this->my_http_vars['BMLTPlugin_option_sheet_push_down_'.$i];
                             }
                         
-                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_support_mobile_'.$i] ) )
-                            {
-                            $options['support_mobile'] = $this->my_http_vars['BMLTPlugin_option_sheet_support_mobile_'.$i];
-                            }
-                        
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] ) && floatVal ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] ) )
                             {
                             $options['map_center_latitude'] = floatVal ( $this->my_http_vars['BMLTPlugin_option_latitude_'.$i] );
@@ -1379,7 +1361,7 @@ class BMLTPlugin
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
 
-            if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) && isset ( $mobile_options['support_mobile'] ) && $mobile_options['support_mobile'] )
+            if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
                 {
                 $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$support_mobile;
                 if ( isset ( $this->my_http_vars['WML'] ) )
