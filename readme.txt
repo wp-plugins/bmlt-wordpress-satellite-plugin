@@ -23,7 +23,7 @@ It is very easy to install and use. It has an administration panel that lets you
 == Screenshots ==
 
 == Changelog ==
-2.0 -
+2.0.0B0 -February 14, 2011
     Major rewrite. You can now have multiple settings, which can include different servers.
     You can "theme" the displays.
     We no longer support non-JS browsers.

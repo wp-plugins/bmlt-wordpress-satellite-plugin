@@ -129,7 +129,7 @@ class BMLTPlugin
     ****************************************************************************************/
 
     /// This is the only localizable string that is not processed. This is because it contains HTML. However, it is also a "hidden" string that is only displayed when the browser does not support JS.
-    static  $local_no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a href="###ROOT_SERVER###">main server</a> to do the search.</noscript>'; ///< This is the noscript presented for the old-style meeting search. It directs the user to the root server, which will support non-JS browsers.
+    static  $local_no_js_warning = '<noscript class="no_js">This Meeting Search will not work because your browser does not support JavaScript. However, you can use the <a rel="external nofollow" href="###ROOT_SERVER###">main server</a> to do the search.</noscript>'; ///< This is the noscript presented for the old-style meeting search. It directs the user to the root server, which will support non-JS browsers.
      
     /// This one is processed.
     static  $local_noscript = 'This will not work, because you do not have JavaScript active.';             ///< The string displayed in a <noscript> element.
@@ -1124,11 +1124,11 @@ class BMLTPlugin
                     $params = urldecode ( $this->my_http_vars['search_parameters'] );
                     $url = "$root_server?switcher=GetSearchResults&".$params;
                     $result = bmlt_satellite_controller::call_curl ( $url );
-                    $result = preg_replace ( '|\<a |', '<a rel="external" ', $result );
+                    $result = preg_replace ( '|\<a |', '<a rel="nofollow external" ', $result );
                     if ( $this->my_http_vars['single_uri'] )
                         {
-                        $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
-                        $result = preg_replace ( '|\<a rel="external"|','<a rel="external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
+                        $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a rel=\"nofollow\" title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+                        $result = preg_replace ( '|\<a rel="external"|','<a rel="nofollow external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
                         }
                     ob_end_clean(); // Just in case we are in an OB
                     die ( $result );
@@ -1567,7 +1567,7 @@ class BMLTPlugin
                         {
                         $plink = $options['bmlt_new_search_url'];
                         }
-                    $menu = '<div class="bmlt_menu_div no_print"><a href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
+                    $menu = '<div class="bmlt_menu_div no_print"><a rel="nofollow" href="'.htmlspecialchars($plink).'">'.self::process_text ( self::$local_menu_new_search_text ).'</a></div>';
                     }
                 
                 if ( isset ( $this->my_http_vars['search_form'] ) )
@@ -2187,9 +2187,9 @@ class BMLTPlugin
         $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
             $ret .= '<h1 class="banner_h1">'.self::process_text ( self::$local_GPS_banner ).'</h1>';
             $ret .= '<h2 class="banner_h2">'.self::process_text ( self::$local_GPS_banner_subtext ).'</h2>';
-            $ret .= '<div class="link_one_line"><a accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_all ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_today ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.self::process_text ( self::$local_search_tomorrow ).'</a></div>';
             $ret .= '<hr class="meeting_divider_hr" />';
         $ret .= '</div>';
         
@@ -2736,7 +2736,7 @@ class BMLTPlugin
                                                     
                                                     $url = 'http://maps.google.com/maps?q='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']) . '+(%22'.str_replace ( "%28", '-', str_replace ( "%29", '-', $url )).'%22)';
                                                     $url .= '&ll='.urlencode($meeting['latitude']).','.urlencode($meeting['longitude']);
-                                                    $ret .= '<a accesskey="'.$index.'" href="'.htmlspecialchars ( $url ).'" title="'.htmlspecialchars($meeting['meeting_name']).'">'.self::process_text ( self::$local_map_link ).'</a>';
+                                                    $ret .= '<a rel="external nofollow" accesskey="'.$index.'" href="'.htmlspecialchars ( $url ).'" title="'.htmlspecialchars($meeting['meeting_name']).'">'.self::process_text ( self::$local_map_link ).'</a>';
                                                     $ret .= '<script type="text/javascript">document.getElementById(\'maplink_'.intval($meeting['id_bigint']).'\').style.display=\'block\';var c_BMLTPlugin_settings_id = '.htmlspecialchars ( $this->my_http_vars['bmlt_settings_id'] ).';</script>';
 
                                                     $ret .= '</p>';
