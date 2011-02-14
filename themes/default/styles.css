@@ -322,7 +322,7 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
     padding-bottom:4px;
 }
 
-.BMLTPlugin_simple_throbber_container_div
+table#bmlt_container .BMLTPlugin_simple_throbber_container_div
 {
     text-align:center;
     margin-top:8px;
@@ -333,8 +333,14 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
 {
     display:block;
     text-align:center;
-    margin-left auto;
-    margin-right auto;
+    margin-left:auto;
+    margin-right:auto;
     width:40px;
     height:40px;
+}
+
+table#bmlt_container .c_comdef_search_specification_map_invis_a,
+table#bmlt_container .c_comdef_search_specification_map_vis_a
+{
+    margin-left:8px;
 }

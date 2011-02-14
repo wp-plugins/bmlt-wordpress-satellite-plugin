@@ -157,6 +157,7 @@ table#bmlt_container .c_comdef_search_results_alt1,
 table#bmlt_container .c_comdef_search_results_alt1 td,
 table#bmlt_container .throbber_div,          /* These are the window that surrounds the "throbber" */
 table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
+table#bmlt_container .bmlt_search_spec_table,
 .BMLTPlugin_simple_throbber_div
 {
     background-color:#ccc;
@@ -355,7 +356,7 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
     padding-bottom:4px;
 }
 
-.BMLTPlugin_simple_throbber_container_div
+table#bmlt_container .BMLTPlugin_simple_throbber_container_div
 {
     text-align:center;
     margin-top:8px;
@@ -366,8 +367,19 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
 {
     display:block;
     text-align:center;
-    margin-left auto;
-    margin-right auto;
+    margin-left:auto;
+    margin-right:auto;
     width:40px;
     height:40px;
+}
+
+table#bmlt_container .c_comdef_search_specification_map_invis_a,
+table#bmlt_container .c_comdef_search_specification_map_vis_a
+{
+    background-image: none;
+    background-color:#eee;
+    margin-right:8px;
+    margin-left:8px;
+    margin-bottom:4px;
+    border:1px solid #600;
 }
