@@ -331,6 +331,8 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
 .BMLTPlugin_simple_throbber_div img,
 .BMLTPlugin_simple_throbber_div
 {
+    display:block;
+    text-align:center;
     margin-left auto;
     margin-right auto;
     width:40px;
