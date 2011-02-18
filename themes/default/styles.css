@@ -21,7 +21,6 @@ table#bmlt_container .c_comdef_search_specification_map_div
 
 table#bmlt_container .c_comdef_search_specification_form_container_div *,
 table#bmlt_container div.c_comdef_search_results_single_div *,
-table#bmlt_container .marker_main_info_window_div,
 table#bmlt_container .marker_info_window_div,
 table#bmlt_container .marker_info_window_div *,
 table#bmlt_container .throbber_div,
@@ -30,6 +29,11 @@ table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
 table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div img
 {
     margin:auto;
+}
+
+table#bmlt_container .marker_main_info_window_inner_div
+{
+    font-size:x-small;
 }
 
 table#bmlt_container
@@ -322,7 +326,7 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
     padding-bottom:4px;
 }
 
-table#bmlt_container .BMLTPlugin_simple_throbber_container_div
+.BMLTPlugin_simple_throbber_container_div
 {
     text-align:center;
     margin-top:8px;
