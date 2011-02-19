@@ -19,7 +19,7 @@ Version: 2.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+// define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 // Include the satellite driver class.
 require_once ( 'bmlt_satellite_controller.class.php' );
@@ -309,7 +309,6 @@ class BMLTPlugin
             {
             $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
             }
-        
         return $url;
         }
     
@@ -1112,9 +1111,23 @@ class BMLTPlugin
                     $url = "$root_server?switcher=GetSearchResults&".$params;
                     $result = bmlt_satellite_controller::call_curl ( $url );
                     $result = preg_replace ( '|\<a |', '<a rel="nofollow external" ', $result );
-                    if ( $this->my_http_vars['single_uri'] )
+                    // What all this does, is pick out the single URI in the search parameters string, and replace the meeting details link with it.
+                    if ( preg_match ( '|&single_uri=|', $this->my_http_vars['search_parameters'] ) )
                         {
-                        $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a rel=\"nofollow\" title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$this->my_http_vars['single_uri']."$1&amp;supports_ajax=yes\">", $result );
+                        $single_uri = '';
+                        $sp = explode ( '&', $this->my_http_vars['search_parameters'] );
+                        foreach ( $sp as $s )
+                            {
+                            if ( preg_match ( '|single_uri=|', $s ) )
+                                {
+                                list ( $key, $single_uri ) = explode ( '=', $s );
+                                break;
+                                }
+                            }
+                        if ( $single_uri )
+                            {
+                            $result = preg_replace ( '|\<a [^>]*href="'.preg_quote($options['root_server']).'.*?single_meeting_id=(\d+)[^>]*>|', "<a rel=\"nofollow\" title=\"".self::process_text (self::$local_single_meeting_tooltip)."\" href=\"".$single_uri."=$1&amp;supports_ajax=yes\">", $result );
+                            }
                         $result = preg_replace ( '|\<a rel="external"|','<a rel="nofollow external" title="'.self::process_text (self::$local_gm_link_tooltip).'"', $result );
                         }
                     ob_end_clean(); // Just in case we are in an OB
@@ -1304,148 +1317,140 @@ class BMLTPlugin
     ****************************************************************************************/
     function standard_head ( )
         {
-        $head_content = "";
+        $load_head = false;   // This is a throwback. It prevents the GM JS from being loaded if there is no directly specified settings ID.
+        $head_content = "<!-- Added by the BMLT plugin 2.0. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
+       // This is how we figure out which options we'll be using.
         
-        if ( function_exists ( 'plugins_url' ) )
+        if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
             {
-            $load_head = false;   // This is a throwback. It prevents the GM JS from being loaded if there is no directly specified settings ID.
- 			$head_content = "<!-- Added by the BMLT plugin. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-           // This is how we figure out which options we'll be using.
-            
-            if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
+             $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
+            }
+        
+        if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
+            {
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
                 {
-                 $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
+                $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
                 }
-            
-            if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
+            }
+        
+        if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
+            {
+            $options = $this->getBMLTOptions ( 1 );
+            $this->my_option_id = $options['id'];
+            global $wp_query;
+            $page_obj_id = $wp_query->get_queried_object_id();
+            if ( $page_obj_id ) // In the old version, the standard BMLT window could not be shown in posts; only pages.
                 {
-                if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                $page_obj = get_page ( $page_obj_id );
+                if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
                     {
-                    $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                    $load_head = true;
                     }
                 }
-            
-            if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
-                {
-                $options = $this->getBMLTOptions ( 1 );
-                $this->my_option_id = $options['id'];
-                global $wp_query;
-                $page_obj_id = $wp_query->get_queried_object_id();
-                if ( $page_obj_id ) // In the old version, the standard BMLT window could not be shown in posts; only pages.
-                    {
-                    $page_obj = get_page ( $page_obj_id );
-                    if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
-                        {
-                        $load_head = true;
-                        }
-                    }
-                }
-            else
-                {
-                $load_head = true;
-                }
-            
-            // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
-            // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
-            // Post redirectors are also handled, but at this point, only the page will be checked.
-            $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_mobile', true ) ) ) );
-            
-            if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
-                {
-                $mobile_options = $this->getBMLTOptions_by_id ( $support_mobile );
-                }
-            else
-                {
-                $support_mobile = null;
-                }
-            
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-
-            if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
-                {
-                $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$support_mobile;
-                if ( isset ( $this->my_http_vars['WML'] ) )
-                    {
-                    $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
-                    }
-                if ( isset ( $this->my_http_vars['simulate_smartphone'] ) )
-                    {
-                    $mobile_url .= '&simulate_smartphone';
-                    }
-                ob_end_clean();
-                header ( "location: $mobile_url" );
-                die ( );
-                }
-            
-            if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
-                {
-                $load_head = false;
-                }
-            
-		    $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
-            
-            $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
-            
-            $this->load_params ( );
-            
-            $root_server_root = $options['root_server'];
-            
-            $head_content .= '<link rel="stylesheet" type="text/css" href="';
-            
-            $url = self::get_plugin_path();
-            
-            $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
-            
-            if ( !defined ('_DEBUG_MODE_' ) )
-                {
-                $head_content .= 'style_stripper.php?filename=';
-                }
-            
-            $head_content .= 'styles.css" />';
-
-            if ( $root_server_root )
-                {
-                $root_server = $root_server_root."/client_interface/xhtml/index.php";
-                
-                if ( $load_head )
-                    {
-                    $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-                    }
-                
-                if ( $options['push_down_more_details'] )
-                    {
-                    $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
-                    $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
-                    $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:100%;margin:0;}';
-                    }
-                
-                if ( $options['additional_css'] )
-                    {
-                    $additional_css .= $options['additional_css'];
-                    }
-                
-                if ( $additional_css )
-                    {
-                    $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
-                    }
-                }
-            
-            $head_content .= '<script type="text/javascript" src="';
-            
-            $head_content .= htmlspecialchars ( $url );
-            
-            if ( !defined ('_DEBUG_MODE_' ) )
-                {
-                $head_content .= 'js_stripper.php?filename=';
-                }
-            
-            $head_content .= 'javascript.js"></script>';
             }
         else
             {
-            echo "<!-- BMLTPlugin ERROR (head)! No plugins_url()! -->";
+            $load_head = true;
             }
+        
+        // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
+        // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
+        // Post redirectors are also handled, but at this point, only the page will be checked.
+        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_mobile', true ) ) ) );
+        
+        if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+            {
+            $mobile_options = $this->getBMLTOptions_by_id ( $support_mobile );
+            }
+        else
+            {
+            $support_mobile = null;
+            }
+        
+        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+
+        if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
+            {
+            $mobile_url = $_SERVER['PHP_SELF'].'?BMLTPlugin_mobile&bmlt_settings_id='.$support_mobile;
+            if ( isset ( $this->my_http_vars['WML'] ) )
+                {
+                $mobile_url .= '&WML='.intval ( $this->my_http_vars['WML'] );
+                }
+            if ( isset ( $this->my_http_vars['simulate_smartphone'] ) )
+                {
+                $mobile_url .= '&simulate_smartphone';
+                }
+            ob_end_clean();
+            header ( "location: $mobile_url" );
+            die ( );
+            }
+        
+        if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
+            {
+            $load_head = false;
+            }
+        
+        $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
+        
+        $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
+        
+        $this->load_params ( );
+        
+        $root_server_root = $options['root_server'];
+        
+        $head_content .= '<link rel="stylesheet" type="text/css" href="';
+        
+        $url = self::get_plugin_path();
+        
+        $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
+        
+        if ( !defined ('_DEBUG_MODE_' ) )
+            {
+            $head_content .= 'style_stripper.php?filename=';
+            }
+        
+        $head_content .= 'styles.css" />';
+
+        if ( $root_server_root )
+            {
+            $root_server = $root_server_root."/client_interface/xhtml/index.php";
             
+            if ( $load_head )
+                {
+                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+                }
+            
+            if ( $options['push_down_more_details'] )
+                {
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
+                $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_close_box_div{position:relative;left:100%;margin-left:-18px;}';
+                $additional_css .= 'table#bmlt_container div#bmlt_contact_us_form_div{position:static;width:100%;margin:0;}';
+                }
+            
+            if ( $options['additional_css'] )
+                {
+                $additional_css .= $options['additional_css'];
+                }
+            
+            if ( $additional_css )
+                {
+                $head_content .= '<style type="text/css">'.preg_replace ( "|\s+|", " ", $additional_css ).'</style>';
+                }
+            }
+        
+        $head_content .= '<script type="text/javascript" src="';
+        
+        $head_content .= htmlspecialchars ( $url );
+        
+        if ( !defined ('_DEBUG_MODE_' ) )
+            {
+            $head_content .= 'js_stripper.php?filename=';
+            }
+        
+        $head_content .= 'javascript.js"></script>';
+
+//die ( '<pre>'.htmlspecialchars ( print_r ( $head_content, true ) ).'</pre>' );        
         echo $head_content;
         }
         
