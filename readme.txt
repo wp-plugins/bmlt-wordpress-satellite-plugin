@@ -13,6 +13,9 @@ The <a href="http://magshare.org/bmlt">Basic Meeting List Toolbox (BMLT)</a> is 
 The "root server" is a standalone Web site, but "satellite servers" are set up to point to the "root." This is a "satellite," set up as a WordPress plugin.
 It is very easy to install and use. It has an administration panel that lets you choose a map center, designate the root, set up the map zoom, and whether or not older browsers are supported.
 
+<strong>CAUTION:</strong> Be extremely cautions in upgrading to the 2.0 version, as it represents a MAJOR departure from the 1.X versions!
+The styling, especially, has been affected. If you have customized your installation, you'll probably need to redo it. We recommend that you create a custom "theme," by modifying one of the supplied themes.
+
 == Installation ==
 
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
@@ -22,7 +25,27 @@ It is very easy to install and use. It has an administration panel that lets you
 
 == Screenshots ==
 
+1. Basic Map Search Screen
+2. Advanced Search Screen (Text Entry)
+3. Results Displayed As A List
+4. Results Displayed As A Map
+5. Info Window In Map Results
+6. Detailed Results For One Meeting
+7. Administration Screen
+8. Theme Selection Popup (GNYR is A Custom Theme)
+9. Settings Selection Popup
+10. Popup of Simple "Preset" Searches
+11. Preset Search In Progress
+12. Preset Search Results
+13. Display of Format Codes
+14. Mobile Smartphone Screen
+15. Mobile Smartphone Map Results
+16. Mobile Results for Basic (non-smartphone) Device
+
 == Changelog ==
+2.0.0RC1 -February 20, 2011
+    Fixed a number of issues encountered during beta testing.
+    
 2.0.0B0 -February 14, 2011
     Major rewrite. You can now have multiple settings, which can include different servers.
     You can "theme" the displays.
