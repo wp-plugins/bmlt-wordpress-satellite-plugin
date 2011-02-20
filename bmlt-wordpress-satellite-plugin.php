@@ -461,7 +461,7 @@ class BMLTPlugin
                                     'bmlt_initial_view' => self::$default_initial_view,
                                     'push_down_more_details' => self::$default_push_down_more_details,
                                     'additional_css' => self::$default_additional_css,
-                                    'id' => (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
+                                    'id' => abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                                     'setting_name' => '',
                                     'theme' => self::$default_theme
                                     );
@@ -602,7 +602,7 @@ class BMLTPlugin
                 // If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
                 if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
                     {
-                    $in_options['id'] = (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : time());   // This gives the option a unique slug
+                    $in_options['id'] = abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999))));   // This gives the option a unique slug
                     $admin2Options = array ('num_servers' => intval( $in_option_number ));
     
                     $this->setAdmin2Options ( $admin2Options );
@@ -1078,7 +1078,8 @@ class BMLTPlugin
                 }
             else
                 {
-                $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
+                $page = get_page();
+                $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
                 
                 if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
                     {
@@ -1323,9 +1324,10 @@ class BMLTPlugin
         
         if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
             {
-             $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_settings_id', true ) ) ) );
+            $page = get_page();
+            $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
             }
-        
+
         if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
             {
             if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
@@ -1357,8 +1359,8 @@ class BMLTPlugin
         // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
         // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
         // Post redirectors are also handled, but at this point, only the page will be checked.
-        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( get_the_ID(), 'bmlt_mobile', true ) ) ) );
-        
+        $page = get_page();
+        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_mobile', true ) ) ) );
         if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
             {
             $mobile_options = $this->getBMLTOptions_by_id ( $support_mobile );
