@@ -781,10 +781,10 @@ function WhereAmI ( in_qualifier_day,	/**< A string. This determines whether to 
 			g_watch_position = null;
 				
 			// This is the basic URI.
-			var uri = c_BMLTPlugin_files_uri+'BMLTPlugin_mobile_ajax_router=1&request=';
+			var uri = c_BMLTPlugin_files_uri+'BMLTPlugin_mobile_ajax_router=1&bmlt_settings_id='+c_bmlt_settings_id+'&request=';
 			
 			// This is the actual search filter.
-			var request = '/client_interface/json/index.php?switcher=GetSearchResults&compress_output=1';
+			var request = '/client_interface/json/index.php?switcher=GetSearchResults&compress_output=1&bmlt_settings_id='+c_bmlt_settings_id;
 			
 			// This is the location part.
 			request += '&geo_width=-10&lat_val=' + g_location_coords.lat() + '&long_val=' + g_location_coords.lng();

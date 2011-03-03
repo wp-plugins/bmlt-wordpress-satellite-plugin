@@ -75,8 +75,11 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
     return req;
 };
 
-function BMLTPlugin_simple_div_filler ( in_uri,
-                                        in_header
+/****************************************************************************************//**
+*   \brief Call to initiate a simple popup search.                                          *
+********************************************************************************************/
+function BMLTPlugin_simple_div_filler ( in_uri,     ///< The URI to call.
+                                        in_header   ///< The text for the header.
                                     )
 {
     if ( !in_uri )
@@ -93,7 +96,10 @@ function BMLTPlugin_simple_div_filler ( in_uri,
         };
 };
 
-function BMLTPlugin_simple_div_filler_callback ( in_req
+/****************************************************************************************//**
+*   \brief AJAX callback for the simple popup search.                                       *
+********************************************************************************************/
+function BMLTPlugin_simple_div_filler_callback ( in_req ///< The HTTPRequest object for this call.
                                                 )
 {
     document.getElementById('simple_search_container').innerHTML='<h2 class="bmlt_simple_header">'+in_req.extra_data+'</h2>'+in_req.responseText;

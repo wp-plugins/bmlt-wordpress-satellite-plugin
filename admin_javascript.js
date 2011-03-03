@@ -152,10 +152,6 @@ function BMLTPlugin_SaveOptions()
          
         url += '&BMLTPlugin_option_sheet_push_down_'+option_index+'='+push_down;
        
-        var support_mobile = (document.getElementById ( 'BMLTPlugin_option_sheet_support_mobile_'+option_index ).checked ? '1' : '0');
-         
-        url += '&BMLTPlugin_option_sheet_support_mobile_'+option_index+'='+support_mobile;
-        
         var additional_css = document.getElementById ( 'BMLTPlugin_option_sheet_additional_css_'+option_index ).value.toString();
          
         url += '&BMLTPlugin_option_sheet_additional_css_'+option_index+'=';
@@ -227,29 +223,34 @@ function BMLTPlugin_SettingCallback (in_success ///< The HTTPRequest object
 function BMLTPlugin_DirtifyOptionSheet( in_disable  ///< If this is true, then we "clean" the flag.
                                         )
 {
-    document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled = (in_disable == true);
-    document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).className = 'BMLTPlugin_toolbar_button_save_' + ((in_disable == true) ? 'disabled' : 'enabled').toString();
+    var keyID = (window.event && window.event.keyCode) ? window.event.keyCode : null;
 
-    document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).disabled = (in_disable != true);
-    document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_create_button').toString();
+    if ( keyID != 9 )   // Don't react to tab.
+        {
+        document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled = (in_disable == true);
+        document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).className = 'BMLTPlugin_toolbar_button_save_' + ((in_disable == true) ? 'disabled' : 'enabled').toString();
     
-    if ( document.getElementById ( 'BMLTPlugin_toolbar_button_del' ) )
-        {
-        document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
-        document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
-        };
+        document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).disabled = (in_disable != true);
+        document.getElementById ( 'BMLTPlugin_toolbar_button_new' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_create_button').toString();
         
-    if ( !document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled )
-        {
-        if ( window.onbeforeunload != BMLTPlugin_CloseHandler )
+        if ( document.getElementById ( 'BMLTPlugin_toolbar_button_del' ) )
             {
-            g_BMLTPlugin_oldBeforeUnload = window.onbeforeunload;
-            window.onbeforeunload = BMLTPlugin_CloseHandler;
+            document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).disabled = (in_disable != true);
+            document.getElementById ( 'BMLTPlugin_toolbar_button_del' ).className = ((in_disable != true) ? 'BMLTPlugin_toolbar_button_save_disabled' : 'BMLTPlugin_delete_button').toString();
             };
-        }
-    else
-        {
-        window.onbeforeunload = g_BMLTPlugin_oldBeforeUnload;
+            
+        if ( !document.getElementById ( 'BMLTPlugin_toolbar_button_save' ).disabled )
+            {
+            if ( window.onbeforeunload != BMLTPlugin_CloseHandler )
+                {
+                g_BMLTPlugin_oldBeforeUnload = window.onbeforeunload;
+                window.onbeforeunload = BMLTPlugin_CloseHandler;
+                };
+            }
+        else
+            {
+            window.onbeforeunload = g_BMLTPlugin_oldBeforeUnload;
+            };
         };
 };
 

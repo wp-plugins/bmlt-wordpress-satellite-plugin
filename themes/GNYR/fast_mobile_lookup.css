@@ -24,14 +24,16 @@ body
 {
 	font-family:Helvetica,Arial,San-Serif;
 	text-align:center;
-    background-color:#009;
+    background-color:#006;
 }
 
 #search_form_body div.search_div,
 .multi_meeting_div
 {
 	padding:8px;
-	color:white;
+    background-color:#ffc;
+    border: 1px solid #f30;
+	color:#006;
 }
 
 #search_form_body div.search_div a,
@@ -39,7 +41,7 @@ body
 .multi_meeting_div a,
 .multi_meeting_div a:visited
 {
-	color:white;
+	color:#039;
 	text-decoration:underline;
 }
 
@@ -48,7 +50,7 @@ body
 .multi_meeting_div a:hover,
 .multi_meeting_div a:active
 {
-	color:#eee;
+	color:#f30;
 	text-decoration:none;
 }
 
@@ -57,10 +59,11 @@ body
 	position:absolute;
 	top: 0px;
 	left: 0px;
-	margin:0;
+	right: 0px;
+	margin:1px;
 	padding: 0;
-	width: 100%;
-    border: 1px solid #009;
+    background-color:#ffc;
+    border: 1px solid #f30;
 }
 
 .results_map_div
@@ -200,9 +203,17 @@ input.address_input
 
 .infoWindow_Wrapper_div
 {
-	background-color:white;
-	border:2px solid #555;
 	padding:4px;
 	margin:0;
 	overflow auto;
 }
+
+.infoWindow_Wrapper_div,
+#search_form_body div.search_div,
+.multi_meeting_div,
+.info_window_div
+{
+	-moz-border-radius:4px !important;
+	-webkit-border-radius: 4px !important;
+}
+
