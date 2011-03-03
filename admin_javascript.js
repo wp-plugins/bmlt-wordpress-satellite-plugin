@@ -223,7 +223,7 @@ function BMLTPlugin_SettingCallback (in_success ///< The HTTPRequest object
 function BMLTPlugin_DirtifyOptionSheet( in_disable  ///< If this is true, then we "clean" the flag.
                                         )
 {
-    var keyID = (event && event.keyCode) ? event.keyCode : null;
+    var keyID = (window.event && window.event.keyCode) ? window.event.keyCode : null;
 
     if ( keyID != 9 )   // Don't react to tab.
         {

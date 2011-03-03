@@ -1,22 +1,15 @@
 <?php
 /****************************************************************************************//**
-* \file unit_test.php                                                                       *
-* \mainpage                                                                                 *
-* \brief A unit test harness for the BMLTPlugin class.                                      *
-* \version 1.0.0                                                                            *
-* \license Public Domain -No restrictions at all.                                           *
-********************************************************************************************/
-/****************************************************************************************//**
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.0.0                                                                          *
+*   \version 2.0.1                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.0
+Version: 2.0.1
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
@@ -1079,7 +1072,7 @@ class BMLTPlugin
                 }
             else
                 {
-                $page = get_page();
+                $page = get_page(null);
                 $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
                 
                 if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
@@ -1325,7 +1318,7 @@ class BMLTPlugin
         
         if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
             {
-            $page = get_page();
+            $page = get_page(null);
             $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
             }
 
@@ -1360,7 +1353,7 @@ class BMLTPlugin
         // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
         // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
         // Post redirectors are also handled, but at this point, only the page will be checked.
-        $page = get_page();
+        $page = get_page(null);
         $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_mobile', true ) ) ) );
         if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
             {
