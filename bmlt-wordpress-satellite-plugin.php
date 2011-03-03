@@ -3,13 +3,13 @@
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.0.1                                                                          *
+*   \version 2.0.2                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.0.1
+Version: 2.0.2
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
@@ -1072,7 +1072,8 @@ class BMLTPlugin
                 }
             else
                 {
-                $page = get_page(null);
+                $page_id = null;
+                $page = get_page($page_id);
                 $option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
                 
                 if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
@@ -1318,7 +1319,8 @@ class BMLTPlugin
         
         if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
             {
-            $page = get_page(null);
+            $page_id = null;
+            $page = get_page($page_id);
             $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_settings_id', true ) ) ) );
             }
 
@@ -1353,7 +1355,8 @@ class BMLTPlugin
         // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
         // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
         // Post redirectors are also handled, but at this point, only the page will be checked.
-        $page = get_page(null);
+        $page_id = null;
+        $page = get_page($page_id);
         $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( get_post_meta ( $page->ID, 'bmlt_mobile', true ) ) ) );
         if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
             {
@@ -1529,6 +1532,7 @@ class BMLTPlugin
         if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
             {
             $display = '';
+
             
             $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
             
@@ -2333,6 +2337,7 @@ class BMLTPlugin
     {
         $ret .= '<card id="card_'.$index.'" title="'.htmlspecialchars($meeting['meeting_name']).'">';
         
+
         if ( $count > 1 )
             {
             $next_card = null;
@@ -2466,6 +2471,7 @@ class BMLTPlugin
         return $ret;
     }
     
+
     /************************************************************************************//**
     *   \brief Runs the lookup.                                                             *
     *                                                                                       *
