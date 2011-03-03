@@ -1,3 +1,8 @@
+table#bmlt_container div.c_comdef_search_results_map_container_div img
+{
+    max-width: none;
+}
+
 table#bmlt_container,
 table#bmlt_container .embedded_map_div,
 table#bmlt_container td.BMLTPlugin_container_td,
@@ -14,9 +19,21 @@ table#bmlt_container .c_comdef_search_specification_map_div
     border:none;
 }
 
-table#bmlt_container *
+table#bmlt_container .c_comdef_search_specification_form_container_div *,
+table#bmlt_container div.c_comdef_search_results_single_div *,
+table#bmlt_container .marker_info_window_div,
+table#bmlt_container .marker_info_window_div *,
+table#bmlt_container .throbber_div,
+table#bmlt_container .throbber_div img,
+table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
+table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div img
 {
     margin:auto;
+}
+
+table#bmlt_container .marker_main_info_window_inner_div
+{
+    font-size:x-small;
 }
 
 table#bmlt_container
@@ -164,7 +181,7 @@ table#bmlt_container .bmlt_spec_tab:visited
 table#bmlt_container .marker_more_info_a:hover,     /* Same, but for rollovers (hover). */
 table#bmlt_container .marker_more_info_a:active,
 table#bmlt_container .bmlt_spec_tab:hover,
-table#bmlt_container .bmlt_spec_tab:active
+table#bmlt_container .bmlt_spec_tab active
 {
     color:white;
     text-decoration: none;
@@ -291,7 +308,7 @@ table#bmlt_container .single_header_link:visited
 }
 
 table#bmlt_container .single_header_link:hover,
-table#bmlt_container .single_header_link:active
+table#bmlt_container .single_header_link active
 {
     color:white;
     text-decoration: none;
@@ -318,8 +335,16 @@ table#bmlt_container .c_comdef_search_results_formats_div .format_term_dt
 .BMLTPlugin_simple_throbber_div img,
 .BMLTPlugin_simple_throbber_div
 {
+    display:block;
+    text-align:center;
     margin-left:auto;
     margin-right:auto;
     width:40px;
     height:40px;
+}
+
+table#bmlt_container .c_comdef_search_specification_map_invis_a,
+table#bmlt_container .c_comdef_search_specification_map_vis_a
+{
+    margin-left:8px;
 }
