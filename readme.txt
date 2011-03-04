@@ -43,6 +43,9 @@ The styling, especially, has been affected. If you have customized your installa
 16. Mobile Results for Basic (non-smartphone) Device
 
 == Changelog ==
+2.0.2 -March 3, 2011
+    Fixed a critical problem that appeared in 2.0.1 because of a silly error on the coders' part.
+    
 2.0.1 -March 3, 2011
     Fixed a JavaScript issue that prevented the options from being displayed in Firefox.
     Added null parameters to some get_page() calls to prevent warnings.
