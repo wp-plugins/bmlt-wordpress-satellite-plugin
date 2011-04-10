@@ -29,32 +29,32 @@ class BMLTPlugin
     ****************************************************************************************/
     
     /// This is a SINGLETON pattern. There can only be one...
-    static  $g_s_there_can_only_be_one = null;                                      ///< This is a static variable that holds the single instance.
+    static  $g_s_there_can_only_be_one = null;                              ///< This is a static variable that holds the single instance.
     
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (DEFAULTS)                              *
     *   In Version 2, these are all ignored:                                                *
     *       $default_bmlt_fullscreen                                                        *
     *       $default_support_old_browsers                                                   *
-    *       $default_initial_view                                                           *
     *       $default_sb_array                                                               *
-    *       $default_language                                                               *
     ****************************************************************************************/
     
-    static  $adminOptionsName = "BMLTAdminOptions";                                 ///< The name, in the database, for the version 1 options for this plugin.
-    static  $admin2OptionsName = "BMLT2AdminOptions";                               ///< These options are for version 2.
+    static  $adminOptionsName = "BMLTAdminOptions";                         ///< The name, in the database, for the version 1 options for this plugin.
+    static  $admin2OptionsName = "BMLT2AdminOptions";                       ///< These options are for version 2.
     
     // These are the old settings that we still care about.
-    static  $default_rootserver = '';                                               ///< This is the default root BMLT server URI.
-    static  $default_map_center_latitude = 29.764377375163125;                      ///< This is the default basic search map center latitude
-    static  $default_map_center_longitude = -95.4931640625;                         ///< This is the default basic search map center longitude
-    static  $default_map_zoom = 8;                                                  ///< This is the default basic search map zoom level
-    static  $default_new_search = '';                                               ///< If this is set to something, then a new search uses the exact URI.
-    static  $default_gkey = '';                                                     ///< This is only necessary for older versions.
-    static  $default_push_down_more_details = '1';      ///< If this is set to 1, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
-    static  $default_additional_css = '';               ///< This is additional CSS that is inserted inline into the <head> section.
-    static  $default_initial_view = '';                 ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
-    static  $default_theme = 'default';                 ///< This is the default for the "style theme" for the plugin. Different settings can have different themes.
+    static  $default_rootserver = '';                                       ///< This is the default root BMLT server URI.
+    static  $default_map_center_latitude = 29.764377375163125;              ///< This is the default basic search map center latitude
+    static  $default_map_center_longitude = -95.4931640625;                 ///< This is the default basic search map center longitude
+    static  $default_map_zoom = 8;                                          ///< This is the default basic search map zoom level
+    static  $default_new_search = '';                                       ///< If this is set to something, then a new search uses the exact URI.
+    static  $default_gkey = '';                                             ///< This is only necessary for older versions.
+    static  $default_push_down_more_details = '1';                          ///< If this is set to 1, then "More Details" and "Contact" windows will "push down" the content, instead of floating over it.
+    static  $default_additional_css = '';                                   ///< This is additional CSS that is inserted inline into the <head> section.
+    static  $default_initial_view = '';                                     ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
+    static  $default_theme = 'default';                                     ///< This is the default for the "style theme" for the plugin. Different settings can have different themes.
+    static  $default_language = 'en';                                       ///< The default language is English, but the root server can override.
+    static  $default_distance_units = 'mi';                                 ///< The default distance units are miles.
     
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
@@ -85,25 +85,32 @@ class BMLTPlugin
     static  $local_options_new_search_label = 'New Search URL:';            ///< The Label for the new search item.
     static  $local_options_gkey_label = 'Google Maps API Key:';             ///< The Label for the Google Maps API Key item.
     static  $local_options_no_name_string = 'Enter Setting Name';           ///< The Value to use for a name field for a setting with no name.
-    static  $local_options_no_root_server_string = 'Enter a Root Server URL';   ///< The Value to use for a root with no URL.
+    static  $local_options_no_root_server_string = 'Enter a Root Server URL';                               ///< The Value to use for a root with no URL.
     static  $local_options_no_new_search_string = 'Enter a New Search URL'; ///< The Value to use for a new search with no URL.
     static  $local_options_no_gkey_string = 'Enter a New API Key';          ///< The Value to use for a new search with no URL.
     static  $local_options_test_server = 'Test';                            ///< This is the title for the "test server" button.
+    static  $local_options_fetch_server_langs = 'Fetch Server Languages';   ///< This is the title for the "Fetch Server Languages" button.
+    static  $local_options_fetch_server_langs_tooltip = 'If you press this button, the server will be queried for its available and default languages.';    ///< This is the tooltip for the "Fetch Server Languages" button.
+    static  $local_options_default_lang_value = 'No Languages Available';   ///< This is the title for the languages popup, prior to being populated by the server.
     static  $local_options_test_server_success = 'Version ';                ///< This is a prefix for the version, on success.
-    static  $local_options_test_server_failure = 'This Root Server URL is not Valid';               ///< This is a prefix for the version, on failure.
-    static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.'; ///< This is the tooltip text for the "test server" button.
-    static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';     ///< The Label for the map.
-    static  $local_options_gkey_caveat = 'These are only necessary for old-style BMLT implementations';  ///< This lets people know that this is not necessary for newer installs.
+    static  $local_options_test_server_failure = 'This Root Server URL is not Valid';                       ///< This is a prefix for the version, on failure.
+    static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.';         ///< This is the tooltip text for the "test server" button.
+    static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';             ///< The Label for the map.
+    static  $local_options_gkey_caveat = 'These are only necessary for old-style BMLT implementations';     ///< This lets people know that this is not necessary for newer installs.
     static  $local_options_initial_view = array (                           ///< The list of choices for presentation in the popup.
                                                 '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
                                                 );
     static  $local_options_initial_view_prompt = 'Initial Search Type:';    ///< The label for the initial view popup.
     static  $local_options_theme_prompt = 'Select a Color Theme:';          ///< The label for the theme selection popup.
-    static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.'; ///< The label for the "more details" checkbox.
-    static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';           ///< The label for the Additional CSS textarea.
+    static  $local_options_push_down_checkbox_label = '"More Details" Windows "push down" the main list or map, as opposed to popping up over them.';       ///< The label for the "more details" checkbox.
+    static  $local_options_more_styles_label = 'Add CSS Styles to the Plugin:';                             ///< The label for the Additional CSS textarea.
     static  $local_single_meeting_tooltip = 'Follow This Link for Details About This Meeting.'; ///< The tooltip shown for a single meeting.
     static  $local_gm_link_tooltip = 'Follow This Link to be Taken to A Google Maps Location for This Meeting.';    ///< The tooltip shown for the Google Maps link.
     static  $local_not_enough_for_old_style = 'In order to display the "classic" BMLT window, you need to have both a root server and a Google Maps API key in the corresponding setting.'; ///< Displayed if there is no GMAP API key.
+    static  $local_options_language_prompt = 'Language:';                   ///< This is for the language select.
+    static  $local_options_distance_prompt = 'Distance Units:';             ///< This is for the distance units select.
+    static  $local_options_miles = 'Miles';                                 ///< The string for miles.
+    static  $local_options_kilometers = 'Kilometers';                       ///< The string for kilometers.
     
     /// These are for the actual search displays
     static  $local_select_search = 'Select a Quick Search';                 ///< Used for the "filler" in the quick search popup.
@@ -111,7 +118,7 @@ class BMLTPlugin
     static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu in the old-style BMLT search.
     
     /// A simple message for most <noscript> elements. We have a different one for the older interactive search (below).
-    static  $local_noscript = 'This will not work, because you do not have JavaScript active.'; ///< The string displayed in a <noscript> element.
+    static  $local_noscript = 'This will not work, because you do not have JavaScript active.';             ///< The string displayed in a <noscript> element.
                                     
     /************************************************************************************//**
     *                      STATIC DATA MEMBERS (SPECIAL LOCALIZABLE)                        *
@@ -385,7 +392,9 @@ class BMLTPlugin
                         'additional_css' => self::$default_additional_css,
                         'id' => abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                         'setting_name' => '',
-                        'theme' => self::$default_theme
+                        'theme' => self::$default_theme,
+                        'language_enum' => self::$default_language,
+                        'distance_units' => self::$default_distance_units
                         );
         }
     
@@ -1038,6 +1047,31 @@ class BMLTPlugin
                     $ret .= '</div>';
                     }
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                    $id = 'BMLTPlugin_option_sheet_distance_units_'.$in_options_index;
+                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_distance_prompt ).'</label>';
+                    $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                        $ret .= '<option value="mi"';
+                        if ( 'mi' == $options['distance_units'] )
+                            {
+                            $ret .= ' selected="selected"';
+                            }
+                        $ret .= '>'.$this->process_text ( self::$local_options_miles ).'</option>';
+                        $ret .= '<option value="km"';
+                        if ( 'km' == $options['distance_units'] )
+                            {
+                            $ret .= ' selected="selected"';
+                            }
+                        $ret .= '>'.$this->process_text ( self::$local_options_kilometers ).'</option>';
+                    $ret .= '</select>';
+                $ret .= '</div>';
+                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                    $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
+                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_language_prompt ).'</label>';
+                    $ret .= '<select disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()"><option value="" selected="selected">'.$this->process_text ( self::$local_options_default_lang_value ).'</option></select>';
+                    $ret .= '<input type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.intval($in_options_index).')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_Server_Lang_Throbber" id="BMLTPlugin_option_sheet_Server_Lang_Throbber_'.$in_options_index.'"></div>';
+                $ret .= '</div>';
+                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_more_styles_label ).'</label>';
                     $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
@@ -1219,6 +1253,16 @@ class BMLTPlugin
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] ) && intval ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] ) )
                             {
                             $options['map_zoom'] = floatVal ( $this->my_http_vars['BMLTPlugin_option_zoom_'.$i] );
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_language_'.$i] ) )
+                            {
+                            $options['lang_enum'] = $this->my_http_vars['BMLTPlugin_option_sheet_language_'.$i];
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i] ) )
+                            {
+                            $options['distance_units'] = $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i];
                             }
                         
                         if ( !$this->setBMLTOptions ( $options, $i ) )

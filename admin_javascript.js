@@ -131,6 +131,20 @@ function BMLTPlugin_SaveOptions()
             url += encodeURIComponent ( new_search );
             };
         
+        var lang_enum = document.getElementById ( 'BMLTPlugin_option_sheet_language_'+option_index ).value.toString();
+        
+         if ( lang_enum )
+            {
+            url += '&BMLTPlugin_option_sheet_language_'+option_index+'='+encodeURIComponent ( lang_enum );
+            }
+        
+        var distance_units = document.getElementById ( 'BMLTPlugin_option_sheet_distance_units_'+option_index ).value.toString();
+        
+         if ( distance_units )
+            {
+            url += '&BMLTPlugin_option_sheet_distance_units_'+option_index+'='+encodeURIComponent ( distance_units );
+            }
+       
         var gmaps_key = document.getElementById ( 'BMLTPlugin_option_sheet_gkey_'+option_index ).value.toString();
          
         url += '&BMLTPlugin_option_sheet_gkey_'+option_index+'=';
@@ -252,6 +266,25 @@ function BMLTPlugin_DirtifyOptionSheet( in_disable  ///< If this is true, then w
             window.onbeforeunload = g_BMLTPlugin_oldBeforeUnload;
             };
         };
+};
+
+/****************************************************************************************//**
+*   \brief Fetches the available and default languages from the server, and sets up the     *
+*   language dropdown accordingly.                                                          *
+*                                                                                           *
+********************************************************************************************/
+function BMLTPlugin_FetchServerLangs ( in_id    ///< The index of the option to test.
+                                        )
+{
+};
+
+/****************************************************************************************//**
+*   \brief This is the AJAX callback for setting up the server languages.                   *
+*                                                                                           *
+********************************************************************************************/
+function BMLTPlugin_FetchServerLangsCallback ( in_text  ///< The processing result. Should be a JSON object.
+                                                )
+{
 };
 
 /****************************************************************************************//**
