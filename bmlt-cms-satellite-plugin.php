@@ -946,7 +946,7 @@ class BMLTPlugin
                                 $html .= '};';
                                 }
                             }
-                        $url = self::get_plugin_path();
+                        $url = $this->get_plugin_path();
                         $url = htmlspecialchars ( $url.'google_map_images' );
                         $html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
                         $html .= 'BMLTPlugin_admin_load_map();';
@@ -1280,7 +1280,7 @@ class BMLTPlugin
                 {
                 $ret = $this->BMLTPlugin_fast_mobile_lookup ();
     
-                $url = self::get_plugin_path();
+                $url = $this->get_plugin_path();
                 
                 ob_end_clean(); // Just in case we are in an OB
                 
@@ -1464,7 +1464,7 @@ class BMLTPlugin
                     $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
                     }
                 
-                $url = self::get_plugin_path();
+                $url = $this->get_plugin_path();
                 
                 $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
                 
@@ -1571,7 +1571,7 @@ class BMLTPlugin
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
 
                     $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-                    $url = self::get_plugin_path();
+                    $url = $this->get_plugin_path();
                     $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
                     
                     $display .= "var c_g_BMLTPlugin_images = '$img_url';";
@@ -1724,7 +1724,7 @@ class BMLTPlugin
         $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';
         $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?\';';
         $ret .= 'var c_bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].';';        
-        $url = self::get_plugin_path();
+        $url = $this->get_plugin_path();
 
         $img_url = "$url/google_map_images";
 
@@ -1753,7 +1753,7 @@ class BMLTPlugin
     function BMLTPlugin_fast_mobile_lookup_header_stuff()
         {
         $ret = '';
-        $url = self::get_plugin_path();
+        $url = $this->get_plugin_path();
             
         $ret .= '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';    // WML 1 only cares about the charset and cache.
         $ret .= '<meta http-equiv="Cache-Control" content="max-age=300"  />';               // Cache for 5 minutes.
@@ -1766,7 +1766,7 @@ class BMLTPlugin
             $ret .= '<meta http-equiv="Content-Style-Type" content="text/css" />';
             $ret .= '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />'; // Make sure iPhone screens stay humble.
             
-            $url = self::get_plugin_path();
+            $url = $this->get_plugin_path();
             
             $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
             
@@ -2436,7 +2436,7 @@ class BMLTPlugin
 
             $ret .= '<div id="location_finder" class="results_map_div">';
             
-            $url = self::get_plugin_path();
+            $url = $this->get_plugin_path();
             
             $throbber_loc .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/Throbber.gif' );
             
