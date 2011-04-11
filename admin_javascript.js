@@ -302,18 +302,18 @@ function BMLTPlugin_FetchServerLangs ( in_id    ///< The index of the option to 
 {
     var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action;
     var option_index = BMLTPlugin_GetSelectedOptionIndex();
-    
+    var throbber_item = document.getElementById('BMLTPlugin_option_sheet_Server_Lang_Throbber_'+option_index);
+   
     url += '&BMLTPlugin_Fetch_Langs_AJAX_Call=1';
     
     var root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
     
-    url += '&BMLTPlugin_option_sheet_root_server_'+option_index+'=';
-
     if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
         {
-        url += encodeURIComponent ( root_server );
+        url += '&BMLTPlugin_AJAX_Call_Check_Root_URI='+encodeURIComponent ( root_server );
         };
 
+    throbber_item.innerHTML = '<img src="'+c_g_BMLTPlugin_admin_google_map_images+'/small_throbber.gif" alt="AJAX Throbber" />';
     BMLTPlugin_AjaxRequest ( url, BMLTPlugin_FetchServerLangsCallback, 'get' );
 };
 
@@ -321,9 +321,45 @@ function BMLTPlugin_FetchServerLangs ( in_id    ///< The index of the option to 
 *   \brief This is the AJAX callback for setting up the server languages.                   *
 *                                                                                           *
 ********************************************************************************************/
-function BMLTPlugin_FetchServerLangsCallback ( in_text  ///< The processing result. Should be a JSON object.
+function BMLTPlugin_FetchServerLangsCallback ( in_object  ///< The processing result. Should be an HTTPRequest with a JSON object in the text.
                                                 )
 {
+    if ( in_object.responseText )
+        {
+        var option_index = BMLTPlugin_GetSelectedOptionIndex();
+        var select_item = document.getElementById('BMLTPlugin_option_sheet_language_'+option_index);
+        var throbber_item = document.getElementById('BMLTPlugin_option_sheet_Server_Lang_Throbber_'+option_index);
+        
+        if ( select_item )
+            {
+            var name_item = document.getElementById('BMLTPlugin_option_sheet_language_name_'+option_index);
+            
+            if ( name_item )
+                {
+                eval ( 'var json_obj = '+in_object.responseText+';' );
+
+                select_item.options.length = 0;
+                
+                for ( var c = 0; c < json_obj.length; c++ )
+                    {
+                    var lang_enum = json_obj[c][0];
+                    var lang_name = json_obj[c][1];
+                    var lang_default = json_obj[c][2];
+
+                    select_item.options[c] = new Option ( lang_name.toString(), lang_enum.toString());
+
+                    if ( lang_default )
+                        {
+                        select_item.selectedIndex = c;
+                        };
+                    };
+                
+                select_item.disabled = false;
+                
+                throbber_item.innerHTML = '';
+               };
+            };
+        };
 };
 
 /****************************************************************************************//**
@@ -333,7 +369,7 @@ function BMLTPlugin_FetchServerLangsCallback ( in_text  ///< The processing resu
 function BMLTPlugin_CloseHandler()
 {
     return c_g_BMLTPlugin_unsaved_prompt;
-}
+};
 
 /****************************************************************************************//**
 *   \brief Starts the message "fader."                                                      *

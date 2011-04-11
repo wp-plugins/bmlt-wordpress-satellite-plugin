@@ -175,6 +175,26 @@
     margin-left:4px;
 }
 
+.BMLTPlugin_option_sheet_Server_Lang_Throbber
+{
+    height:24px;
+    width:24px;
+}
+
+.BMLTPlugin_lang_select,
+.BMLTPlugin_option_sheet_Server_Lang_Throbber,
+.BMLTPlugin_lang_button
+{
+    display: block;
+    float:left;
+}
+
+.BMLTPlugin_option_sheet_Server_Lang_Throbber,
+.BMLTPlugin_lang_button
+{
+    margin-left:8px;
+}
+
 .BMLTPlugin_option_sheet_line_name_text
 {
     width: 300px;

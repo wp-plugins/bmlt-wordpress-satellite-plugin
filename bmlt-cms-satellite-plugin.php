@@ -11,6 +11,7 @@
 
 // Include the satellite driver class.
 require_once ( dirname ( __FILE__ ).'/bmlt_satellite_controller.class.php' );
+require_once ( dirname ( __FILE__ ).'/Array2Json.php' );
 
 /****************************************************************************************//**
 *   \class BMLTPlugin                                                                       *
@@ -1071,10 +1072,10 @@ class BMLTPlugin
                     $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
                     $ret .= '<input type="hidden" id="BMLTPlugin_option_sheet_language_name_'.$in_options_index.'" value="'.$this->process_text ( $options['lang_name'] ).'" />';
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_language_prompt ).'</label>';
-                    $ret .= '<select disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_ChangeLanguage()">';
+                    $ret .= '<select class="BMLTPlugin_lang_select" disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_ChangeLanguage()">';
                         $ret .= '<option value="'.htmlspecialchars ( $options['lang_enum'] ).'" selected="selected">'.$this->process_text ( $options['lang_name'] ).'</option>';
                     $ret .= '</select>';
-                    $ret .= '<input type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.$in_options_index.')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
+                    $ret .= '<input class="BMLTPlugin_lang_button" type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.$in_options_index.')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
                     $ret .= '<div class="BMLTPlugin_option_sheet_Server_Lang_Throbber" id="BMLTPlugin_option_sheet_Server_Lang_Throbber_'.$in_options_index.'"></div>';
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
@@ -1308,6 +1309,22 @@ class BMLTPlugin
                             }
                         else
                             {
+                            $slangs = $test->get_server_langs();
+                            
+                            if ( $slangs )
+                                {
+                                $langs = array();
+                                foreach ( $slangs as $key => $value )
+                                    {
+                                    $langs[] = array ( $key, $value['name'], $value['default'] );
+                                    }
+                                
+                                $ret = array2json ( $langs );
+                                }
+                            else
+                                {
+                                $ret = 'ERROR';
+                                }
                             }
                         }
                     }
