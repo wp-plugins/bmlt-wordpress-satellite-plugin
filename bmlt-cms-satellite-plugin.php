@@ -941,7 +941,7 @@ class BMLTPlugin
             $html .= '<div id="BMLTPlugin_options_container" style="display:none">';    // This is displayed using JavaScript.
                 $html .= '<h1 class="BMLTPlugin_Admin_h1">'.$this->process_text ( self::$local_options_title ).'</h1>';
                 $html .= $process_html;
-                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
+                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
                     $html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
                         $html .= '<legend id="BMLTPlugin_legend" class="BMLTPlugin_legend">';
                             $count = $this->get_num_options();
@@ -1007,7 +1007,7 @@ class BMLTPlugin
                     $html .= '</fieldset>';
                 $html .= '</form>';
                 $html .= '<div class="BMLTPlugin_toolbar_line_bottom">';
-                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
+                    $html .= '<form action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
                     if ( $count > 1 )
                         {
                         $html .= '<div class="BMLTPlugin_toolbar_button_line_left">';
@@ -1022,7 +1022,7 @@ class BMLTPlugin
                         $html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.$this->process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptions()" />';
                     $html .= '</div>';
                     $html .= '</form>';
-                    $html .= '<form action ="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get">';
+                    $html .= '<form action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get">';
                     $html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $this->my_http_vars['page'] ).'" />';
                     $html .= '<input type="submit" id="BMLTPlugin_toolbar_button_new" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.$this->process_text ( self::$local_options_add_new ).'" />';
                     $html .= '</form>';
@@ -1750,7 +1750,7 @@ class BMLTPlugin
                         $line['prompt'] = trim($text_ar[$lines++]);
                         if ( $line['parameters'] && $line['prompt'] )
                             {
-                            $uri = $_SERVER['PHP_SELF'].'?bmlt_settings_id='.$this->my_option_id.'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->my_option_id.'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
                             $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
                             }
                         }
@@ -1914,7 +1914,7 @@ class BMLTPlugin
         $ret .= 'var c_g_distance_prompt = \''.$this->process_text ( self::$local_mobile_distance ).'\';';
         $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
         $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';
-        $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?\';';
+        $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?\';';
         $ret .= 'var c_bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].';';        
         $url = $this->get_plugin_path();
 
@@ -2007,9 +2007,9 @@ class BMLTPlugin
         $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
             $ret .= '<h1 class="banner_h1">'.$this->process_text ( self::$local_GPS_banner ).'</h1>';
             $ret .= '<h2 class="banner_h2">'.$this->process_text ( self::$local_GPS_banner_subtext ).'</h2>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
             $ret .= '<hr class="meeting_divider_hr" />';
         $ret .= '</div>';
         
@@ -2025,7 +2025,7 @@ class BMLTPlugin
         {
         if ( !isset ( $this->my_http_vars['WML'] ) || ($this->my_http_vars['WML'] != 1) )
             {
-            $ret = '<form class="address_input_form" method="get" action="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'"';
+            $ret = '<form class="address_input_form" method="get" action="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'"';
             if ( !isset ( $this->my_http_vars['WML'] ) )
                 {
                 // This fills the form with a "seed" text (standard accessibility practice). We do it this way, so we don't clutter the form if no JavaScript is available.
@@ -2139,7 +2139,7 @@ class BMLTPlugin
             $ret .= '<option value="tomorrow">'.$this->process_text ( self::$local_search_tomorrow ).'</option>';
             $ret .= '</select>';
             $ret .= '<anchor>';
-            $ret .= '<go href="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'" method="get">';
+            $ret .= '<go href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'" method="get">';
             $ret .= '<postfield name="address" value="$(address)"/>';
             $ret .= '<postfield name="qualifier" value="$(qualifier)"/>';
             $ret .= '<postfield name="do_search" value="the hard way" />';
@@ -2186,7 +2186,7 @@ class BMLTPlugin
                 array_push ( $vars, $text );
                 }
             
-            $myself = htmlspecialchars ( $_SERVER['PHP_SELF'] ).'?'.join ( '&amp;', $vars ).'&amp;access_card=';
+            $myself = htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?'.join ( '&amp;', $vars ).'&amp;access_card=';
         
             if ( $index < $count )
                 {
@@ -2739,6 +2739,26 @@ class BMLTPlugin
     *                                                                                       *
     * These need to be overloaded by the subclasses.                                        *
     ****************************************************************************************/
+    
+    /************************************************************************************//**
+    *   \brief Return an HTTP path to the AJAX callback target for the mobile handler.      *
+    *                                                                                       *
+    *   \returns a string, containing the path. Defaults to the base URI.                   *
+    ****************************************************************************************/
+    protected function get_ajax_mobile_base_uri()
+        {
+        return $this->get_ajax_base_uri();
+        }
+    
+    /************************************************************************************//**
+    *   \brief Return an HTTP path to the AJAX callback target.                             *
+    *                                                                                       *
+    *   \returns a string, containing the path.                                             *
+    ****************************************************************************************/
+    protected function get_ajax_base_uri()
+        {
+        return null;
+        }
     
     /************************************************************************************//**
     *   \brief Return an HTTP path to the plugin directory.                                 *

@@ -162,6 +162,13 @@ function BMLTPlugin_SaveOptions()
             url += '&BMLTPlugin_option_sheet_language_'+option_index+'='+encodeURIComponent ( lang_enum );
             }
         
+        var lang_name = document.getElementById ( 'BMLTPlugin_option_sheet_language_name_'+option_index ).value.toString();
+        
+         if ( lang_name )
+            {
+            url += '&BMLTPlugin_option_sheet_language_name_'+option_index+'='+encodeURIComponent ( lang_name );
+            }
+        
         var distance_units = document.getElementById ( 'BMLTPlugin_option_sheet_distance_units_'+option_index ).value.toString();
         
          if ( distance_units )
@@ -335,6 +342,8 @@ function BMLTPlugin_FetchServerLangsCallback ( in_object  ///< The processing re
             {
             var name_item = document.getElementById('BMLTPlugin_option_sheet_language_name_'+option_index);
             
+            var old_enum = select_item.options[select_item.selectedIndex].value;
+            
             if ( name_item )
                 {
                 eval ( 'var json_obj = '+in_object.responseText+';' );
@@ -358,6 +367,13 @@ function BMLTPlugin_FetchServerLangsCallback ( in_object  ///< The processing re
                 select_item.disabled = false;
                 
                 throbber_item.innerHTML = '';
+                
+                var new_enum = select_item.options[select_item.selectedIndex].value;
+                
+                if ( old_enum != new_enum )
+                    {
+                    BMLTPlugin_DirtifyOptionSheet();
+                    };
                };
             };
         }

@@ -39,6 +39,16 @@ class BMLTWPPlugin extends BMLTPlugin
         }
     
     /************************************************************************************//**
+    *   \brief Return an HTTP path to the AJAX callback target.                             *
+    *                                                                                       *
+    *   \returns a string, containing the path.                                             *
+    ****************************************************************************************/
+    protected function get_ajax_base_uri()
+        {
+        return $_SERVER['PHP_SELF'];
+        }
+    
+    /************************************************************************************//**
     *   \brief Return an HTTP path to the plugin directory.                                 *
     *                                                                                       *
     *   \returns a string, containing the path.                                             *
