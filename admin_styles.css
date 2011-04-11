@@ -167,7 +167,8 @@
 }
 
 .BMLTPlugin_option_sheet_text_div,
-.BMLTPlugin_option_sheet_Version
+.BMLTPlugin_option_sheet_Version,
+.BMLTPlugin_option_sheet_Server_Lang_Throbber
 {
     color: #36c;
     font-style:italic;
@@ -177,8 +178,10 @@
 
 .BMLTPlugin_option_sheet_Server_Lang_Throbber
 {
+    color: red;
+    line-height:24px;
+    vertical-align:center;
     height:24px;
-    width:24px;
 }
 
 .BMLTPlugin_lang_select,

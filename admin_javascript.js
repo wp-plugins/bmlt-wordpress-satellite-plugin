@@ -324,11 +324,12 @@ function BMLTPlugin_FetchServerLangs ( in_id    ///< The index of the option to 
 function BMLTPlugin_FetchServerLangsCallback ( in_object  ///< The processing result. Should be an HTTPRequest with a JSON object in the text.
                                                 )
 {
+    var option_index = BMLTPlugin_GetSelectedOptionIndex();
+    var throbber_item = document.getElementById('BMLTPlugin_option_sheet_Server_Lang_Throbber_'+option_index);
+    
     if ( in_object.responseText )
         {
-        var option_index = BMLTPlugin_GetSelectedOptionIndex();
         var select_item = document.getElementById('BMLTPlugin_option_sheet_language_'+option_index);
-        var throbber_item = document.getElementById('BMLTPlugin_option_sheet_Server_Lang_Throbber_'+option_index);
         
         if ( select_item )
             {
@@ -359,6 +360,10 @@ function BMLTPlugin_FetchServerLangsCallback ( in_object  ///< The processing re
                 throbber_item.innerHTML = '';
                };
             };
+        }
+    else
+        {
+        throbber_item.innerHTML = c_g_BMLTPlugin_root_canal;
         };
 };
 
@@ -489,7 +494,7 @@ function BMLTPlugin_TestRootUriCallback(in_success  ///< The text in this is eit
     var indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+option_index );
     var version = document.getElementById ('BMLTPlugin_option_sheet_version_indicator_'+option_index );
     
-    if ( parseInt(in_success.responseText) == 0 )
+    if ( !in_success.responseText || (parseInt(in_success.responseText) == 0) )
         {
         indicator.className = 'BMLTPlugin_option_sheet_BAD';
         version.innerHTML = c_g_BMLTPlugin_test_server_failure;

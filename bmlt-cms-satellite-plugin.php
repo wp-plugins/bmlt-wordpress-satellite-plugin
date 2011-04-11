@@ -316,7 +316,7 @@ class BMLTPlugin
 
         foreach ( $in_array as $key => $value )
             {
-            if ( isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher.
+            if ( ($key != 'lang_enum') && isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher or the language.
                 {
                 if ( is_array ( $value ) )
                     {
@@ -1291,7 +1291,7 @@ class BMLTPlugin
             }
         elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) || isset ( $this->my_http_vars['BMLTPlugin_Fetch_Langs_AJAX_Call'] ) )
             {
-            $ret = '0';
+            $ret = '';
             
             if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
                 {
@@ -1320,10 +1320,6 @@ class BMLTPlugin
                                     }
                                 
                                 $ret = array2json ( $langs );
-                                }
-                            else
-                                {
-                                $ret = 'ERROR';
                                 }
                             }
                         }
@@ -1517,6 +1513,12 @@ class BMLTPlugin
                     {
                     $map_center = "&search_spec_map_center=".$options['map_center_latitude'].",".$options['map_center_longitude'].",".$options['map_zoom'];
                     $uri = "$root_server?switcher=GetSimpleSearchForm$this->my_params$map_center";
+                    
+                    if ( $options['lang_enum'] )
+                        {
+                        $uri .= '&lang_enum='.$options['lang_enum'];
+                        }
+                    
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
                 elseif ( isset ( $this->my_http_vars['single_meeting_id'] ) && $this->my_http_vars['single_meeting_id'] )
