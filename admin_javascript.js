@@ -74,9 +74,12 @@ function BMLTPlugin_SelectOptionSheet ( in_value,       ///< The current value o
         };
     
     BMLTPlugin_admin_load_map();
+
     var indicator = document.getElementById ( 'BMLTPlugin_option_sheet_indicator_'+in_value );
+    var version = document.getElementById ('BMLTPlugin_option_sheet_version_indicator_'+in_value );
     
     indicator.className = 'BMLTPlugin_option_sheet_NEUT';
+    version.innerHTML = null;
 };
 
 /****************************************************************************************//**
