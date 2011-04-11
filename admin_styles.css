@@ -166,6 +166,14 @@
     color: #36c;
 }
 
+.BMLTPlugin_option_sheet_text_div
+{
+    color: #36c;
+    font-style:italic;
+    display:inline;
+    margin-left:4px;
+}
+
 .BMLTPlugin_option_sheet_line_name_text
 {
     width: 300px;

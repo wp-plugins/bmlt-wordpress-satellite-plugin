@@ -109,6 +109,7 @@ class BMLTPlugin
     static  $local_not_enough_for_old_style = 'In order to display the "classic" BMLT window, you need to have both a root server and a Google Maps API key in the corresponding setting.'; ///< Displayed if there is no GMAP API key.
     static  $local_options_language_prompt = 'Language:';                   ///< This is for the language select.
     static  $local_options_distance_prompt = 'Distance Units:';             ///< This is for the distance units select.
+    static  $local_options_distance_disclaimer = 'This will not change the units used in all of the displays.';                                             ///< This tells the admin that only some stuff will be affected.
     static  $local_options_miles = 'Miles';                                 ///< The string for miles.
     static  $local_options_kilometers = 'Kilometers';                       ///< The string for kilometers.
     
@@ -1063,6 +1064,7 @@ class BMLTPlugin
                             }
                         $ret .= '>'.$this->process_text ( self::$local_options_kilometers ).'</option>';
                     $ret .= '</select>';
+                $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_distance_disclaimer ).'</div>';
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
