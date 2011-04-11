@@ -1181,16 +1181,6 @@ class BMLTPlugin
                 $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_distance_disclaimer ).'</div>';
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
-                    $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
-                    $ret .= '<input type="hidden" id="BMLTPlugin_option_sheet_language_name_'.$in_options_index.'" value="'.$this->process_text ( $options['lang_name'] ).'" />';
-                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_language_prompt ).'</label>';
-                    $ret .= '<select class="BMLTPlugin_lang_select" disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_ChangeLanguage()">';
-                        $ret .= '<option value="'.htmlspecialchars ( $options['lang_enum'] ).'" selected="selected">'.$this->process_text ( $options['lang_name'] ).'</option>';
-                    $ret .= '</select>';
-                    $ret .= '<input class="BMLTPlugin_lang_button" type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.$in_options_index.')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
-                    $ret .= '<div class="BMLTPlugin_option_sheet_Server_Lang_Throbber" id="BMLTPlugin_option_sheet_Server_Lang_Throbber_'.$in_options_index.'"></div>';
-                $ret .= '</div>';
-                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_more_styles_label ).'</label>';
                     $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
@@ -1222,6 +1212,16 @@ class BMLTPlugin
                                 $ret .= '>'.$this->process_text ( $prompt ).'</option>';
                                 }
                         $ret .= '</select>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
+                        $ret .= '<input type="hidden" id="BMLTPlugin_option_sheet_language_name_'.$in_options_index.'" value="'.$this->process_text ( $options['lang_name'] ).'" />';
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_language_prompt ).'</label>';
+                        $ret .= '<select class="BMLTPlugin_lang_select" disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_ChangeLanguage()">';
+                            $ret .= '<option value="'.htmlspecialchars ( $options['lang_enum'] ).'" selected="selected">'.$this->process_text ( $options['lang_name'] ).'</option>';
+                        $ret .= '</select>';
+                        $ret .= '<input class="BMLTPlugin_lang_button" type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.$in_options_index.')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
+                        $ret .= '<div class="BMLTPlugin_option_sheet_Server_Lang_Throbber" id="BMLTPlugin_option_sheet_Server_Lang_Throbber_'.$in_options_index.'"></div>';
                     $ret .= '</div>';
                     $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_special_check_div">';
                         $id = 'BMLTPlugin_option_sheet_push_down_'.$in_options_index;

@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
 Tested up to: 3.1.1
-Stable tag: 2.0.2
+Stable tag: 2.1
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -41,10 +41,14 @@ The styling, especially, has been affected. If you have customized your installa
 14. Mobile Smartphone Screen
 15. Mobile Smartphone Map Results
 16. Mobile Results for Basic (non-smartphone) Device
+17. The Language Selection Popup (Admin Screen)
+18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
 2.1 -
-    "Genericized" the class a bit, so it will be easier to port to other CMSs.
+    Significant refactoring to make it easier to port the plugin to other CMSes.
+    Added the ability to select distance units (Km or Mi). This will only affect the mobile handler (at the moment).
+    Added the ability to project a language, via the original interactive search (You can select a different language from the server's default).
     
 2.0.2 -March 3, 2011
     Fixed a critical problem that appeared in 2.0.1 because of a silly error on the coders' part.
