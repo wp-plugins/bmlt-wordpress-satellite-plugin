@@ -83,6 +83,27 @@ function BMLTPlugin_SelectOptionSheet ( in_value,       ///< The current value o
 };
 
 /****************************************************************************************//**
+*   \brief Reacts to a new language being selected in the popup menu.                       *
+********************************************************************************************/
+function BMLTPlugin_ChangeLanguage( )
+{
+    var option_index = BMLTPlugin_GetSelectedOptionIndex();
+    var name_object = document.getElementById ( 'BMLTPlugin_option_sheet_language_name_'+option_index );
+    
+    if ( name_object )
+        {
+        var select_object = document.getElementById ( 'BMLTPlugin_option_sheet_language_'+option_index );
+        
+        if ( select_object )
+            {
+            name_object.value = select_object.options[select_object.selectedIndex].text;
+            };
+        };
+    
+    BMLTPlugin_DirtifyOptionSheet();
+};
+
+/****************************************************************************************//**
 *   \brief Deletes one of the options after a confirm.                                      *
 ********************************************************************************************/
 function BMLTPlugin_DeleteOptionSheet()
@@ -279,6 +300,21 @@ function BMLTPlugin_DirtifyOptionSheet( in_disable  ///< If this is true, then w
 function BMLTPlugin_FetchServerLangs ( in_id    ///< The index of the option to test.
                                         )
 {
+    var url = document.getElementById ( 'BMLTPlugin_sheet_form' ).action;
+    var option_index = BMLTPlugin_GetSelectedOptionIndex();
+    
+    url += '&BMLTPlugin_Fetch_Langs_AJAX_Call=1';
+    
+    var root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
+    
+    url += '&BMLTPlugin_option_sheet_root_server_'+option_index+'=';
+
+    if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
+        {
+        url += encodeURIComponent ( root_server );
+        };
+
+    BMLTPlugin_AjaxRequest ( url, BMLTPlugin_FetchServerLangsCallback, 'get' );
 };
 
 /****************************************************************************************//**

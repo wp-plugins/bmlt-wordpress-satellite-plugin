@@ -166,7 +166,8 @@
     color: #36c;
 }
 
-.BMLTPlugin_option_sheet_text_div
+.BMLTPlugin_option_sheet_text_div,
+.BMLTPlugin_option_sheet_Version
 {
     color: #36c;
     font-style:italic;
@@ -185,14 +186,9 @@
 {
     width: 600px;
     float:left;
+    color: #36c;
 }
 
-
-.BMLTPlugin_option_sheet_Version
-{
-    float:left;
-    margin-left:8px;
-}
 
 .BMLTPlugin_option_sheet_Test_Button_div
 {

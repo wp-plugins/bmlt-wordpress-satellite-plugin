@@ -54,6 +54,7 @@ class BMLTPlugin
     static  $default_initial_view = '';                                     ///< The initial view for old-style BMLT. It can be 'map', 'text', 'advanced', 'advanced map', 'advanced text' or ''.
     static  $default_theme = 'default';                                     ///< This is the default for the "style theme" for the plugin. Different settings can have different themes.
     static  $default_language = 'en';                                       ///< The default language is English, but the root server can override.
+    static  $default_language_string = 'English';                           ///< The default language is English, and the name is spelled out, here.
     static  $default_distance_units = 'mi';                                 ///< The default distance units are miles.
     
     /************************************************************************************//**
@@ -91,7 +92,6 @@ class BMLTPlugin
     static  $local_options_test_server = 'Test';                            ///< This is the title for the "test server" button.
     static  $local_options_fetch_server_langs = 'Fetch Server Languages';   ///< This is the title for the "Fetch Server Languages" button.
     static  $local_options_fetch_server_langs_tooltip = 'If you press this button, the server will be queried for its available and default languages.';    ///< This is the tooltip for the "Fetch Server Languages" button.
-    static  $local_options_default_lang_value = 'No Languages Available';   ///< This is the title for the languages popup, prior to being populated by the server.
     static  $local_options_test_server_success = 'Version ';                ///< This is a prefix for the version, on success.
     static  $local_options_test_server_failure = 'This Root Server URL is not Valid';                       ///< This is a prefix for the version, on failure.
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.';         ///< This is the tooltip text for the "test server" button.
@@ -109,7 +109,7 @@ class BMLTPlugin
     static  $local_not_enough_for_old_style = 'In order to display the "classic" BMLT window, you need to have both a root server and a Google Maps API key in the corresponding setting.'; ///< Displayed if there is no GMAP API key.
     static  $local_options_language_prompt = 'Language:';                   ///< This is for the language select.
     static  $local_options_distance_prompt = 'Distance Units:';             ///< This is for the distance units select.
-    static  $local_options_distance_disclaimer = 'This will not change the units used in all of the displays.';                                             ///< This tells the admin that only some stuff will be affected.
+    static  $local_options_distance_disclaimer = 'This will not affect all of the displays.';               ///< This tells the admin that only some stuff will be affected.
     static  $local_options_miles = 'Miles';                                 ///< The string for miles.
     static  $local_options_kilometers = 'Kilometers';                       ///< The string for kilometers.
     
@@ -394,7 +394,8 @@ class BMLTPlugin
                         'id' => abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                         'setting_name' => '',
                         'theme' => self::$default_theme,
-                        'language_enum' => self::$default_language,
+                        'lang_enum' => self::$default_language,
+                        'lang_name' => self::$default_language_string,
                         'distance_units' => self::$default_distance_units
                         );
         }
@@ -1068,9 +1069,12 @@ class BMLTPlugin
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_language_'.$in_options_index;
+                    $ret .= '<input type="hidden" id="BMLTPlugin_option_sheet_language_name_'.$in_options_index.'" value="'.$this->process_text ( $options['lang_name'] ).'" />';
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_language_prompt ).'</label>';
-                    $ret .= '<select disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()"><option value="" selected="selected">'.$this->process_text ( self::$local_options_default_lang_value ).'</option></select>';
-                    $ret .= '<input type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.intval($in_options_index).')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
+                    $ret .= '<select disabled="disabled" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_ChangeLanguage()">';
+                        $ret .= '<option value="'.htmlspecialchars ( $options['lang_enum'] ).'" selected="selected">'.$this->process_text ( $options['lang_name'] ).'</option>';
+                    $ret .= '</select>';
+                    $ret .= '<input type="button" value="'.$this->process_text ( self::$local_options_fetch_server_langs ).'" onclick="BMLTPlugin_FetchServerLangs('.$in_options_index.')" title="'.$this->process_text ( self::$local_options_fetch_server_langs_tooltip ).'" />';
                     $ret .= '<div class="BMLTPlugin_option_sheet_Server_Lang_Throbber" id="BMLTPlugin_option_sheet_Server_Lang_Throbber_'.$in_options_index.'"></div>';
                 $ret .= '</div>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
@@ -1262,6 +1266,11 @@ class BMLTPlugin
                             $options['lang_enum'] = $this->my_http_vars['BMLTPlugin_option_sheet_language_'.$i];
                             }
                         
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_language_name_'.$i] ) )
+                            {
+                            $options['lang_name'] = $this->my_http_vars['BMLTPlugin_option_sheet_language_name_'.$i];
+                            }
+                        
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i] ) )
                             {
                             $options['distance_units'] = $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i];
@@ -1279,7 +1288,7 @@ class BMLTPlugin
             ob_end_clean(); // Just in case we are in an OB
             die ( strVal ( $ret ) );
             }
-        elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
+        elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) || isset ( $this->my_http_vars['BMLTPlugin_Fetch_Langs_AJAX_Call'] ) )
             {
             $ret = '0';
             
@@ -1293,7 +1302,13 @@ class BMLTPlugin
                     {
                     if ( !$test->get_m_error_message() )
                         {
-                        $ret = trim($test->get_server_version());
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) )
+                            {
+                            $ret = trim($test->get_server_version());
+                            }
+                        else
+                            {
+                            }
                         }
                     }
                 }
