@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0.1                                                                            *
+*   \version 1.0.1                                                                          *
 *                                                                                           *
 ********************************************************************************************/
 
@@ -1656,7 +1656,7 @@ class BMLTPlugin
         // Simple searches can be mixed in with other content.
         $in_the_content = $this->display_simple_search ( $in_the_content );
 
-        $in_the_content = $this->display_old_search ( $in_the_content, $count );
+        $in_the_content = $this->display_old_search ( $in_the_content );
         
         return $in_the_content;
         }
@@ -1667,8 +1667,7 @@ class BMLTPlugin
     *                                                                                       *
     *   \returns a string, containing the content.                                          *
     ****************************************************************************************/
-    function display_old_search ($in_content,      ///< This is the content to be filtered.
-                                 &$out_count       ///< This is set to 1, if a substitution was made.
+    function display_old_search ($in_content      ///< This is the content to be filtered.
                                  )
         {
         if ( self::get_shortcode ( $in_content, 'bmlt') ) 
