@@ -45,6 +45,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+2.1.1 -
+    Sequestered the mobile stuff into a fieldset in the admin.
+    Added the ability to set the mobile "grace period," as well as specify a mobile offset from the server.
+    
 2.1 -
     Significant refactoring to make it easier to port the plugin to other CMSes.
     Added the ability to select distance units (Km or Mi). This will only affect the mobile handler (at the moment).

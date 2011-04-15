@@ -315,7 +315,6 @@ class BMLTPlugin
     
     var $my_driver = null;              ///< This will contain an instance of the BMLT satellite driver class.
     var $my_params = null;              ///< This will contain the $this->my_http_vars and $_POST query variables.
-    var $my_option_id = null;           ///< This will be used to hold a page-chosen option ID.
     var $my_http_vars = null;           ///< This will hold all of the query arguments.
     
     /************************************************************************************//**
@@ -476,35 +475,14 @@ class BMLTPlugin
         {
         $ret = null;
         
-        $code_regex_html = "(\<p[^>]*?>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?";
-        $code_regex_brackets = "(\<p[^>]*?>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?";
+        $code_regex_html = "\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>";
+        $code_regex_brackets = "\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\]";
         
         $matches = array();
         
         if ( preg_match ( '#'.$code_regex_html.'#i', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#i', $in_text_to_parse, $matches ) )
             {
-            $ret = $matches[1]; // See if we have any parameters.
-            
-            $match_array = explode ( ',', $ret );   // It is possible to have multiple data, separated by commas
-
-            $ret['raw'] = $ret; // This is the raw parameter
-
-            if ( is_array ( $match_array ) && count ( $match_array ) )
-                {
-                foreach ( $match_array as $match )
-                    {
-                    $match_split = explode ( '=', $match ); // We'll see if we have any assignments
-                    if ( is_array ( $match_split ) && count ( $match_split ) )  // If so, we parse them.
-                        {
-                        $ret[$match_split[0]] = $match_split[1];
-                        }
-                    else    // Otherwise, we simply assume that this is raw text.
-                        {
-                        break;  // That's it. No more joy.
-                        }
-                    }
-                }
-            else    // If we can't make sense of the data, we'll just return true.
+            if ( !($ret = trim ( $matches[1], '()' )) ) // See if we have any parameters.
                 {
                 $ret = true;
                 }
@@ -1693,13 +1671,13 @@ class BMLTPlugin
                                  &$out_count       ///< This is set to 1, if a substitution was made.
                                  )
         {
-        if ( self::get_shortcode ($in_content, 'bmlt') ) 
+        if ( self::get_shortcode ( $in_content, 'bmlt') ) 
             {
             $display = '';
+            $options_id = $this->cms_get_page_settings_id( $in_content );
+            
+            $options = $this->getBMLTOptions_by_id ( $options_id );
 
-            
-            $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-            
             $root_server_root = $options['root_server'];
 
             if ( $root_server_root && $options['gmaps_api_key'] )
@@ -1774,7 +1752,7 @@ class BMLTPlugin
     function display_simple_search ($in_content      ///< This is the content to be filtered.
                                     )
         {
-        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
         
         $root_server_root = $options['root_server'];
 
@@ -1782,21 +1760,21 @@ class BMLTPlugin
             {
             // This stupid thing is because WP is nice enough to mess up the ampersands.
             $in_content = str_replace ( '&#038;', '&', $in_content );
-            $matches = array();
-            while ( preg_match ( '|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $in_content, $matches ) )
+
+            while ( $params = self::get_shortcode ( $in_content, 'bmlt_simple' ) )
                 {
-				$uri = $root_server_root."/client_interface/simple/index.php?".$matches[1];
+                $param_array = explode ( '##-##', $params );
+                
+                if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
+                    {
+                    $options = $this->getBMLTOptions_by_id ( $param_array[0] );
+                    $root_server_root = $options['root_server'];
+                    $params = $param_array[1];
+                    }
+                
+				$uri = $root_server_root."/client_interface/simple/index.php?".$params;
                 $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                $in_content = preg_replace('|\<!\-\-\s?BMLT_SIMPLE\s?\((.*?)\)\s?\-\-\>|i', $the_new_content, $in_content, 1 );
-                $matches = array();
-                }
-            
-            while ( preg_match ( '|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]|i', $in_content, $matches ) )
-                {
-				$uri = $root_server_root."/client_interface/simple/index.php?".$matches[1];
-                $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                $in_content = preg_replace('|\[\[\s?BMLT_SIMPLE\s?\((.*?)\)\s?\]\]|i', $the_new_content, $in_content, 1 );
-                $matches = array();
+                $in_content = self::replace_shortcode ( $in_content, 'bmlt_simple', $the_new_content );
                 }
             }
         
@@ -2870,7 +2848,43 @@ class BMLTPlugin
         {
         return null;
         }
+
+    /************************************************************************************//**
+    *   \brief This function fetches the settings ID for a page (if there is one).          *
+    *                                                                                       *
+    *   \returns a mixed type, with the settings ID.                                        *
+    ****************************************************************************************/
+    protected function cms_get_page_settings_id ($in_content ///< Required (for the base version) content to check.
+                                                )
+        {
+        $my_option_id = null;
         
+        if ( $in_content )  // The default version requires content.
+            {
+            if ( $params = self::get_shortcode ( $in_content, 'bmlt_simple') ) 
+                {
+                $param_array = explode ( '##-##', $params );
+                
+                if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
+                    {
+                    $my_option_id = $param_array[0];
+                    }
+                }
+    
+            if ($params = self::get_shortcode ( $in_content, 'bmlt') ) 
+                {
+                $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                }
+    
+            if ( $params = self::get_shortcode ( $in_content, 'simple_search_list') ) 
+                {
+                $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                }
+            }
+        
+        return $my_option_id;
+        }
+
     /************************************************************************************//**
     *                                  THE CMS CALLBACKS                                    *
     ****************************************************************************************/

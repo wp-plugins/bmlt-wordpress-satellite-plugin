@@ -231,6 +231,38 @@ class BMLTWPPlugin extends BMLTPlugin
         
         return $ret;
         }
+
+    /************************************************************************************//**
+    *   \brief This function fetches the settings ID for a page (if there is one).          *
+    *                                                                                       *
+    *   \returns a mixed type, with the settings ID.                                        *
+    ****************************************************************************************/
+    protected function cms_get_page_settings_id ($in_content = false  ///< Optional content to check.
+                                                )
+        {
+        $page_id = null;
+        $page = get_page($page_id);
+        $my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
+
+        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+            {
+            $my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+            }
+        elseif ( $in_content = $in_content ? $in_content : $page->post_content )
+            {
+            $my_option_id_content = parent::cms_get_page_settings_id ( $in_content );
+            
+            $my_option_id = $my_option_id_content ? $my_option_id_content : $my_option_id;
+            }
+        
+        if ( !$my_option_id )   // If nothing else gives, we go for the default (first) settings.
+            {
+            $options = $this->getBMLTOptions ( 1 );
+            $my_option_id = $options['id'];
+            }
+        
+        return $my_option_id;
+        }
         
     /************************************************************************************//**
     *                               THE WORDPRESS CALLBACKS                                 *
@@ -273,42 +305,7 @@ class BMLTWPPlugin extends BMLTPlugin
         {
         $load_head = false;   // This is a throwback. It prevents the GM JS from being loaded if there is no directly specified settings ID.
         $head_content = "<!-- Added by the BMLT plugin 2.0. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-       // This is how we figure out which options we'll be using.
-        
-        if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
-            {
-            $page_id = null;
-            $page = get_page($page_id);
-            $this->my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
-            }
-
-        if ( !$this->my_option_id ) // If a setting was not already applied, we search for a custom field.
-            {
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-                {
-                $this->my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-                }
-            }
-        
-        if ( !$this->my_option_id ) // All else fails, we use the first setting (default).
-            {
-            $options = $this->getBMLTOptions ( 1 );
-            $this->my_option_id = $options['id'];
-            global $wp_query;
-            $page_obj_id = $wp_query->get_queried_object_id();
-            if ( $page_obj_id ) // In the old version, the standard BMLT window could not be shown in posts; only pages.
-                {
-                $page_obj = get_page ( $page_obj_id );
-                if ( $page_obj && self::get_shortcode ( $page_obj->post_content, 'bmlt' ) )
-                    {
-                    $load_head = true;
-                    }
-                }
-            }
-        else
-            {
-            $load_head = true;
-            }
+        $load_head = true;
         
         // If you specify the bmlt_mobile custom field in this page (not post), then it can force the browser to redirect to a mobile handler.
         // The value of bmlt_mobile must be the settings ID of the server you want to handle the mobile content.
@@ -325,7 +322,7 @@ class BMLTWPPlugin extends BMLTPlugin
             $support_mobile = null;
             }
         
-        $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
 
         if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
             {
@@ -510,7 +507,7 @@ class BMLTWPPlugin extends BMLTPlugin
                         $line['prompt'] = trim($text_ar[$lines++]);
                         if ( $line['parameters'] && $line['prompt'] )
                             {
-                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->my_option_id.'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->cms_get_page_settings_id().'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
                             $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
                             }
                         }
@@ -522,7 +519,7 @@ class BMLTWPPlugin extends BMLTPlugin
                     $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
 
-                    $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
+                    $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
                     $url = $this->get_plugin_path();
                     $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
                     
