@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0                                                                            *
+*   \version 1.0.1                                                                            *
 *                                                                                           *
 ********************************************************************************************/
 
@@ -169,6 +169,8 @@ class BMLTPlugin
     static  $default_language = 'en';                                       ///< The default language is English, but the root server can override.
     static  $default_language_string = 'English';                           ///< The default language is English, and the name is spelled out, here.
     static  $default_distance_units = 'mi';                                 ///< The default distance units are miles.
+    static  $default_grace_period = 15;                                     ///< The default grace period for the mobile search (in minutes).
+    static  $default_time_offset = 0;                                       ///< The default time offset from the main server (in hours).
     
     /************************************************************************************//**
     *                           STATIC DATA MEMBERS (LOCALIZABLE)                           *
@@ -210,6 +212,9 @@ class BMLTPlugin
     static  $local_options_test_server_tooltip = 'This tests the root server, to see if it is OK.';         ///< This is the tooltip text for the "test server" button.
     static  $local_options_map_label = 'Select a Center Point and Zoom Level for Map Displays';             ///< The Label for the map.
     static  $local_options_gkey_caveat = 'These are only necessary for old-style BMLT implementations';     ///< This lets people know that this is not necessary for newer installs.
+    static  $local_options_mobile_legend = 'These are for the fast mobile lookup';                          ///< This indicates that the enclosed settings are for the fast mobile lookup.
+    static  $local_options_mobile_grace_period_label = 'Grace Period:';     ///< When you do a "later today" search, you get a "Grace Period."
+    static  $local_options_mobile_time_offset_label = 'Time Offset:';       ///< This may have an offset (time zone difference) from the main server.
     static  $local_options_initial_view = array (                           ///< The list of choices for presentation in the popup.
                                                 '' => 'Root Server Decides', 'map' => 'Map', 'text' => 'Text', 'advanced' => 'Advanced (Server Decides)', 'advanced_map' => 'Advanced Map', 'advanced_text' => 'Advanced Text'
                                                 );
@@ -223,6 +228,8 @@ class BMLTPlugin
     static  $local_options_language_prompt = 'Language:';                   ///< This is for the language select.
     static  $local_options_distance_prompt = 'Distance Units:';             ///< This is for the distance units select.
     static  $local_options_distance_disclaimer = 'This will not affect all of the displays.';               ///< This tells the admin that only some stuff will be affected.
+    static  $local_options_grace_period_disclaimer = 'Minutes Elapsed Before A Meeting is Considered "Past."';      ///< This explains what the grace period means.
+    static  $local_options_time_offset_disclaimer = 'Hours of Difference From the Main Server.';            ///< This explains what the time offset means.
     static  $local_options_miles = 'Miles';                                 ///< The string for miles.
     static  $local_options_kilometers = 'Kilometers';                       ///< The string for kilometers.
     
@@ -248,19 +255,6 @@ class BMLTPlugin
     
     static  $local_options_success_time = 2000;                             ///< The number of milliseconds a success message is displayed.
     static  $local_options_failure_time = 5000;                             ///< The number of milliseconds a failure message is displayed.
-    
-    /************************************************************************************//**
-    *                              STATIC DATA MEMBERS (MOBILE)                             *
-    *                                                                                       *
-    *   We use an adaptation of the standalone Fast Mobile Lookup, here. These originated   *
-    *   as defines, but are now static data members.                                        *
-    ****************************************************************************************/
-
-    /// This defines a "grace time," so that meetings later today will include the current time, plus the "grace time," so it isn't so anal.
-    static  $mobile_grace_time = 15;	///< This is in minutes.
-
-    /// This is set to either 'mi' (Miles) or 'km' (Kilometers), for the distance display.
-    static  $distance_units = 'mi';
                                     
     /************************************************************************************//**
     *                       STATIC DATA MEMBERS (MOBILE LOCALIZABLE)                        *
@@ -465,6 +459,81 @@ class BMLTPlugin
         {
         $this->my_params = self::get_params ( $this->my_http_vars );
         }
+
+    /************************************************************************************//**
+    *   \brief This will parse the given text, to see if it contains the submitted code.    *
+    *                                                                                       *
+    *   The code can be contained in EITHER an HTML comment (<!--CODE-->), OR a double-[[]] *
+    *   notation.                                                                           *
+    *                                                                                       *
+    *   \returns Boolean true if the code is found (1 or more instances), OR an associative *
+    *   array of data that is associated with the code (anything within parentheses). Null  *
+    *   is returned if there is no shortcode detected.                                      *
+    ****************************************************************************************/
+    function get_shortcode (  $in_text_to_parse,  ///< The text to search for shortcodes
+                              $in_code            ///< The code that w're looking for.
+                            )
+        {
+        $ret = null;
+        
+        $code_regex_html = "\<\!\-\-\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\-\-\>";
+        $code_regex_brackets = "\<\[\[\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\]\]";
+        
+        $matches = array();
+        
+        if ( preg_match ( '#'.$code_regex_html.'#', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#', $in_text_to_parse, $matches ) )
+            {
+            $ret = $matches[1]; // See if we have any parameters.
+            
+            $match_array = explode ( ',', $ret );   // It is possible to have multiple data, separated by commas
+
+            $ret['raw'] = $ret; // This is the raw parameter
+
+            if ( is_array ( $match_array ) && count ( $match_array ) )
+                {
+                foreach ( $match_array as $match )
+                    {
+                    $match_split = explode ( '=', $match ); // We'll see if we have any assignments
+                    if ( is_array ( $match_split ) && count ( $match_split ) )  // If so, we parse them.
+                        {
+                        $ret[$match_split[0]] = $match_split[1];
+                        }
+                    else    // Otherwise, we simply assume that this is raw text.
+                        {
+                        break;  // That's it. No more joy.
+                        }
+                    }
+                }
+            else    // If we can't make sense of the data, we'll just return true.
+                {
+                $ret = true;
+                }
+            }
+        
+        return $ret;
+        }
+
+    /************************************************************************************//**
+    *   \brief This will parse the given text, to see if it contains the submitted code.    *
+    *                                                                                       *
+    *   The code can be contained in EITHER an HTML comment (<!--CODE-->), OR a double-[[]] *
+    *   notation.                                                                           *
+    *                                                                                       *
+    *   \returns A string, consisting of the new text.                                      *
+    ****************************************************************************************/
+    function replace_shortcode (    $in_text_to_parse,      ///< The text to search for shortcodes
+                                    $in_code,               ///< The code that w're looking for.
+                                    $in_replacement_text    ///< The text we'll be replacing the shortcode with.
+                                )
+        {
+        $code_regex_html = "\<\!\-\-\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\-\-\>";
+        $code_regex_brackets = "\<\[\[\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\]\]";
+
+        $ret = preg_replace ( '#'.$code_regex_html.'#', $in_text_to_parse, $in_replacement_text );
+        $ret .= preg_replace ( '#'.$code_regex_brackets.'#', $ret, $in_replacement_text );
+        
+        return $ret;
+        }
     
     /************************************************************************************//**
     *                               OPTIONS MANAGEMENT                                      *
@@ -492,7 +561,7 @@ class BMLTPlugin
     *                                                                                       *
     *   \returns an associative array, with the default option settings.                    *
     ****************************************************************************************/
-    protected function geDefaulttBMLTOptions ()
+    protected function geDefaultBMLTOptions ()
         {
         // These are the defaults. If the saved option has a different value, it replaces the ones in here.
         return array (  'root_server' => self::$default_rootserver,
@@ -509,7 +578,9 @@ class BMLTPlugin
                         'theme' => self::$default_theme,
                         'lang_enum' => self::$default_language,
                         'lang_name' => self::$default_language_string,
-                        'distance_units' => self::$default_distance_units
+                        'distance_units' => self::$default_distance_units,
+                        'grace_period' => self::$default_grace_period,
+                        'time_offset' => self::$default_time_offset
                         );
         }
     
@@ -524,7 +595,7 @@ class BMLTPlugin
                                                         */
                             )
         {
-        $BMLTOptions = $this->geDefaulttBMLTOptions(); // Start off with the defaults.
+        $BMLTOptions = $this->geDefaultBMLTOptions(); // Start off with the defaults.
         
         // Make sure we aren't resetting to default.
         if ( ($in_option_number == null) || (intval ( $in_option_number ) > 0) )
@@ -703,14 +774,9 @@ class BMLTPlugin
         {
         $ret = false;
         
-        if ( function_exists ( 'update_option' ) )
+        if ( $this->cms_set_option ( self::$admin2OptionsName, $in_options ) )
             {
-            $this->cms_set_option ( self::$admin2OptionsName, $in_options );
             $ret = true;
-            }
-        else
-            {
-            echo "<!-- BMLTPlugin ERROR (setAdmin2Options)! No update_option()! -->";
             }
         
         return $ret;
@@ -748,7 +814,7 @@ class BMLTPlugin
         $opt = $this->getBMLTOptions ( -1 );
         $ret = null;
         
-        // If we successfully get the options, we save them, in order to 
+        // If we successfully get the options, we save them, in order to put them in place
         if ( is_array ( $opt ) && count ( $opt ) )
             {
             $ret = $this->get_num_options ( );
@@ -803,7 +869,7 @@ class BMLTPlugin
 
         $ret = false;
         
-        if ( first_num )
+        if ( $first_num )
             {
             $last_num = $this->get_num_options ( );
             
@@ -941,7 +1007,7 @@ class BMLTPlugin
             $html .= '<div id="BMLTPlugin_options_container" style="display:none">';    // This is displayed using JavaScript.
                 $html .= '<h1 class="BMLTPlugin_Admin_h1">'.$this->process_text ( self::$local_options_title ).'</h1>';
                 $html .= $process_html;
-                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
+                $html .= '<form id="BMLTPlugin_sheet_form" action ="'.$this->get_admin_form_uri().'" method="get" onsubmit="function(){return false}">';
                     $html .= '<fieldset class="BMLTPlugin_option_fieldset" id="BMLTPlugin_option_fieldset">';
                         $html .= '<legend id="BMLTPlugin_legend" class="BMLTPlugin_legend">';
                             $count = $this->get_num_options();
@@ -1007,7 +1073,7 @@ class BMLTPlugin
                     $html .= '</fieldset>';
                 $html .= '</form>';
                 $html .= '<div class="BMLTPlugin_toolbar_line_bottom">';
-                    $html .= '<form action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get" onsubmit="function(){return false}">';
+                    $html .= '<form action ="'.$this->get_admin_form_uri().'" method="get" onsubmit="function(){return false}">';
                     if ( $count > 1 )
                         {
                         $html .= '<div class="BMLTPlugin_toolbar_button_line_left">';
@@ -1022,8 +1088,7 @@ class BMLTPlugin
                         $html .= '<input id="BMLTPlugin_toolbar_button_save" type="button" value="'.$this->process_text ( self::$local_options_save ).'" onclick="BMLTPlugin_SaveOptions()" />';
                     $html .= '</div>';
                     $html .= '</form>';
-                    $html .= '<form action ="'.htmlspecialchars ( $this->get_ajax_base_uri() ).'?page='.htmlspecialchars ( $this->my_http_vars['page']).'" method="get">';
-                    $html .= '<input type="hidden" name="page" value="'.htmlspecialchars ( $this->my_http_vars['page'] ).'" />';
+                    $html .= '<form action ="'.$this->get_admin_form_uri().'" method="post">';
                     $html .= '<input type="submit" id="BMLTPlugin_toolbar_button_new" class="BMLTPlugin_create_button" name="BMLTPlugin_create_option" value="'.$this->process_text ( self::$local_options_add_new ).'" />';
                     $html .= '</form>';
                 $html .= '</div>';
@@ -1162,31 +1227,66 @@ class BMLTPlugin
                     $ret .= '</div>';
                     }
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
-                    $id = 'BMLTPlugin_option_sheet_distance_units_'.$in_options_index;
-                    $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_distance_prompt ).'</label>';
-                    $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
-                        $ret .= '<option value="mi"';
-                        if ( 'mi' == $options['distance_units'] )
-                            {
-                            $ret .= ' selected="selected"';
-                            }
-                        $ret .= '>'.$this->process_text ( self::$local_options_miles ).'</option>';
-                        $ret .= '<option value="km"';
-                        if ( 'km' == $options['distance_units'] )
-                            {
-                            $ret .= ' selected="selected"';
-                            }
-                        $ret .= '>'.$this->process_text ( self::$local_options_kilometers ).'</option>';
-                    $ret .= '</select>';
-                $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_distance_disclaimer ).'</div>';
-                $ret .= '</div>';
-                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_more_styles_label ).'</label>';
                     $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
                     $ret .= htmlspecialchars ( $options['additional_css'] );
                     $ret .= '</textarea>';
                 $ret .= '</div>';
+                $ret .= '<fieldset class="BMLTPlugin_option_sheet_mobile_settings_fieldset">';
+                    $ret .= '<legend class="BMLTPlugin_gmap_caveat_legend">'.$this->process_text ( self::$local_options_mobile_legend ).'</legend>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_distance_units_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_distance_prompt ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            $ret .= '<option value="mi"';
+                            if ( 'mi' == $options['distance_units'] )
+                                {
+                                $ret .= ' selected="selected"';
+                                }
+                            $ret .= '>'.$this->process_text ( self::$local_options_miles ).'</option>';
+                            $ret .= '<option value="km"';
+                            if ( 'km' == $options['distance_units'] )
+                                {
+                                $ret .= ' selected="selected"';
+                                }
+                            $ret .= '>'.$this->process_text ( self::$local_options_kilometers ).'</option>';
+                        $ret .= '</select>';
+                        $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_distance_disclaimer ).'</div>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_grace_period_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_grace_period_label ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            for ( $minute = 0; $minute < 60; $minute += 5 )
+                                {
+                                $ret .= '<option value="'.$minute.'"';
+                                if ( $minute == $options['grace_period'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.$minute.'</option>';
+                                }
+                        $ret .= '</select>';
+                        $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_grace_period_disclaimer ).'</div>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_time_offset_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_time_offset_label ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            for ( $hour = -23; $hour < 24; $hour++ )
+                                {
+                                $ret .= '<option value="'.$hour.'"';
+                                if ( $hour == $options['time_offset'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.$hour.'</option>';
+                                }
+                        $ret .= '</select>';
+                        $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_time_offset_disclaimer ).'</div>';
+                    $ret .= '</div>';
+                $ret .= '</fieldset>';
                 $ret .= '<fieldset class="BMLTPlugin_option_sheet_old_settings_fieldset">';
                     $ret .= '<legend class="BMLTPlugin_gmap_caveat_legend">'.$this->process_text ( self::$local_options_gkey_caveat ).'</legend>';
                     $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
@@ -1389,6 +1489,16 @@ class BMLTPlugin
                             $options['distance_units'] = $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i];
                             }
                         
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_grace_period_'.$i] ) )
+                            {
+                            $options['grace_period'] = $this->my_http_vars['BMLTPlugin_option_sheet_grace_period_'.$i];
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_time_offset_'.$i] ) )
+                            {
+                            $options['time_offset'] = $this->my_http_vars['BMLTPlugin_option_sheet_time_offset_'.$i];
+                            }
+                        
                         if ( !$this->setBMLTOptions ( $options, $i ) )
                             {
                             $ret = 0;
@@ -1571,14 +1681,7 @@ class BMLTPlugin
         // Simple searches can be mixed in with other content.
         $in_the_content = $this->display_simple_search ( $in_the_content );
 
-        $count = 0;
-
-        $in_the_content = $this->display_old_popup_search ( $in_the_content, $count );
-        
-        if ( !$count )
-            {
-            $in_the_content = $this->display_old_search ( $in_the_content, $count );
-            }
+        $in_the_content = $this->display_old_search ( $in_the_content, $count );
         
         return $in_the_content;
         }
@@ -1716,75 +1819,6 @@ class BMLTPlugin
         
         return $in_content;
         }
-        
-    /************************************************************************************//**
-    *   \brief This is a function that filters the content, and replaces a portion with the *
-    *   "popup" search, if provided by the 'bmlt_simple_searches' custom field.             *
-    *                                                                                       *
-    *   \returns a string, containing the content.                                          *
-    ****************************************************************************************/
-    function display_old_popup_search ( $in_content,      ///< This is the content to be filtered.
-                                        &$out_count       ///< This is set to 1, if a substitution was made.
-                                        )
-        {
-        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
-            {
-            $text = $this->cms_get_post_meta ( get_the_ID(), 'bmlt_simple_searches' );
-            $display .= '';
-            if ( $text )
-                {
-                $text_ar = explode ( "\n", $text );
-                
-                if ( is_array ( $text_ar ) && count ( $text_ar ) )
-                    {
-                    $display .= '<noscript class="no_js">'.$this->process_text ( self::$local_noscript ).'</noscript>';
-                    $display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
-                    $display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
-                    $display .= '<select id="meeting_search_select"class="simple_search_list" onchange="BMLTPlugin_simple_div_filler (this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
-                    $display .= '<option disabled="disabled" selected="selected">'.$this->process_text ( self::$local_select_search ).'</option>';
-                    $lines_max = count ( $text_ar );
-                    $lines = 0;
-                    while ( $lines < $lines_max )
-                        {
-                        $line['parameters'] = trim($text_ar[$lines++]);
-                        $line['prompt'] = trim($text_ar[$lines++]);
-                        if ( $line['parameters'] && $line['prompt'] )
-                            {
-                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->my_option_id.'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
-                            $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
-                            }
-                        }
-                    $display .= '<option disabled="disabled"></option>';
-                    $display .= '<option disabled="disabled" value="">'.$this->process_text ( self::$local_clear_search ).'</option>';
-                    $display .= '</select></div></form>';
-                    
-                    $display .= '<script type="text/javascript">';
-                    $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
-                    $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
-
-                    $options = $this->getBMLTOptions_by_id ( $this->my_option_id );
-                    $url = $this->get_plugin_path();
-                    $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
-                    
-                    $display .= "var c_g_BMLTPlugin_images = '$img_url';";
-                    $display .= '</script>';
-                    $display .= '<div id="simple_search_container"></div></div>';
-                    }
-                }
-            
-            // We only allow one instance per page.
-            $count = 0;
-            
-            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $display, $in_content, 1, $count );
-            
-            if ( !$count )
-                {
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $display, $in_content, 1 );
-                }
-            }
-        
-        return $in_content;
-        }
 
     /************************************************************************************//**
     *                              FAST MOBILE LOOKUP ROUTINES                              *
@@ -1886,6 +1920,8 @@ class BMLTPlugin
     function BMLTPlugin_fast_mobile_lookup_javascript_stuff( $in_sensor = true  ///< A Boolean. If false, then we will invoke the API with the sensor set false. Default is true.
                                                             )
         {
+        $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
+            
         $ret = '';
         $sensor = $in_sensor ? 'true' : 'false';
 
@@ -1908,12 +1944,12 @@ class BMLTPlugin
         $ret .= 'var c_g_debug_mode = '.( defined ( 'DEBUG_MODE' ) ? 'true' : 'false' ).';';
         $h = null;
         $m = null;
-        list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
+        list ( $h, $m ) = explode ( ':', date ( "G:i", time() + ($options['time_offset'] * 60 * 60) - ($options['grace_time'] * 60) ) );
         $ret .= 'var c_g_hour = '.intval ( $h ).';';
         $ret .= 'var c_g_min = '.intval ( $m ).';';
         $ret .= 'var c_g_distance_prompt = \''.$this->process_text ( self::$local_mobile_distance ).'\';';
-        $ret .= 'var c_g_distance_units_are_km = '.((strtolower (self::$distance_units) == 'km' ) ? 'true' : 'false').';';
-        $ret .= 'var c_g_distance_units = \''.((strtolower (self::$distance_units) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';
+        $ret .= 'var c_g_distance_units_are_km = '.((strtolower ($options['distance_units']) == 'km' ) ? 'true' : 'false').';';
+        $ret .= 'var c_g_distance_units = \''.((strtolower ($options['distance_units']) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';
         $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?\';';
         $ret .= 'var c_bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].';';        
         $url = $this->get_plugin_path();
@@ -2252,9 +2288,9 @@ class BMLTPlugin
         
         if ( $meeting['distance_in_km'] )
             {
-            $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
+            $distance = round ( ((strtolower ($options['distance_units']) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
             
-            $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) );
+            $distance = strval ($distance).' '.((strtolower ($options['distance_units']) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) );
 
             $ret .= '<p><b>'.$this->process_text ( self::$local_mobile_distance ).':</b> '.htmlspecialchars ( $distance ).'</p>';
             }
@@ -2286,8 +2322,8 @@ class BMLTPlugin
             }
         else
             {
-            $dist_a = intval ( round ((self::$distance_units == 'M') ? $in_a_meeting['distance_in_miles'] : $in_a_meeting['distance_in_km'], 1) * 10 );
-            $dist_b = intval ( round ((self::$distance_units == 'M') ? $in_b_meeting['distance_in_miles'] : $in_b_meeting['distance_in_km'], 1) * 10 );
+            $dist_a = intval ( round (strtolower(($options['distance_units']) == 'mi') ? $in_a_meeting['distance_in_miles'] : $in_a_meeting['distance_in_km'], 1) * 10 );
+            $dist_b = intval ( round ((strtolower($options['distance_units']) == 'mi') ? $in_b_meeting['distance_in_miles'] : $in_b_meeting['distance_in_km'], 1) * 10 );
 
             if ( $dist_a != $dist_b )
                 {
@@ -2361,9 +2397,10 @@ class BMLTPlugin
                             $weekdays = '';
                             $h = 0;
                             $m = 0;
-                            $today = intval(date ( "w" )) + 1;
+                            $time = time() + ($options['time_offset'] * 60 * 60);
+                            $today = intval(date ( "w", $time )) + 1;
                             // We set the current time, minus the grace time. This allows us to be running late, yet still have the meeting listed.
-                            list ( $h, $m ) = explode ( ':', date ( "G:i", time() - (self::$mobile_grace_time * 60) ) );
+                            list ( $h, $m ) = explode ( ':', date ( "G:i", time() - ($options['grace_period'] * 60) ) );
                             if ( $qualifier == 'today' )
                                 {
                                 $weekdays = strval ($today);
@@ -2452,9 +2489,9 @@ class BMLTPlugin
                                             
                                             if ( $meeting['distance_in_km'] )
                                                 {
-                                                $distance = round ( ((strtolower (self::$distance_units) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
+                                                $distance = round ( ((strtolower ($options['distance_units']) == 'km') ? $meeting['distance_in_km'] : $meeting['distance_in_miles']), 1 );
                                                 
-                                                $distance = strval ($distance).' '.((strtolower (self::$distance_units) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) );
+                                                $distance = strval ($distance).' '.((strtolower ($options['distance_units']) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) );
                                                 }
 
                                             $time[0] = intval ( $time[0] );
@@ -2755,9 +2792,29 @@ class BMLTPlugin
     *                                                                                       *
     *   \returns a string, containing the path.                                             *
     ****************************************************************************************/
-    protected function get_ajax_base_uri()
+    protected function get_admin_ajax_base_uri()
+        {
+        return htmlspecialchars ( $this->get_ajax_base_uri() );
+        }
+    
+    /************************************************************************************//**
+    *   \brief Return an HTTP path to the basic admin form submit (action) URI              *
+    *                                                                                       *
+    *   \returns a string, containing the path.                                             *
+    ****************************************************************************************/
+    protected function get_admin_form_uri()
         {
         return null;
+        }
+    
+    /************************************************************************************//**
+    *   \brief Return an HTTP path to the AJAX callback target.                             *
+    *                                                                                       *
+    *   \returns a string, containing the path.                                             *
+    ****************************************************************************************/
+    protected function get_ajax_base_uri()
+        {
+        return $_SERVER['PHP_SELF'];
         }
     
     /************************************************************************************//**

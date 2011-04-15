@@ -175,6 +175,20 @@ function BMLTPlugin_SaveOptions()
             {
             url += '&BMLTPlugin_option_sheet_distance_units_'+option_index+'='+encodeURIComponent ( distance_units );
             }
+        
+        var grace_period = document.getElementById ( 'BMLTPlugin_option_sheet_grace_period_'+option_index ).value.toString();
+        
+         if ( grace_period )
+            {
+            url += '&BMLTPlugin_option_sheet_grace_period_'+option_index+'='+encodeURIComponent ( grace_period );
+            }
+        
+        var time_offset = document.getElementById ( 'BMLTPlugin_option_sheet_time_offset_'+option_index ).value.toString();
+        
+         if ( time_offset )
+            {
+            url += '&BMLTPlugin_option_sheet_time_offset_'+option_index+'='+encodeURIComponent ( time_offset );
+            }
        
         var gmaps_key = document.getElementById ( 'BMLTPlugin_option_sheet_gkey_'+option_index ).value.toString();
          
