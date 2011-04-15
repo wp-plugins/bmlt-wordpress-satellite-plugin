@@ -1569,27 +1569,11 @@ class BMLTPlugin
                 die ( );
                 }
             else
-                {
-                $page_id = null;
-                $page = get_page($page_id);
-                $option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
+                {                
+                $options_id = $this->cms_get_page_settings_id( );
                 
-                if ( !$option_id ) // If a setting was not already applied, we search for a custom field.
-                    {
-                    if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-                        {
-                        $option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-                        }
-                    }
-                
-                if ( !$option_id ) // All else fails, we use the first setting (default).
-                    {
-                    $options = $this->getBMLTOptions ( 1 );
-                    $option_id = $options['id'];
-                    }
-                
-                $options = $this->getBMLTOptions_by_id ( $option_id );
-        
+                $options = $this->getBMLTOptions_by_id ( $options_id );
+
                 $this->load_params ( );
             
                 if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
@@ -1682,14 +1666,10 @@ class BMLTPlugin
             if ( $root_server_root && $options['gmaps_api_key'] )
                 {
                 $root_server = $root_server_root."/client_interface/xhtml/index.php";
-    
-                $pid = get_page_uri(get_the_ID());
-                
-                $plink = get_permalink ( get_the_ID() );
                 
                 $menu = '';
                     
-                if ( $pid && !isset ( $this->my_http_vars['search_form'] ) )
+                if ( !isset ( $this->my_http_vars['search_form'] ) && $options['bmlt_new_search_url'] )
                     {
                     if ( $options['bmlt_new_search_url'] )
                         {
