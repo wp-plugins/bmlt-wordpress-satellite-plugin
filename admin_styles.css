@@ -290,7 +290,8 @@
     margin-bottom: 4px;
 }
 
-.BMLTPlugin_option_sheet_old_settings_fieldset
+.BMLTPlugin_option_sheet_old_settings_fieldset,
+.BMLTPlugin_option_sheet_mobile_settings_fieldset
 {
     clear:both;
     border:1px solid #6cf;

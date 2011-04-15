@@ -470,18 +470,18 @@ class BMLTPlugin
     *   array of data that is associated with the code (anything within parentheses). Null  *
     *   is returned if there is no shortcode detected.                                      *
     ****************************************************************************************/
-    function get_shortcode (  $in_text_to_parse,  ///< The text to search for shortcodes
-                              $in_code            ///< The code that w're looking for.
-                            )
+    static function get_shortcode ( $in_text_to_parse,  ///< The text to search for shortcodes
+                                    $in_code            ///< The code that w're looking for.
+                                    )
         {
         $ret = null;
         
-        $code_regex_html = "\<\!\-\-\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\-\-\>";
-        $code_regex_brackets = "\<\[\[\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\]\]";
+        $code_regex_html = "(\<p[^>]*?>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?";
+        $code_regex_brackets = "(\<p[^>]*?>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?";
         
         $matches = array();
         
-        if ( preg_match ( '#'.$code_regex_html.'#', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#', $in_text_to_parse, $matches ) )
+        if ( preg_match ( '#'.$code_regex_html.'#i', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#i', $in_text_to_parse, $matches ) )
             {
             $ret = $matches[1]; // See if we have any parameters.
             
@@ -521,18 +521,15 @@ class BMLTPlugin
     *                                                                                       *
     *   \returns A string, consisting of the new text.                                      *
     ****************************************************************************************/
-    function replace_shortcode (    $in_text_to_parse,      ///< The text to search for shortcodes
-                                    $in_code,               ///< The code that w're looking for.
-                                    $in_replacement_text    ///< The text we'll be replacing the shortcode with.
-                                )
+    static function replace_shortcode ( $in_text_to_parse,      ///< The text to search for shortcodes
+                                        $in_code,               ///< The code that w're looking for.
+                                        $in_replacement_text    ///< The text we'll be replacing the shortcode with.
+                                        )
         {
-        $code_regex_html = "\<\!\-\-\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\-\-\>";
-        $code_regex_brackets = "\<\[\[\s?".strtolower ( trim ( $in_code ) )."\s?(\(.*?\))?\s?\]\]";
+        $code_regex_html = "(\<p[^>]*?>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?";
+        $code_regex_brackets = "(\<p[^>]*?>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?";
 
-        $ret = preg_replace ( '#'.$code_regex_html.'#', $in_text_to_parse, $in_replacement_text );
-        $ret .= preg_replace ( '#'.$code_regex_brackets.'#', $ret, $in_replacement_text );
-        
-        return $ret;
+        return preg_replace ( '#'.$code_regex_brackets.'#i', $ret, preg_replace ( '#'.$code_regex_html.'#i', $in_text_to_parse, $in_replacement_text ) );
         }
     
     /************************************************************************************//**
@@ -1696,7 +1693,7 @@ class BMLTPlugin
                                  &$out_count       ///< This is set to 1, if a substitution was made.
                                  )
         {
-        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
+        if ( self::get_shortcode ($in_content, 'bmlt') ) 
             {
             $display = '';
 
@@ -1750,32 +1747,18 @@ class BMLTPlugin
                 $the_new_content = str_replace ( '###ROOT_SERVER###', $root_server_root, self::$local_no_js_warning ).$the_new_content;
                 $the_new_content = '<div id="bmlt_container_div" class="bmlt_container_div"><table id="bmlt_container" cellspacing="0" cellpadding="0" class="bmlt_container_table"><tbody class="BMLTPlugin_container_tbody"><tr class="BMLTPlugin_container_tr"><td class="BMLTPlugin_container_td">'.$menu.'<div class="bmlt_content_div">'.$the_new_content.'</div>'.$menu.'</td></tr></tbody></table></div>';
                 // We only allow one instance per page.
-                $count = 0;
 
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1, $count );
-                
-                if ( !$count )
-                    {
-                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
-                    }
+                $in_content = self::replace_shortcode ($in_content, 'bmlt', $the_new_content);
                 
                 $url = $this->get_plugin_path();
-                
-                $head_content .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/' );
                 
 	            $in_content = str_replace ( $options['root_server'].'/client_interface/xhtml/../../themes/default/html/images/Throbber.gif', "$url/themes/".$options['theme']."/images/Throbber.gif", $in_content);
                 }
             else
                 {
                 $the_new_content = $this->process_text ( self::$local_not_enough_for_old_style );
-                $count = 0;
 
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?BMLT\s?\-\-\>(<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1, $count );
-                
-                if ( !$count )
-                    {
-                    $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?BMLT\s?\]\](<\/p[^>]*>)*?/i", $the_new_content, $in_content, 1 );
-                    }
+                $in_content = self::replace_shortcode ($in_content, 'bmlt', $the_new_content);
                 }
             }
         

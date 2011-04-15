@@ -299,7 +299,7 @@ class BMLTWPPlugin extends BMLTPlugin
             if ( $page_obj_id ) // In the old version, the standard BMLT window could not be shown in posts; only pages.
                 {
                 $page_obj = get_page ( $page_obj_id );
-                if ( $page_obj && (preg_match ( "/\[\[\s?BMLT\s?\]\]/", $page_obj->post_content ) || preg_match ( "/\<\!\-\-\s?BMLT\s?\-\-\>/", $page_obj->post_content )) )
+                if ( $page_obj && self::get_shortcode ( $page_obj->post_content, 'bmlt' ) )
                     {
                     $load_head = true;
                     }
@@ -487,9 +487,9 @@ class BMLTWPPlugin extends BMLTPlugin
                                         &$out_count       ///< This is set to 1, if a substitution was made.
                                         )
         {
-        if ( preg_match ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $in_content ) || preg_match ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $in_content ) )
+        if ( self::get_shortcode ( $in_content, 'simple_search_list' ) )
             {
-            $text = get_post_meta ( get_the_ID(), 'bmlt_simple_searches' );
+            $text = $this->cms_get_post_meta ( get_the_ID(), 'bmlt_simple_searches' );
             $display .= '';
             if ( $text )
                 {
@@ -532,15 +532,7 @@ class BMLTWPPlugin extends BMLTPlugin
                     }
                 }
             
-            // We only allow one instance per page.
-            $count = 0;
-            
-            $in_content = preg_replace ( "/(<p[^>]*>)*?\<\!\-\-\s?SIMPLE_SEARCH_LIST\s?\-\-\>(<\/p[^>]*>)*?/i", $display, $in_content, 1, $count );
-            
-            if ( !$count )
-                {
-                $in_content = preg_replace ( "/(<p[^>]*>)*?\[\[\s?SIMPLE_SEARCH_LIST\s?\]\](<\/p[^>]*>)*?/i", $display, $in_content, 1 );
-                }
+            $in_content = self::replace_shortcode ($in_content, 'simple_search_list', $display);
             }
         
         return $in_content;
