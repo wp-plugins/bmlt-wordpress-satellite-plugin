@@ -2831,33 +2831,53 @@ class BMLTPlugin
     /************************************************************************************//**
     *   \brief This function fetches the settings ID for a page (if there is one).          *
     *                                                                                       *
+    *   If $in_check_mobile is set to true, then ONLY a check for mobile support will be    *
+    *   made, and no other shortcodes will be checked.                                      *
+    *                                                                                       *
     *   \returns a mixed type, with the settings ID.                                        *
     ****************************************************************************************/
-    protected function cms_get_page_settings_id ($in_content ///< Required (for the base version) content to check.
+    protected function cms_get_page_settings_id ($in_content,               ///< Required (for the base version) content to check.
+                                                 $in_check_mobile = false   ///< True if this includes a check for mobile. Default is false.
                                                 )
         {
         $my_option_id = null;
         
         if ( $in_content )  // The default version requires content.
             {
-            if ( $params = self::get_shortcode ( $in_content, 'bmlt_simple') ) 
+            // We only return a mobile ID if we have the shortcode, we're asked for it, we're not already handling mobile, and we have a mobile UA.
+            if ( $in_check_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') && ($params = self::get_shortcode ( $in_content, 'bmlt_mobile')) ) 
                 {
-                $param_array = explode ( '##-##', $params );
-                
-                if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
+                if ( $params === true ) // If no mobile settings number was provided, we use the default.
                     {
-                    $my_option_id = $param_array[0];
+                    $options = $this->getBMLTOptions ( 1 );
+                    $my_option_id = $options['id'];
+                    }
+                else
+                    {
+                    $my_option_id = $params;
                     }
                 }
-    
-            if ($params = self::get_shortcode ( $in_content, 'bmlt') ) 
+            elseif( !$in_check_mobile ) // A mobile check ignores the rest.
                 {
-                $my_option_id = ( $params !== true) ? $params : $my_option_id;
-                }
-    
-            if ( $params = self::get_shortcode ( $in_content, 'simple_search_list') ) 
-                {
-                $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                if ( $params = self::get_shortcode ( $in_content, 'bmlt_simple') ) 
+                    {
+                    $param_array = explode ( '##-##', $params );
+                    
+                    if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
+                        {
+                        $my_option_id = $param_array[0];
+                        }
+                    }
+        
+                if ($params = self::get_shortcode ( $in_content, 'bmlt') ) 
+                    {
+                    $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                    }
+        
+                if ( $params = self::get_shortcode ( $in_content, 'simple_search_list') ) 
+                    {
+                    $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                    }
                 }
             }
         

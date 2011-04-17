@@ -235,30 +235,44 @@ class BMLTWPPlugin extends BMLTPlugin
     /************************************************************************************//**
     *   \brief This function fetches the settings ID for a page (if there is one).          *
     *                                                                                       *
+    *   If $in_check_mobile is set to true, then ONLY a check for mobile support will be    *
+    *   made, and no other shortcodes will be checked.                                      *
+    *                                                                                       *
     *   \returns a mixed type, with the settings ID.                                        *
     ****************************************************************************************/
-    protected function cms_get_page_settings_id ($in_content = false  ///< Optional content to check.
+    protected function cms_get_page_settings_id ($in_content,               ///< Required (for the base version) content to check.
+                                                 $in_check_mobile = false   ///< True if this includes a check for mobile. Default is false.
                                                 )
         {
+        $my_option_id = null;
         $page_id = null;
         $page = get_page($page_id);
-        $my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
-
-        if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-            {
-            $my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-            }
-        elseif ( $in_content = $in_content ? $in_content : $page->post_content )
-            {
-            $my_option_id_content = parent::cms_get_page_settings_id ( $in_content );
-            
-            $my_option_id = $my_option_id_content ? $my_option_id_content : $my_option_id;
-            }
         
-        if ( !$my_option_id )   // If nothing else gives, we go for the default (first) settings.
+        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) ) );
+        
+        if ( $in_check_mobile && $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
             {
-            $options = $this->getBMLTOptions ( 1 );
-            $my_option_id = $options['id'];
+            $my_option_id = $support_mobile;
+            }
+        elseif ( !$in_check_mobile )
+            {
+            $my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
+            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                {
+                $my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                }
+            elseif ( $in_content = $in_content ? $in_content : $page->post_content )
+                {
+                $my_option_id_content = parent::cms_get_page_settings_id ( $in_content, $in_check_mobile );
+                
+                $my_option_id = $my_option_id_content ? $my_option_id_content : $my_option_id;
+                }
+            
+            if ( !$my_option_id )   // If nothing else gives, we go for the default (first) settings.
+                {
+                $options = $this->getBMLTOptions ( 1 );
+                $my_option_id = $options['id'];
+                }
             }
         
         return $my_option_id;
@@ -312,8 +326,10 @@ class BMLTWPPlugin extends BMLTPlugin
         // Post redirectors are also handled, but at this point, only the page will be checked.
         $page_id = null;
         $page = get_page($page_id);
-        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) ) );
-        if ( $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+        
+        $support_mobile = $this->cms_get_page_settings_id ( $in_content, true );
+        
+        if ( $support_mobile )
             {
             $mobile_options = $this->getBMLTOptions_by_id ( $support_mobile );
             }
