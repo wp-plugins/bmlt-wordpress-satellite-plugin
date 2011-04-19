@@ -1758,30 +1758,27 @@ class BMLTPlugin
     function display_simple_search ($in_content      ///< This is the content to be filtered.
                                     )
         {
-        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
+        $options_id = $this->cms_get_page_settings_id( $in_content );
         
+        $options = $this->getBMLTOptions_by_id ( $options_id );
         $root_server_root = $options['root_server'];
 
-        if ( $root_server_root )
+        $in_content = str_replace ( '&#038;', '&', $in_content );   // This stupid kludge is because WordPress does an untoward substitution. Won't do anything unless WordPress has been naughty.
+        while ( $params = self::get_shortcode ( $in_content, 'bmlt_simple' ) )
             {
-            // This stupid thing is because WP is nice enough to mess up the ampersands.
-            $in_content = str_replace ( '&#038;', '&', $in_content );
-
-            while ( $params = self::get_shortcode ( $in_content, 'bmlt_simple' ) )
+            $param_array = explode ( '##-##', $params );    // You can specify a settings ID, by separating it from the URI parameters with a ##-##.
+            
+            if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
                 {
-                $param_array = explode ( '##-##', $params );
-                
-                if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
-                    {
-                    $options = $this->getBMLTOptions_by_id ( $param_array[0] );
-                    $root_server_root = $options['root_server'];
-                    $params = $param_array[1];
-                    }
-                
-				$uri = $root_server_root."/client_interface/simple/index.php?".$params;
-                $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
-                $in_content = self::replace_shortcode ( $in_content, 'bmlt_simple', $the_new_content );
+                $options = $this->getBMLTOptions_by_id ( $param_array[0] );
+                $root_server_root = $options['root_server'];
+                $params = $param_array[1];
                 }
+            
+            $uri = $root_server_root."/client_interface/simple/index.php?".$params;
+
+            $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
+            $in_content = self::replace_shortcode ( $in_content, 'bmlt_simple', $the_new_content );
             }
         
         return $in_content;
