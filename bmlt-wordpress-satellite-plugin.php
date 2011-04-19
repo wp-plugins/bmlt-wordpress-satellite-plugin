@@ -248,30 +248,37 @@ class BMLTWPPlugin extends BMLTPlugin
         $page_id = null;
         $page = get_page($page_id);
         
-        $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) ) );
-        
-        if ( $in_check_mobile && $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
+        if ( !$in_check_mobile && isset ( $this->my_http_vars['bmlt_settings_id'] ) && is_array ($this->getBMLTOptions ( $this->my_http_vars['bmlt_settings_id'] )) )
             {
-            $my_option_id = $support_mobile;
+            $my_option_id = $this->my_http_vars['bmlt_settings_id'];
             }
-        elseif ( !$in_check_mobile )
+        else
             {
-            $my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
-            if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
-                {
-                $my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
-                }
-            elseif ( $in_content = $in_content ? $in_content : $page->post_content )
-                {
-                $my_option_id_content = parent::cms_get_page_settings_id ( $in_content, $in_check_mobile );
-                
-                $my_option_id = $my_option_id_content ? $my_option_id_content : $my_option_id;
-                }
+            $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) ) );
             
-            if ( !$my_option_id )   // If nothing else gives, we go for the default (first) settings.
+            if ( $in_check_mobile && $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
                 {
-                $options = $this->getBMLTOptions ( 1 );
-                $my_option_id = $options['id'];
+                $my_option_id = $support_mobile;
+                }
+            elseif ( !$in_check_mobile )
+                {
+                $my_option_id = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_settings_id' ) ) ) );
+                if ( isset ( $this->my_http_vars['bmlt_settings_id'] ) && intval ( $this->my_http_vars['bmlt_settings_id'] ) )
+                    {
+                    $my_option_id = intval ( $this->my_http_vars['bmlt_settings_id'] );
+                    }
+                elseif ( $in_content = $in_content ? $in_content : $page->post_content )
+                    {
+                    $my_option_id_content = parent::cms_get_page_settings_id ( $in_content, $in_check_mobile );
+                    
+                    $my_option_id = $my_option_id_content ? $my_option_id_content : $my_option_id;
+                    }
+                
+                if ( !$my_option_id )   // If nothing else gives, we go for the default (first) settings.
+                    {
+                    $options = $this->getBMLTOptions ( 1 );
+                    $my_option_id = $options['id'];
+                    }
                 }
             }
         

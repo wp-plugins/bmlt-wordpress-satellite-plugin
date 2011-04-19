@@ -13,10 +13,13 @@
     a "driver," not a communication stack. It is up to the implementation to do things like
     manage multiple transactions and whatnot.
     
-    \version 1.0.3
+    \version 1.0.4
     \license Public Domain -No restrictions at all.
     
     <h2 id="docs_release_notes">RELEASE NOTES:</h2>
+    - February 1, 2011 - 1.0.4 Release
+        - Changed the call_curl routine a bit to make it slightly more robust.
+        
     - February 1, 2011 - 1.0.3 Release
         - Added the capability to get change records from the server (Requires a root server version of 1.8.13 or greater).
         
@@ -1356,10 +1359,10 @@ class bmlt_satellite_controller
             curl_setopt ( $resource, CURLOPT_ENCODING, 'gzip,deflate' );
             
             // Execute cURL call and return results in $content variable.
-            $content = curl_exec ( $resource );
+            $content = false;
             
             // Check if curl_exec() call failed (returns false on failure) and handle failure.
-            if ( $content === false )
+            if ( !curl_exec ( $resource ) )
                 {
                 // If there is no error message variable passed, we die quietly.
                 if ( isset ( $error_message ) )
@@ -1370,21 +1373,17 @@ class bmlt_satellite_controller
                 }
             else
                 {
+                $content = curl_multi_getcontent ( $resource );
                 // Do what you want with returned content (e.g. HTML, XML, etc) here or AFTER curl_close() call below as it is stored in the $content variable.
             
                 // You MIGHT want to get the HTTP status code returned by server (e.g. 200, 400, 500).
                 // If that is the case then this is how to do it.
                 $http_status = curl_getinfo ($resource, CURLINFO_HTTP_CODE );
                 }
-            
             // Close cURL and free resource.
             curl_close ( $resource );
             
-            // Maybe echo $contents of $content variable here.
-            if ( $content !== false )
-                {
-                $ret = $content;
-                }
+            $ret = $content;
             }
         
         return $ret;

@@ -1562,7 +1562,6 @@ class BMLTPlugin
                     $handler = "ob_gzhandler";
                     }
                 
-                ob_end_clean(); // Just in case we are in an OB
                 ob_start($handler);
                     echo $ret;
                 ob_end_flush();
@@ -1575,12 +1574,23 @@ class BMLTPlugin
                 $options = $this->getBMLTOptions_by_id ( $options_id );
 
                 $this->load_params ( );
-            
                 if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
                     {
                     $url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
                     ob_end_clean(); // Just in case we are in an OB
-                    die ( bmlt_satellite_controller::call_curl ( $url ) );
+                    $ret = bmlt_satellite_controller::call_curl ( $url );
+                    
+                    $handler = null;
+                    
+                    if ( zlib_get_coding_type() === false )
+                        {
+                        $handler = "ob_gzhandler";
+                        }
+                    
+                    ob_start($handler);
+                        echo $ret;
+                    ob_end_flush();
+                    die ( );
                     }
                 elseif ( isset ( $this->my_http_vars['direct_simple'] ) )
                     {
@@ -1608,8 +1618,20 @@ class BMLTPlugin
                             }
                         $result = preg_replace ( '|\<a rel="external"|','<a rel="nofollow external" title="'.$this->process_text ( self::$local_gm_link_tooltip).'"', $result );
                         }
+
                     ob_end_clean(); // Just in case we are in an OB
-                    die ( $result );
+                    
+                    $handler = null;
+                    
+                    if ( zlib_get_coding_type() === false )
+                        {
+                        $handler = "ob_gzhandler";
+                        }
+                    
+                    ob_start($handler);
+                        echo $result;
+                    ob_end_flush();
+                    die ( );
                     }
                 elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
                     {
@@ -1661,6 +1683,10 @@ class BMLTPlugin
             
             $options = $this->getBMLTOptions_by_id ( $options_id );
 
+            $this->my_http_vars['bmlt_settings_id'] = $options_id;
+            
+            $this->load_params();
+            
             $root_server_root = $options['root_server'];
 
             if ( $root_server_root && $options['gmaps_api_key'] )
@@ -1698,6 +1724,7 @@ class BMLTPlugin
                 elseif ( isset ( $this->my_http_vars['do_search'] ) )
                     {
                     $uri = "$root_server?switcher=GetSearchResults".$this->my_params;
+
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
  
