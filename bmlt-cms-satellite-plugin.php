@@ -504,10 +504,13 @@ class BMLTPlugin
                                         $in_replacement_text    ///< The text we'll be replacing the shortcode with.
                                         )
         {
-        $code_regex_html = "(\<p[^>]*?>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?";
-        $code_regex_brackets = "(\<p[^>]*?>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?";
+        $code_regex_html = "#(\<p[^\>]*?\>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?#i";
+        $code_regex_brackets = "#(\<p[^\>]*?\>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?#i";
 
-        return preg_replace ( '#'.$code_regex_brackets.'#i', $ret, preg_replace ( '#'.$code_regex_html.'#i', $in_text_to_parse, $in_replacement_text ) );
+        $ret = preg_replace ( $code_regex_html, $in_replacement_text, $in_text_to_parse );
+        $ret = preg_replace ( $code_regex_brackets, $in_replacement_text, $ret );
+        
+        return $ret;
         }
     
     /************************************************************************************//**
