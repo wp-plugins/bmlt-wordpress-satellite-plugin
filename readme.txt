@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
 Tested up to: 3.1.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -45,12 +45,15 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
-2.1.1 -
+2.1.2 -April 20, 2011
+    Fixed some warnings that interfered with the operation of 2.1.1
+
+2.1.1 -April 20, 2011
     Sequestered the mobile stuff into a fieldset in the admin.
     Added the ability to set the mobile "grace period," as well as specify a mobile offset from the server.
     Added a number of fixes and adjustments as we debugged the Joomla plugin.
     
-2.1 -
+2.1 -April 11, 2011
     Significant refactoring to make it easier to port the plugin to other CMSes.
     Added the ability to select distance units (Km or Mi). This will only affect the mobile handler (at the moment).
     Added the ability to project a language, via the original interactive search (You can select a different language from the server's default).

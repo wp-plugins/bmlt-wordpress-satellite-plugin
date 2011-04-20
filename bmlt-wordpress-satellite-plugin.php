@@ -3,13 +3,13 @@
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.1.1                                                                          *
+*   \version 2.1.2                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.1
+Version: 2.1.2
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
@@ -345,7 +345,7 @@ class BMLTWPPlugin extends BMLTPlugin
             $support_mobile = null;
             }
         
-        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
+        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id($in_content) );
 
         if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
             {
@@ -530,7 +530,7 @@ class BMLTWPPlugin extends BMLTPlugin
                         $line['prompt'] = trim($text_ar[$lines++]);
                         if ( $line['parameters'] && $line['prompt'] )
                             {
-                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->cms_get_page_settings_id().'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
+                            $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->cms_get_page_settings_id($in_content).'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
                             $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
                             }
                         }
@@ -542,7 +542,7 @@ class BMLTWPPlugin extends BMLTPlugin
                     $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
                     $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
 
-                    $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id() );
+                    $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id($in_content) );
                     $url = $this->get_plugin_path();
                     $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
                     
