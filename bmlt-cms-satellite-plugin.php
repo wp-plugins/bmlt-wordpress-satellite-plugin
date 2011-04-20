@@ -1572,7 +1572,7 @@ class BMLTPlugin
                 }
             else
                 {                
-                $options_id = $this->cms_get_page_settings_id( );
+                $options_id = $this->cms_get_page_settings_id( null );
                 
                 $options = $this->getBMLTOptions_by_id ( $options_id );
 
