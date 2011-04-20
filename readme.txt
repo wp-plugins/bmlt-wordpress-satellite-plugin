@@ -21,7 +21,7 @@ The styling, especially, has been affected. If you have customized your installa
 1. Upload `the bmlt_plugin` directory to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Place `<!--BMLT-->` or `[[BMLT]]` in the HTML view of a page. It will be replaced by the plugin.
-1. You can also use <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/the-bmlt-in-depth/using-the-simple-table-output/">special shortcodes and HTML comments</a> (It's a slow page -have patience) to specify tables and blocks of predetermined search results.
+1. You can also use <a href="http://magshare.org/blog/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/the-bmlt-in-depth/using-the-simple-table-output/">special shortcodes and HTML comments</a> (It's a slow page -have patience) to specify tables and blocks of predetermined search results.
 
 == Screenshots ==
 
@@ -163,4 +163,4 @@ The styling, especially, has been affected. If you have customized your installa
 
 == Installing and Administering the Plugin ==
 
-You need to <a href="http://magshare.org/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/the-bmlt-in-depth/implementing-the-bmlt/the-wordpress-satellite/">go to this Web page to get very detailed instructions on installing and configuring the plugin.</a>
+You need to <a href="http://magshare.org/blog/welcome-to-magshare/bmlt-the-basic-meeting-list-toolbox/the-bmlt-in-depth/implementing-the-bmlt/the-wordpress-satellite/">go to this Web page to get very detailed instructions on installing and configuring the plugin.</a>
