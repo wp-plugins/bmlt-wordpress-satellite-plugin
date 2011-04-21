@@ -45,6 +45,9 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+2.1.3 -
+    Addressed some issues that could cause problems on some servers (a screwy intval() implementation).
+    
 2.1.2 -April 20, 2011
     Fixed some warnings that interfered with the operation of 2.1.1
 

@@ -551,7 +551,7 @@ class BMLTPlugin
                         'bmlt_initial_view' => self::$default_initial_view,
                         'push_down_more_details' => self::$default_push_down_more_details,
                         'additional_css' => self::$default_additional_css,
-                        'id' => abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
+                        'id' => abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
                         'setting_name' => '',
                         'theme' => self::$default_theme,
                         'lang_enum' => self::$default_language,
@@ -645,7 +645,7 @@ class BMLTPlugin
             
             if ( is_array ( $temp_BMLTOptions ) && count ( $temp_BMLTOptions ) )
                 {
-                if ( intval ($temp_BMLTOptions['id']) == intval($in_option_id) )
+                if ( $temp_BMLTOptions['id'] == $in_option_id )
                     {
                     $BMLTOptions = $temp_BMLTOptions;
                     // If they want to know the ID, we supply it here.
@@ -697,7 +697,7 @@ class BMLTPlugin
             // If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
             if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
                 {
-                $in_options['id'] = abs (function_exists ( 'microtime' ) ? intval(microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999))));   // This gives the option a unique slug
+                $in_options['id'] = abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999))));   // This gives the option a unique slug
                 $admin2Options = array ('num_servers' => intval( $in_option_number ));
 
                 $this->setAdmin2Options ( $admin2Options );
@@ -1149,7 +1149,7 @@ class BMLTPlugin
             {
 
             $ret .= '<div class="BMLTPlugin_option_sheet" id="BMLTPlugin_option_sheet_'.$in_options_index.'_div" style="display:'.htmlspecialchars ( $display_mode ).'">';
-                $ret .= '<h2 class="BMLTPlugin_option_id_h2">'.$this->process_text ( self::$local_options_settings_id_prompt ).htmlspecialchars ( intval ( $options['id'] ) ).'</h2>';
+                $ret .= '<h2 class="BMLTPlugin_option_id_h2">'.$this->process_text ( self::$local_options_settings_id_prompt ).htmlspecialchars ( $options['id'] ).'</h2>';
                 $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                     $id = 'BMLTPlugin_option_sheet_name_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_name_label ).'</label>';
@@ -1572,7 +1572,7 @@ class BMLTPlugin
                 }
             else
                 {                
-                $options_id = $this->cms_get_page_settings_id( null );
+                $options_id = $this->cms_get_page_settings_id( );
                 
                 $options = $this->getBMLTOptions_by_id ( $options_id );
 
@@ -2010,9 +2010,9 @@ class BMLTPlugin
         $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
             $ret .= '<h1 class="banner_h1">'.$this->process_text ( self::$local_GPS_banner ).'</h1>';
             $ret .= '<h2 class="banner_h2">'.$this->process_text ( self::$local_GPS_banner_subtext ).'</h2>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.intval($this->my_http_vars['bmlt_settings_id']).'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
             $ret .= '<hr class="meeting_divider_hr" />';
         $ret .= '</div>';
         
@@ -2040,7 +2040,7 @@ class BMLTPlugin
             $ret .= '<div class="search_address">';
             // The default, is we return a list. This is changed by JavaScript.
             $ret .= '<input type="hidden" name="BMLTPlugin_mobile" />';
-            $ret .= '<input type="hidden" name="bmlt_settings_id" value="'.intval($this->my_http_vars['bmlt_settings_id']).'" />';
+            $ret .= '<input type="hidden" name="bmlt_settings_id" value="'.$this->my_http_vars['bmlt_settings_id'].'" />';
             $ret .= '<input type="hidden" name="do_search" id="do_search" value="the hard way" />';
             $ret .= '<h1 class="banner_h2">'.$this->process_text ( self::$local_search_address_single ).'</h1>';
             if ( !isset ( $this->my_http_vars['WML'] ) )  // This is here to prevent WAI warnings.
@@ -2148,7 +2148,7 @@ class BMLTPlugin
             $ret .= '<postfield name="do_search" value="the hard way" />';
             $ret .= '<postfield name="WML" value="1" />';
             $ret .= '<postfield name="BMLTPlugin_mobile" value="1" />';
-            $ret .= '<postfield name="bmlt_settings_id" value="'.intval($this->my_http_vars['bmlt_settings_id']).'" />';
+            $ret .= '<postfield name="bmlt_settings_id" value="'.$this->my_http_vars['bmlt_settings_id'].'" />';
             $ret .= '</go>';
             $ret .= $this->process_text ( $local_search_submit_button );
             $ret .= '</anchor>';
