@@ -230,7 +230,7 @@ function BMLTPlugin_SaveOptions()
             };
         };
     
-    BMLTPlugin_AjaxRequest ( url, BMLTPlugin_SettingCallback, 'get' );
+    BMLTPlugin_AjaxRequest ( url, BMLTPlugin_SettingCallback, 'post' );
 };
 
 /****************************************************************************************//**
