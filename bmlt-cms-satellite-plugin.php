@@ -551,7 +551,7 @@ class BMLTPlugin
                         'bmlt_initial_view' => self::$default_initial_view,
                         'push_down_more_details' => self::$default_push_down_more_details,
                         'additional_css' => self::$default_additional_css,
-                        'id' => strval ( abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))) ),   // This gives the option a unique slug
+                        'id' => strval ( abs (time() + intval(rand(0, 999)))),   // This gives the option a unique slug
                         'setting_name' => '',
                         'theme' => self::$default_theme,
                         'lang_enum' => self::$default_language,
@@ -697,7 +697,7 @@ class BMLTPlugin
             // If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
             if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
                 {
-                $in_options['id'] = strval ( abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))) );   // This gives the option a unique slug
+                $in_options['id'] = strval ( abs (time() + intval(rand(0, 999))));   // This gives the option a unique slug
                 $admin2Options = array ('num_servers' => intval( $in_option_number ));
 
                 $this->setAdmin2Options ( $admin2Options );
