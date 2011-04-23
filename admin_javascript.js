@@ -220,14 +220,9 @@ function BMLTPlugin_SaveOptions()
             url += encodeURIComponent ( additional_css );
             };
     
-        url += '&BMLTPlugin_option_latitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lat;
-        url += '&BMLTPlugin_option_longitude_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].lng;
-        url += '&BMLTPlugin_option_zoom_'+option_index+'='+c_g_BMLTPlugin_coords[option_index-1].zoom;
-    
-        if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
-            {
-            url += encodeURIComponent ( root_server );
-            };
+        url += '&BMLTPlugin_option_latitude_'+option_index+'='+parseFloat(c_g_BMLTPlugin_coords[option_index-1].lat);
+        url += '&BMLTPlugin_option_longitude_'+option_index+'='+parseFloat(c_g_BMLTPlugin_coords[option_index-1].lng);
+        url += '&BMLTPlugin_option_zoom_'+option_index+'='+parseInt(c_g_BMLTPlugin_coords[option_index-1].zoom);
         };
     
     BMLTPlugin_AjaxRequest ( url, BMLTPlugin_SettingCallback, 'post' );

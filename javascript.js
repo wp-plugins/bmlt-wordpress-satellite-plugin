@@ -58,9 +58,25 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
     
     var req = createXMLHTTPObject();
     req.finalCallback = callback;
+    var sVars = null;
+    method = method.toString().toUpperCase();
+    
+    // Split the URL up, if this is a POST.
+    if ( method == "POST" )
+        {
+        var rmatch = /^([^\?]*)\?(.*)$/.exec ( url );
+        url = rmatch[1];
+        sVars = rmatch[2];
+        };
     if ( extra_data )
         {
         req.extra_data = extra_data;
+        };
+    req.open ( method, url, true );
+	if ( method == "POST" )
+        {
+        req.setRequestHeader("Method", "POST "+url+" HTTP/1.1");
+        req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         };
     req.onreadystatechange = function ( )
         {
@@ -69,8 +85,7 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
         callback ( req );
         req = null;
         };
-    req.open ( method,url, true );
-    req.send ( null );
+    req.send ( sVars );
     
     return req;
 };
