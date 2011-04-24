@@ -131,16 +131,17 @@ function BMLTPlugin_SaveOptions()
     for ( var option_index = 1; option_index <= c_g_BMLTPlugin_coords.length; option_index++ )
         {
         var name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
-        url += '&BMLTPlugin_option_sheet_name_'+option_index+'=';
+
+        // This one is not allowed to be blank.
         if ( name && (name != c_g_BMLTPlugin_no_name) )
             {
-            url += encodeURIComponent ( name );
+            url += '&BMLTPlugin_option_sheet_name_'+option_index+'='+encodeURIComponent ( name );
             };
         
         var root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
         
         url += '&BMLTPlugin_option_sheet_root_server_'+option_index+'=';
-    
+
         if ( root_server && (root_server != c_g_BMLTPlugin_no_root) )
             {
             url += encodeURIComponent ( root_server );
@@ -149,7 +150,7 @@ function BMLTPlugin_SaveOptions()
         var new_search = document.getElementById ( 'BMLTPlugin_option_sheet_new_search_'+option_index ).value.toString();
         
         url += '&BMLTPlugin_option_sheet_new_search_'+option_index+'=';
-    
+
         if ( new_search && (new_search != c_g_BMLTPlugin_no_search) )
             {
             url += encodeURIComponent ( new_search );
@@ -257,12 +258,16 @@ function BMLTPlugin_SettingCallback (in_success ///< The HTTPRequest object
             for ( var option_index = 1; option_index <= c_g_BMLTPlugin_coords.length; option_index++ )
                 {
                 var name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
-                var option = document.getElementById ( 'BMLTPlugin_option_sel_'+option_index );
-                if ( !option )
+                
+                if ( name && (name != c_g_BMLTPlugin_no_name) )
                     {
-                    option = document.getElementById ( 'BMLTPlugin_legend' );
+                    var option = document.getElementById ( 'BMLTPlugin_option_sel_'+option_index );
+                    if ( !option )
+                        {
+                        option = document.getElementById ( 'BMLTPlugin_legend' );
+                        };
+                    option.innerHTML = name;
                     };
-                option.innerHTML = name;
                 };
             };
         

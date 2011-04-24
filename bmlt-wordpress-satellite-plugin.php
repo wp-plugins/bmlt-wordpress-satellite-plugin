@@ -3,13 +3,13 @@
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.1.5                                                                          *
+*   \version 2.1.6                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.5
+Version: 2.1.6
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
@@ -486,7 +486,7 @@ class BMLTWPPlugin extends BMLTPlugin
 
         $count = 0;
 
-        $in_the_content = $this->display_old_popup_search ( $in_the_content, $count );
+        $in_the_content = $this->display_popup_search ( $in_the_content, $count );
         
         if ( !$count )
             {
@@ -503,7 +503,7 @@ class BMLTWPPlugin extends BMLTPlugin
     *   \returns a string, containing the content.                                          *
     ****************************************************************************************/
 
-    function display_old_popup_search ( $in_content,      ///< This is the content to be filtered.
+    function display_popup_search ( $in_content,      ///< This is the content to be filtered.
                                         &$out_count       ///< This is set to 1, if a substitution was made.
                                         )
         {

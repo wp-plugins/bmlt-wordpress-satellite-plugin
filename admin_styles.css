@@ -205,11 +205,18 @@
 
 .BMLTPlugin_option_sheet_line_root_server_text,
 .BMLTPlugin_option_sheet_line_new_search_text,
+.BMLTPlugin_option_sheet_line_gkey_text,
+.BMLTPlugin_option_sheet_line_name_text
+{
+    color: #36c;
+}
+
+.BMLTPlugin_option_sheet_line_root_server_text,
+.BMLTPlugin_option_sheet_line_new_search_text,
 .BMLTPlugin_option_sheet_line_gkey_text
 {
     width: 600px;
     float:left;
-    color: #36c;
 }
 
 
