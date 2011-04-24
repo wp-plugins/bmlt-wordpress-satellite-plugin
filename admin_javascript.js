@@ -132,10 +132,11 @@ function BMLTPlugin_SaveOptions()
         {
         var name = document.getElementById ( 'BMLTPlugin_option_sheet_name_'+option_index ).value.toString();
 
-        // This one is not allowed to be blank.
+        url += '&BMLTPlugin_option_sheet_name_'+option_index+'=';
+
         if ( name && (name != c_g_BMLTPlugin_no_name) )
             {
-            url += '&BMLTPlugin_option_sheet_name_'+option_index+'='+encodeURIComponent ( name );
+            url += encodeURIComponent ( name );
             };
         
         var root_server = document.getElementById ( 'BMLTPlugin_option_sheet_root_server_'+option_index ).value.toString();
