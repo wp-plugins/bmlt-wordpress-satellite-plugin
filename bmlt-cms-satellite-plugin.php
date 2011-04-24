@@ -551,7 +551,7 @@ class BMLTPlugin
                         'bmlt_initial_view' => self::$default_initial_view,
                         'push_down_more_details' => self::$default_push_down_more_details,
                         'additional_css' => self::$default_additional_css,
-                        'id' => abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999)))),   // This gives the option a unique slug
+                        'id' => strval ( time() + intval(rand(0, 999))),   // This gives the option a unique slug
                         'setting_name' => '',
                         'theme' => self::$default_theme,
                         'lang_enum' => self::$default_language,
@@ -697,7 +697,7 @@ class BMLTPlugin
             // If this is a new option, then we also update the admin 2 options, incrementing the number of servers.
             if ( intval ( $in_option_number ) == ($this->get_num_options ( ) + 1) )
                 {
-                $in_options['id'] = abs (function_exists ( 'microtime' ) ? (microtime(true) * 10000) : ((time() * 1000) + intval(rand(0, 999))));   // This gives the option a unique slug
+                $in_options['id'] = strval ( time() + intval(rand(0, 999)));   // This gives the option a unique slug
                 $admin2Options = array ('num_servers' => intval( $in_option_number ));
 
                 $this->setAdmin2Options ( $admin2Options );
@@ -1572,7 +1572,7 @@ class BMLTPlugin
                 }
             else
                 {                
-                $options_id = $this->cms_get_page_settings_id( );
+                $options_id = $this->cms_get_page_settings_id( null );
                 
                 $options = $this->getBMLTOptions_by_id ( $options_id );
 
@@ -1744,6 +1744,8 @@ class BMLTPlugin
             else
                 {
                 $the_new_content = $this->process_text ( self::$local_not_enough_for_old_style );
+                
+                $the_new_content = '<pre>ID: '."$options_id\nOptions: ".htmlspecialchars ( print_r ( $options, true ) ).'</pre>';
 
                 $in_content = self::replace_shortcode ($in_content, 'bmlt', $the_new_content);
                 }
@@ -2877,7 +2879,7 @@ class BMLTPlugin
                 if ( $params === true ) // If no mobile settings number was provided, we use the default.
                     {
                     $options = $this->getBMLTOptions ( 1 );
-                    $my_option_id = $options['id'];
+                    $my_option_id = strval ( $options['id'] );
                     }
                 else
                     {
