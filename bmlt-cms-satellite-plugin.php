@@ -507,8 +507,8 @@ class BMLTPlugin
         $code_regex_html = "#(\<p[^\>]*?\>)?\<\!\-\-\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\-\-\>(\<\/p>)?#i";
         $code_regex_brackets = "#(\<p[^\>]*?\>)?\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\](\<\/p>)?#i";
 
-        $ret = preg_replace ( $code_regex_html, $in_replacement_text, $in_text_to_parse );
-        $ret = preg_replace ( $code_regex_brackets, $in_replacement_text, $ret );
+        $ret = preg_replace ( $code_regex_html, $in_replacement_text, $in_text_to_parse, 1 );
+        $ret = preg_replace ( $code_regex_brackets, $in_replacement_text, $ret, 1 );
         
         return $ret;
         }
@@ -1773,19 +1773,24 @@ class BMLTPlugin
             {
             $param_array = explode ( '##-##', $params );    // You can specify a settings ID, by separating it from the URI parameters with a ##-##.
             
+            $params = null;
+            
             if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
                 {
                 $options = $this->getBMLTOptions_by_id ( $param_array[0] );
                 $root_server_root = $options['root_server'];
-                $params = $param_array[1];
+                $params = '?'.$param_array[1];
+                }
+            else
+                {
+                $params = (count ($param_array) > 0) ? '?'.$param_array[0] : null;
                 }
             
-            $uri = $root_server_root."/client_interface/simple/index.php?".$params;
+            $uri = $root_server_root."/client_interface/simple/index.php".$params;
 
             $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
             $in_content = self::replace_shortcode ( $in_content, 'bmlt_simple', $the_new_content );
             }
-        
         return $in_content;
         }
 
@@ -2900,12 +2905,7 @@ class BMLTPlugin
         
                 if ($params = self::get_shortcode ( $in_content, 'bmlt') ) 
                     {
-                    $my_option_id = ( $params !== true) ? $params : $my_option_id;
-                    }
-        
-                if ( $params = self::get_shortcode ( $in_content, 'simple_search_list') ) 
-                    {
-                    $my_option_id = ( $params !== true) ? $params : $my_option_id;
+                    $my_option_id = ( $params !== true ) ? $params : $my_option_id;
                     }
                 }
             }
