@@ -3,13 +3,13 @@
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.1.7                                                                          *
+*   \version 2.1.8                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.7
+Version: 2.1.8
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
@@ -102,6 +102,7 @@ class BMLTWPPlugin extends BMLTPlugin
         
         return $url;
         }
+
     
     /************************************************************************************//**
     *   \brief This uses the WordPress text processor (__) to process the given string.     *
@@ -254,8 +255,19 @@ class BMLTWPPlugin extends BMLTPlugin
             }
         else
             {
-            $support_mobile = intval ( preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) ) );
+            $support_mobile = preg_replace ( '/\D/', '', trim ( $this->cms_get_post_meta ( $page->ID, 'bmlt_mobile' ) ) );
             
+            if ( !$support_mobile && $in_check_mobile )
+                {
+                $support_mobile = self::get_shortcode ( $in_content, 'bmlt_mobile');
+                
+                if ( $support_mobile === true )
+                    {
+                    $options = $this->getBMLTOptions ( 1 );
+                    $support_mobile = strval ( $options['id'] );
+                    }
+                }
+
             if ( $in_check_mobile && $support_mobile && !isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) && (self::mobile_sniff_ua ($this->my_http_vars) != 'xhtml') )
                 {
                 $my_option_id = $support_mobile;
@@ -334,7 +346,7 @@ class BMLTWPPlugin extends BMLTPlugin
         $page_id = null;
         $page = get_page($page_id);
         
-        $support_mobile = $this->cms_get_page_settings_id ( $in_content, true );
+        $support_mobile = $this->cms_get_page_settings_id ( $page->post_content, true );
         
         if ( $support_mobile )
             {

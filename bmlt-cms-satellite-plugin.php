@@ -22,6 +22,7 @@ require_once ( dirname ( __FILE__ ).'/bmlt_satellite_controller.class.php' );
 	This crap needs to be included to be aboveboard and legal. You can still re-use the code, but
 	you need to make sure that the comments below this are included:
 	
+
 	Copyright (c) 2004-2007, Binny V Abraham
 
 	All rights reserved.
@@ -716,6 +717,7 @@ class BMLTPlugin
         }
         
     /************************************************************************************//**
+
     *   \brief This gets the admin 2 options from the database.                             *
     *                                                                                       *
     *   \returns an associative array, with the option settings.                            *
@@ -980,6 +982,7 @@ class BMLTPlugin
         $process_html = $this->process_admin_page($selected_option);
         $options_coords = array();
 
+
         $html = '<div class="BMLTPlugin_option_page" id="BMLTPlugin_option_page_div">';
             $html .= '<noscript class="no_js">'.$this->process_text ( self::$local_noscript ).'</noscript>';
             $html .= '<div id="BMLTPlugin_options_container" style="display:none">';    // This is displayed using JavaScript.
@@ -1135,6 +1138,7 @@ class BMLTPlugin
                                     )
         {
         $ret = '';
+
         $in_options_index = intval ( $in_options_index );
         
         if ( ($in_options_index < 1) || ($in_options_index > $this->get_num_options()) )
