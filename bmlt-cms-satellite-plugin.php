@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0.1                                                                          *
+*   \version 1.0.2                                                                          *
 *                                                                                           *
 ********************************************************************************************/
 
@@ -1672,6 +1672,66 @@ class BMLTPlugin
         $in_the_content = $this->display_old_search ( $in_the_content );
         
         return $in_the_content;
+        }
+        
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "popup" search, if provided by the 'bmlt_simple_searches' custom field.             *
+    *                                                                                       *
+    *   \returns a string, containing the content.                                          *
+    ****************************************************************************************/
+
+    function display_popup_search ( $in_content,    ///< This is the content to be filtered.
+                                    $in_text,       ///< The text that has the parameters in it.
+                                    &$out_count     ///< This is set to 1, if a substitution was made.
+                                    )
+        {
+        if ( $in_text && self::get_shortcode ( $in_content, 'simple_search_list' ) )
+            {
+            $display .= '';
+
+            $text_ar = explode ( "\n", $in_text );
+            
+            if ( is_array ( $text_ar ) && count ( $text_ar ) )
+                {
+                $display .= '<noscript class="no_js">'.$this->process_text ( self::$local_noscript ).'</noscript>';
+                $display .= '<div id="interactive_form_div" class="interactive_form_div" style="display:none"><form action="#" onsubmit="return false"><div>';
+                $display .= '<label class="meeting_search_select_label" for="meeting_search_select">Find Meetings:</label> ';
+                $display .= '<select id="meeting_search_select"class="simple_search_list" onchange="BMLTPlugin_simple_div_filler (this.value,this.options[this.selectedIndex].text);this.options[this.options.length-1].disabled=(this.selectedIndex==0)">';
+                $display .= '<option disabled="disabled" selected="selected">'.$this->process_text ( self::$local_select_search ).'</option>';
+                $lines_max = count ( $text_ar );
+                $lines = 0;
+                while ( $lines < $lines_max )
+                    {
+                    $line['parameters'] = trim($text_ar[$lines++]);
+                    $line['prompt'] = trim($text_ar[$lines++]);
+                    if ( $line['parameters'] && $line['prompt'] )
+                        {
+                        $uri = $this->get_ajax_base_uri().'?bmlt_settings_id='.$this->cms_get_page_settings_id($in_content).'&amp;direct_simple&amp;search_parameters='.urlencode ( $line['parameters'] );
+                        $display .= '<option value="'.$uri.'">'.__($line['prompt']).'</option>';
+                        }
+                    }
+                $display .= '<option disabled="disabled"></option>';
+                $display .= '<option disabled="disabled" value="">'.$this->process_text ( self::$local_clear_search ).'</option>';
+                $display .= '</select></div></form>';
+                
+                $display .= '<script type="text/javascript">';
+                $display .= 'document.getElementById(\'interactive_form_div\').style.display=\'block\';';
+                $display .= 'document.getElementById(\'meeting_search_select\').selectedIndex=0;';
+
+                $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id($in_content) );
+                $url = $this->get_plugin_path();
+                $img_url .= htmlspecialchars ( $url.'themes/'.$options['theme'].'/images/' );
+                
+                $display .= "var c_g_BMLTPlugin_images = '$img_url';";
+                $display .= '</script>';
+                $display .= '<div id="simple_search_container"></div></div>';
+                }
+            
+            $in_content = self::replace_shortcode ($in_content, 'simple_search_list', $display);
+            }
+        
+        return $in_content;
         }
         
     /************************************************************************************//**
