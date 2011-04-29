@@ -1728,7 +1728,12 @@ class BMLTPlugin
                 $display .= '<div id="simple_search_container"></div></div>';
                 }
             
-            $in_content = self::replace_shortcode ($in_content, 'simple_search_list', $display);
+            if ( $display )
+                {
+                $in_content = self::replace_shortcode ( $in_content, 'simple_search_list', $display );
+            
+                $out_count = 1;
+                }
             }
         
         return $in_content;
