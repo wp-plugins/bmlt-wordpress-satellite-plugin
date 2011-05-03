@@ -5,6 +5,22 @@
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
 *   \version 1.0.2                                                                          *
 *                                                                                           *
+    This file is part of the Basic Meeting List Toolbox (BMLT).
+    
+    Find out more at: http://magshare.org/bmlt
+    
+    BMLT is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    BMLT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this code.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************************/
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
@@ -982,7 +998,6 @@ class BMLTPlugin
         $process_html = $this->process_admin_page($selected_option);
         $options_coords = array();
 
-
         $html = '<div class="BMLTPlugin_option_page" id="BMLTPlugin_option_page_div">';
             $html .= '<noscript class="no_js">'.$this->process_text ( self::$local_noscript ).'</noscript>';
             $html .= '<div id="BMLTPlugin_options_container" style="display:none">';    // This is displayed using JavaScript.
@@ -1496,13 +1511,11 @@ class BMLTPlugin
         elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) || isset ( $this->my_http_vars['BMLTPlugin_Fetch_Langs_AJAX_Call'] ) )
             {
             $ret = '';
-            
             if ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] ) )
                 {
                 $uri = trim ( $this->my_http_vars['BMLTPlugin_AJAX_Call_Check_Root_URI'] );
                 
                 $test = new bmlt_satellite_controller ( $uri );
-                
                 if ( $uri && ($uri != self::$local_options_no_root_server_string ) && $test instanceof bmlt_satellite_controller )
                     {
                     if ( !$test->get_m_error_message() )
@@ -1534,7 +1547,7 @@ class BMLTPlugin
             die ( $ret );
             }
         }
-       
+      
     /************************************************************************************//**
     *   \brief Handles some AJAX routes                                                     *
     *                                                                                       *
@@ -2943,7 +2956,11 @@ class BMLTPlugin
                                                  $in_check_mobile = false   ///< True if this includes a check for mobile. Default is false.
                                                 )
         {
-        $my_option_id = null;
+        $options = $this->getBMLTOptions ( 1 );
+        if ( !$in_check_mobile )
+            {
+            $my_option_id = strval ( $options['id'] );
+            }
         
         if ( $in_content )  // The default version requires content.
             {

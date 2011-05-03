@@ -410,6 +410,8 @@ class BMLTWPPlugin extends BMLTPlugin
                 $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
                 }
             
+            $additional_css = '.bmlt_container * {margin:0;padding:0 } table#bmlt_container div.c_comdef_search_results_map_container_div { position:static; width:100%; height:640px}';
+
             if ( $options['push_down_more_details'] )
                 {
                 $additional_css .= 'table#bmlt_container div.c_comdef_search_results_single_ajax_div{position:static;margin:0;width:100%;}';
