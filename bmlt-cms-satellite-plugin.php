@@ -2954,11 +2954,7 @@ class BMLTPlugin
                                                  $in_check_mobile = false   ///< True if this includes a check for mobile. Default is false.
                                                 )
         {
-        $options = $this->getBMLTOptions ( 1 );
-        if ( !$in_check_mobile )
-            {
-            $my_option_id = strval ( $options['id'] );
-            }
+        $my_option_id = null;
         
         if ( $in_content )  // The default version requires content.
             {
