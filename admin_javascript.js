@@ -2,7 +2,23 @@
 * \file admin_javascript.js                                                                 *
 * \brief The javascript for the BMLTPlugin class (Admin options).                           *
 * \version 1.0.0                                                                            *
-* \license Public Domain -No restrictions at all.                                           *
+    
+    This file is part of the Basic Meeting List Toolbox (BMLT).
+    
+    Find out more at: http://magshare.org/bmlt
+    
+    BMLT is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    BMLT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this code.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************************/
 
 var g_BMLTPlugin_admin_main_map = null;         ///< This will hold the map instance.
@@ -154,6 +170,7 @@ function BMLTPlugin_SaveOptions()
 
         if ( new_search && (new_search != c_g_BMLTPlugin_no_search) )
             {
+
             url += encodeURIComponent ( new_search );
             };
         
@@ -558,6 +575,7 @@ function BMLTPlugin_admin_load_map ( )
             'zoomControlOptions': { 'style': google.maps.ZoomControlStyle.LARGE }
             };
     
+
         g_BMLTPlugin_admin_main_map = new google.maps.Map(document.getElementById("BMLTPlugin_Map_Div"), myOptions);
         google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "click", function (in_event) { g_BMLTPlugin_admin_marker.setPosition(in_event.latLng); BMLTPlugin_admin_MovedMarker(); } );
         google.maps.event.addListener ( g_BMLTPlugin_admin_main_map, "zoom_changed", function () {c_g_BMLTPlugin_coords[BMLTPlugin_GetSelectedOptionIndex()-1].zoom = g_BMLTPlugin_admin_main_map.getZoom();if(!g_BMLTPlugin_hold_the_pickles){BMLTPlugin_DirtifyOptionSheet();}else{g_BMLTPlugin_hold_the_pickles=false;};} );

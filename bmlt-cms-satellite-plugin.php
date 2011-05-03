@@ -1588,11 +1588,9 @@ class BMLTPlugin
                 die ( );
                 }
             else
-                {                
-                $options_id = $this->cms_get_page_settings_id( null );
+                {
+                $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
                 
-                $options = $this->getBMLTOptions_by_id ( $options_id );
-
                 $this->load_params ( );
                 if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
                     {

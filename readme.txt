@@ -45,6 +45,11 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.9 =
+* May 3, 2011
+* Fixed a few issues encountered while implementing the Drupal plugin (a lot of the code is cross-CMS).
+* Added GPL headers to everything.
+
 = 2.1.8 =
 * April 28, 2011
 * Fixed a bug, in which the bmlt_mobile shortcode was not being interpreted properly (Affected WordPress only).
