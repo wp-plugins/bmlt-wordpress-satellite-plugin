@@ -1092,24 +1092,24 @@ class BMLTPlugin
                 $html .= '<div class="BMLTPlugin_toolbar_line_map">';
                     $html .= '<h2 class="BMLTPlugin_map_label_h2">'.$this->process_text ( self::$local_options_map_label ).'</h2>';
                     $html .= '<div class="BMLTPlugin_Map_Div" id="BMLTPlugin_Map_Div"></div>';
-                    $html .= '<script type="text/javascript">';
-                        $html .= "BMLTPlugin_DirtifyOptionSheet(true);";    // This sets up the "Save Changes" button as disabled.
+                    $html .= '<script type="text/javascript">' . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "BMLTPlugin_DirtifyOptionSheet(true);" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');    // This sets up the "Save Changes" button as disabled.
                         // This is a trick I use to hide irrelevant content from non-JS browsers. The element is drawn, hidden, then uses JS to show. No JS, no element.
-                        $html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';";
-                        $html .= "var c_g_BMLTPlugin_no_name = '".$this->process_text ( self::$local_options_no_name_string )."';";
-                        $html .= "var c_g_BMLTPlugin_no_root = '".$this->process_text ( self::$local_options_no_root_server_string )."';";
-                        $html .= "var c_g_BMLTPlugin_no_search = '".$this->process_text ( self::$local_options_no_new_search_string )."';";
+                        $html .= "document.getElementById('BMLTPlugin_options_container').style.display='block';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_no_name = '".$this->process_text ( self::$local_options_no_name_string )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_no_root = '".$this->process_text ( self::$local_options_no_root_server_string )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_no_search = '".$this->process_text ( self::$local_options_no_new_search_string )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
                         $html .= "var c_g_BMLTPlugin_root_canal = '".self::$local_options_url_bad."';";
-                        $html .= "var c_g_BMLTPlugin_success_message = '".$this->process_text ( self::$local_options_save_success )."';";
-                        $html .= "var c_g_BMLTPlugin_failure_message = '".$this->process_text ( self::$local_options_save_failure )."';";
-                        $html .= "var c_g_BMLTPlugin_success_time = ".intval ( self::$local_options_success_time ).";";
-                        $html .= "var c_g_BMLTPlugin_failure_time = ".intval ( self::$local_options_failure_time ).";";
-                        $html .= "var c_g_BMLTPlugin_unsaved_prompt = '".$this->process_text ( self::$local_options_unsaved_message )."';";
-                        $html .= "var c_g_BMLTPlugin_test_server_success = '".$this->process_text ( self::$local_options_test_server_success )."';";
-                        $html .= "var c_g_BMLTPlugin_test_server_failure = '".$this->process_text ( self::$local_options_test_server_failure )."';";
-                        $html .= "var c_g_BMLTPlugin_coords = new Array();";
-                        $html .= "var g_BMLTPlugin_TimeToFade = ".intval ( self::$local_options_success_time ).";";
-                        $html .= "var g_BMLTPlugin_no_gkey_string = '".$this->process_text ( self::$local_options_no_gkey_string)."';";
+                        $html .= "var c_g_BMLTPlugin_success_message = '".$this->process_text ( self::$local_options_save_success )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_failure_message = '".$this->process_text ( self::$local_options_save_failure )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_success_time = ".intval ( self::$local_options_success_time ).";" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_failure_time = ".intval ( self::$local_options_failure_time ).";" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_unsaved_prompt = '".$this->process_text ( self::$local_options_unsaved_message )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_test_server_success = '".$this->process_text ( self::$local_options_test_server_success )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_test_server_failure = '".$this->process_text ( self::$local_options_test_server_failure )."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var c_g_BMLTPlugin_coords = new Array();" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var g_BMLTPlugin_TimeToFade = ".intval ( self::$local_options_success_time ).";" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= "var g_BMLTPlugin_no_gkey_string = '".$this->process_text ( self::$local_options_no_gkey_string)."';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
                         if ( is_array ( $options_coords ) && count ( $options_coords ) )
                             {
                             foreach ( $options_coords as $value )
@@ -1134,8 +1134,8 @@ class BMLTPlugin
                             }
                         $url = $this->get_plugin_path();
                         $url = htmlspecialchars ( $url.'google_map_images' );
-                        $html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';";
-                        $html .= 'BMLTPlugin_admin_load_map();';
+                        $html .= "var c_g_BMLTPlugin_admin_google_map_images = '$url';" . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
+                        $html .= 'BMLTPlugin_admin_load_map();' . (defined ( '_DEBUG_MODE_' ) ? "\n" : '');
                     $html .= '</script>';
                 $html .= '</div>';
             $html .= '</div>';
@@ -1571,8 +1571,6 @@ class BMLTPlugin
             if ( isset ( $this->my_http_vars['BMLTPlugin_mobile'] ) )
                 {
                 $ret = $this->BMLTPlugin_fast_mobile_lookup ();
-    
-                $url = $this->get_plugin_path();
                 
                 ob_end_clean(); // Just in case we are in an OB
                 
@@ -2096,9 +2094,9 @@ class BMLTPlugin
         $ret = '<div class="search_intro" id="hidden_until_js" style="display:none">';
             $ret .= '<h1 class="banner_h1">'.$this->process_text ( self::$local_GPS_banner ).'</h1>';
             $ret .= '<h2 class="banner_h2">'.$this->process_text ( self::$local_GPS_banner_subtext ).'</h2>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
-            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="1" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].((isset ( $this->my_http_vars['base_url'] ) && $this->my_http_vars['base_url']) ? '&amp;base_url='.urlencode($this->my_http_vars['base_url']) : '').'">'.$this->process_text ( self::$local_search_all ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="2" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=today&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].((isset ( $this->my_http_vars['base_url'] ) && $this->my_http_vars['base_url']) ? '&amp;base_url='.urlencode($this->my_http_vars['base_url']) : '').'">'.$this->process_text ( self::$local_search_today ).'</a></div>';
+            $ret .= '<div class="link_one_line"><a rel="nofollow" accesskey="3" href="'.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?BMLTPlugin_mobile&amp;do_search&amp;qualifier=tomorrow&amp;bmlt_settings_id='.$this->my_http_vars['bmlt_settings_id'].((isset ( $this->my_http_vars['base_url'] ) && $this->my_http_vars['base_url']) ? '&amp;base_url='.urlencode($this->my_http_vars['base_url']) : '').'">'.$this->process_text ( self::$local_search_tomorrow ).'</a></div>';
             $ret .= '<hr class="meeting_divider_hr" />';
         $ret .= '</div>';
         
@@ -2126,6 +2124,12 @@ class BMLTPlugin
             $ret .= '<div class="search_address">';
             // The default, is we return a list. This is changed by JavaScript.
             $ret .= '<input type="hidden" name="BMLTPlugin_mobile" />';
+            
+            if ( isset ( $this->my_http_vars['base_url'] ) && $this->my_http_vars['base_url'] )
+                {
+                $ret .= '<input type="hidden" name="base_url" value="'.htmlspecialchars($this->my_http_vars['base_url']).'" />';
+                }
+                
             $ret .= '<input type="hidden" name="bmlt_settings_id" value="'.$this->my_http_vars['bmlt_settings_id'].'" />';
             $ret .= '<input type="hidden" name="do_search" id="do_search" value="the hard way" />';
             $ret .= '<h1 class="banner_h2">'.$this->process_text ( self::$local_search_address_single ).'</h1>';
@@ -2234,6 +2238,10 @@ class BMLTPlugin
             $ret .= '<postfield name="do_search" value="the hard way" />';
             $ret .= '<postfield name="WML" value="1" />';
             $ret .= '<postfield name="BMLTPlugin_mobile" value="1" />';
+            if ( isset ( $this->my_http_vars['base_url'] ) && $this->my_http_vars['base_url'] )
+                {
+                $ret .= '<postfield type="hidden" name="base_url" value="'.htmlspecialchars($this->my_http_vars['base_url']).'" />';
+                }
             $ret .= '<postfield name="bmlt_settings_id" value="'.$this->my_http_vars['bmlt_settings_id'].'" />';
             $ret .= '</go>';
             $ret .= $this->process_text ( $local_search_submit_button );
