@@ -83,11 +83,22 @@
     margin-right: 0px;
 }
 
+.BMLTPlugin_create_button
+{
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#BMLTPlugin_sheet_form.BMLTPlugin_sheet_form
+{
+    margin:0;
+}
+
 .BMLTPlugin_toolbar_button_line_left,
 .BMLTPlugin_toolbar_button_line_right
 {
     text-align: center;
-    width: 33%
+    width: 20%
 }
 
 .BMLTPlugin_toolbar_button_line_left

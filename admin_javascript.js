@@ -568,7 +568,7 @@ function BMLTPlugin_admin_load_map ( )
 
     if ( !g_BMLTPlugin_admin_main_map )
         {
-        myOptions = { 'zoom': zoom, 'center': new google.maps.LatLng ( latitude, longitude ), 'mapTypeId': google.maps.MapTypeId.ROADMAP,
+        myOptions = { 'zoom': zoom, 'scrollwheel': false, 'center': new google.maps.LatLng ( latitude, longitude ), 'mapTypeId': google.maps.MapTypeId.ROADMAP,
             'mapTypeControl': true,
             'mapTypeControlOptions': { 'style': google.maps.MapTypeControlStyle.DROPDOWN_MENU },
             'zoomControl': true,
