@@ -183,7 +183,17 @@
 .BMLTPlugin_option_sheet_line_div
 {
     clear:both;
+    vertical-align:middle;
+    height:20px;
+    line-height: 20px;
+    margin-top:4px;
+    margin-bottom:4px;
+}
+
+.BMLTPlugin_additional_css_line
+{
     vertical-align:top;
+    height:auto;
 }
 
 .BMLTPlugin_option_sheet_line_div label
@@ -229,6 +239,17 @@
     margin-left:8px;
 }
 
+.BMLTPlugin_option_sheet_line_root_server_text,
+.BMLTPlugin_option_sheet_line_new_search_text,
+.BMLTPlugin_option_sheet_line_gkey_text,
+.BMLTPlugin_option_sheet_line_name_text
+{
+    color: #36c;
+    float:left;
+    border:1px solid #6cf;
+    margin-right:4px;
+}
+
 .BMLTPlugin_option_sheet_line_name_text
 {
     width: 300px;
@@ -238,11 +259,7 @@
 .BMLTPlugin_option_sheet_line_new_search_text,
 .BMLTPlugin_option_sheet_line_gkey_text
 {
-    width: 600px;
-    float:left;
-    color: #36c;
-}
-
+    width: 600px;}
 
 .BMLTPlugin_option_sheet_Test_Button_div
 {
@@ -262,6 +279,17 @@
 .BMLTPlugin_option_sheet_Test_Button_div input
 {
     float:left;
+}
+
+.BMLTPlugin_option_sheet_Test_Button_div input,
+.BMLTPlugin_toolbar_line_bottom input,
+.BMLTPlugin_lang_button
+{
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+    border: 1px solid #36c;
 }
 
 .BMLTPlugin_option_sheet_BAD,

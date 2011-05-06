@@ -440,13 +440,17 @@ class BMLTPlugin
             {
             if ( ($key != 'lang_enum') && isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher or the language.
                 {
-                if ( is_array ( $value ) )
+                if ( isset ( $value ) && is_array ( $value ) && count ( $value ) )
                     {
                     foreach ( $value as $val )
                         {
-                        if ( is_array ( $val ) )
+                        if ( isset ( $val ) &&  is_array ( $val ) && count ( $val ) )
                             {
-                            $val = join ( ',', $val );
+                            $val = implode ( ',', $val );
+                            }
+                        else
+                            {
+                            $val = '';
                             }
                         $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
                         }
@@ -499,7 +503,7 @@ class BMLTPlugin
         
         if ( preg_match ( '#'.$code_regex_html.'#i', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#i', $in_text_to_parse, $matches ) )
             {
-            if ( !($ret = trim ( $matches[1], '()' )) ) // See if we have any parameters.
+            if ( !isset ( $matches[1] ) || !($ret = trim ( $matches[1], '()' )) ) // See if we have any parameters.
                 {
                 $ret = true;
                 }
@@ -1224,7 +1228,7 @@ class BMLTPlugin
                         $ret .= '</select>';
                     $ret .= '</div>';
                     }
-                $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                $ret .= '<div class="BMLTPlugin_option_sheet_line_div BMLTPlugin_additional_css_line">';
                     $id = 'BMLTPlugin_option_sheet_additional_css_'.$in_options_index;
                     $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_more_styles_label ).'</label>';
                     $ret .= '<textarea class="BMLTPlugin_option_sheet_additional_css_textarea" id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
@@ -1588,6 +1592,11 @@ class BMLTPlugin
                 }
             else
                 {
+                if ( !isset ( $this->my_http_vars['bmlt_settings_id'] ) )
+                    {
+                    $this->my_http_vars['bmlt_settings_id'] = null; // Just to squash a warning.
+                    }
+                    
                 $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
                 
                 $this->load_params ( );
