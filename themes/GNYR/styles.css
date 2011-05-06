@@ -571,3 +571,33 @@ table#bmlt_container .c_comdef_search_results_single_ajax_throbber_div,
 	-moz-border-radius:4px;
 	-webkit-border-radius: 4px;
 }
+
+table#bmlt_container fieldset,  /* Avoids Drupal 7 shenanigans */
+table#bmlt_container fieldset legend
+{
+    position: static;
+}
+
+
+table#bmlt_container fieldset legend
+{
+    width: auto;
+    border: none;
+    background: default;
+}
+
+table#bmlt_container .bmlt_search_one_service_body_dt input,
+table#bmlt_container .bmlt_search_one_format_div input,
+table#bmlt_container .bmlt_search_one_weekday_div input
+{
+    float:left;
+    display: block;
+    margin-right: 8px;
+}
+
+table#bmlt_container .bmlt_search_one_service_body_dt label,
+table#bmlt_container .bmlt_search_one_format_div label,
+table#bmlt_container .bmlt_search_one_weekday_div label
+{
+    display: inline;
+}
