@@ -2,7 +2,23 @@
 * \file javascript.js                                                                       *
 * \brief The javascript for the BMLTPlugin class.                                           *
 * \version 1.0.0                                                                            *
-* \license Public Domain -No restrictions at all.                                           *
+    
+    This file is part of the Basic Meeting List Toolbox (BMLT).
+    
+    Find out more at: http://magshare.org/bmlt
+    
+    BMLT is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    BMLT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this code.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************************/
     
 /****************************************************************************************//**
@@ -60,6 +76,7 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
     req.finalCallback = callback;
     var sVars = null;
     method = method.toString().toUpperCase();
+    var drupal_kludge = '';
     
     // Split the URL up, if this is a POST.
     if ( method == "POST" )
@@ -67,6 +84,13 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
         var rmatch = /^([^\?]*)\?(.*)$/.exec ( url );
         url = rmatch[1];
         sVars = rmatch[2];
+        // This horrible, horrible kludge, is because Drupal insists on having its q parameter in the GET list only.
+        var rmatch_kludge = /(q=admin\/settings\/bmlt)&?(.*)/.exec ( rmatch[2] );
+        if ( rmatch_kludge[1] )
+            {
+            url += '?'+rmatch_kludge[1];
+            sVars = rmatch_kludge[2];
+            };
         };
     if ( extra_data )
         {

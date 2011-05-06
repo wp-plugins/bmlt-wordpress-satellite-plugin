@@ -1,8 +1,24 @@
 /****************************************************************************************//**
 * \file admin_styles.css                                                                    *
 * \brief The CSS for the BMLTPlugin class (Admin options).                                  *
-* \version 1.0.0                                                                            *
-* \license Public Domain -No restrictions at all.                                           *
+* \version 2.1.9                                                                            *
+    
+    This file is part of the Basic Meeting List Toolbox (BMLT).
+    
+    Find out more at: http://magshare.org/bmlt
+    
+    BMLT is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    BMLT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this code.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************************/
 
 .BMLTPlugin_Admin_h1,
@@ -47,6 +63,7 @@
     border-left:1px solid #6cf;
     border-right:1px solid #6cf;
     border-top:1px solid #6cf;
+    margin:0;
     margin-top:8px;
     margin-right: 12px;
     padding: 8px;
@@ -54,6 +71,7 @@
 
 .BMLTPlugin_toolbar_line_bottom
 {
+    margin: 0;
     border-left:1px solid #6cf;
     border-right:1px solid #6cf;
     margin-right: 12px;
@@ -65,11 +83,22 @@
     margin-right: 0px;
 }
 
+.BMLTPlugin_create_button
+{
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#BMLTPlugin_sheet_form.BMLTPlugin_sheet_form
+{
+    margin:0;
+}
+
 .BMLTPlugin_toolbar_button_line_left,
 .BMLTPlugin_toolbar_button_line_right
 {
     text-align: center;
-    width: 33%
+    width: 20%
 }
 
 .BMLTPlugin_toolbar_button_line_left
@@ -87,6 +116,8 @@
     margin: 8px;
     padding-left:4px;
     padding-right:4px;
+    height: 24px;
+    line-height:24px;
 }
 
 .BMLTPlugin_Message_bar_success
@@ -152,7 +183,17 @@
 .BMLTPlugin_option_sheet_line_div
 {
     clear:both;
+    vertical-align:middle;
+    height:20px;
+    line-height: 20px;
+    margin-top:4px;
+    margin-bottom:4px;
+}
+
+.BMLTPlugin_additional_css_line
+{
     vertical-align:top;
+    height:auto;
 }
 
 .BMLTPlugin_option_sheet_line_div label
@@ -198,6 +239,17 @@
     margin-left:8px;
 }
 
+.BMLTPlugin_option_sheet_line_root_server_text,
+.BMLTPlugin_option_sheet_line_new_search_text,
+.BMLTPlugin_option_sheet_line_gkey_text,
+.BMLTPlugin_option_sheet_line_name_text
+{
+    color: #36c;
+    float:left;
+    border:1px solid #6cf;
+    margin-right:4px;
+}
+
 .BMLTPlugin_option_sheet_line_name_text
 {
     width: 300px;
@@ -205,20 +257,9 @@
 
 .BMLTPlugin_option_sheet_line_root_server_text,
 .BMLTPlugin_option_sheet_line_new_search_text,
-.BMLTPlugin_option_sheet_line_gkey_text,
-.BMLTPlugin_option_sheet_line_name_text
-{
-    color: #36c;
-}
-
-.BMLTPlugin_option_sheet_line_root_server_text,
-.BMLTPlugin_option_sheet_line_new_search_text,
 .BMLTPlugin_option_sheet_line_gkey_text
 {
-    width: 600px;
-    float:left;
-}
-
+    width: 600px;}
 
 .BMLTPlugin_option_sheet_Test_Button_div
 {
@@ -238,6 +279,17 @@
 .BMLTPlugin_option_sheet_Test_Button_div input
 {
     float:left;
+}
+
+.BMLTPlugin_option_sheet_Test_Button_div input,
+.BMLTPlugin_toolbar_line_bottom input,
+.BMLTPlugin_lang_button
+{
+    padding-top:2px;
+    padding-bottom:2px;
+    padding-left:4px;
+    padding-right:4px;
+    border: 1px solid #36c;
 }
 
 .BMLTPlugin_option_sheet_BAD,
@@ -321,7 +373,7 @@
 
 .BMLTPlugin_special_check
 {
-    margin-top:4px;
+    margin-top:8px;
     margin-left:180px;
     display:block;
     float:left;
@@ -331,6 +383,7 @@
 {
     margin-left:4px;
     width:auto;
+    clear: none;
 }
 
 .BMLTPlugin_option_sheet .BMLTPlugin_special_check_div
