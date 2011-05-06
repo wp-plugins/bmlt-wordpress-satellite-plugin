@@ -425,6 +425,7 @@ table#bmlt_container fieldset legend
     background: default;
 }
 
+
 table#bmlt_container .bmlt_search_one_service_body_dt input,
 table#bmlt_container .bmlt_search_one_format_div input,
 table#bmlt_container .bmlt_search_one_weekday_div input
@@ -434,9 +435,16 @@ table#bmlt_container .bmlt_search_one_weekday_div input
     margin-right: 8px;
 }
 
+table#bmlt_container .search_check_div input
+{
+    display: inline;
+    margin-right: 8px;
+}
+
 table#bmlt_container .bmlt_search_one_service_body_dt label,
 table#bmlt_container .bmlt_search_one_format_div label,
-table#bmlt_container .bmlt_search_one_weekday_div label
+table#bmlt_container .bmlt_search_one_weekday_div label,
+table#bmlt_container .search_check_div label
 {
     display: inline;
 }
