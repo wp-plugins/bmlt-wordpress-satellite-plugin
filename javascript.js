@@ -86,7 +86,7 @@ function BMLTPlugin_AjaxRequest (   url,        ///< The URI to be called
         sVars = rmatch[2];
         // This horrible, horrible kludge, is because Drupal insists on having its q parameter in the GET list only.
         var rmatch_kludge = /(q=admin\/settings\/bmlt)&?(.*)/.exec ( rmatch[2] );
-        if ( rmatch_kludge[1] )
+        if ( rmatch_kludge && rmatch_kludge[1] )
             {
             url += '?'+rmatch_kludge[1];
             sVars = rmatch_kludge[2];

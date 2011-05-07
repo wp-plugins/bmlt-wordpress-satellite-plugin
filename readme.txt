@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
 Tested up to: 3.1.1
-Stable tag: 2.1.10
+Stable tag: 2.1.11
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -45,6 +45,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.11 =
+* May 7, 2011
+* Fixed a JavaScript error that prevented saves.
+
 = 2.1.10 =
 * May 6, 2011
 * Added changes to the cross-CMS class and styling for the Drupal module. Won't have much effect on WordPress.
