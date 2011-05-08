@@ -45,6 +45,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.12 =
+* May 8, 2011
+* Fixed an error that interfered with several Advanced Search options.
+
 = 2.1.11 =
 * May 7, 2011
 * Fixed a JavaScript error that prevented saves.
