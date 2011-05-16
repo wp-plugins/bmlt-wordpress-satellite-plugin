@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0.2                                                                          *
+*   \version 1.0.3                                                                          *
 *                                                                                           *
     This file is part of the Basic Meeting List Toolbox (BMLT).
     
@@ -448,7 +448,7 @@ class BMLTPlugin
                             {
                             $val = implode ( ',', $val );
                             }
-                        else
+                        elseif ( !isset ( $val ) )
                             {
                             $val = '';
                             }
@@ -468,7 +468,6 @@ class BMLTPlugin
                     }
                 }
             }
-        
         return $my_params;
         }
     
@@ -1815,7 +1814,6 @@ class BMLTPlugin
                 elseif ( isset ( $this->my_http_vars['do_search'] ) )
                     {
                     $uri = "$root_server?switcher=GetSearchResults".$this->my_params;
-
                     $the_new_content = bmlt_satellite_controller::call_curl ( $uri );
                     }
  
