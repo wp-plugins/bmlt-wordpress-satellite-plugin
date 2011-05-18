@@ -545,7 +545,8 @@ table#bmlt_container,
 	-webkit-border-radius: 6px;
 }
 
-table#bmlt_container input
+table#bmlt_container input,
+table#bmlt_container textarea
 {
     border-radius: 4px !important;
 	-moz-border-radius:4px !important;
@@ -608,4 +609,9 @@ table#bmlt_container .bmlt_search_one_weekday_div label,
 table#bmlt_container .search_check_div label
 {
     display: inline;
+}
+
+table#bmlt_container .bmlt_contact_form_one_line_text_item
+{
+    width: 336px;
 }
