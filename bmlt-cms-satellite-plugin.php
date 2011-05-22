@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0.4                                                                          *
+*   \version 1.0.5                                                                          *
 *                                                                                           *
     This file is part of the Basic Meeting List Toolbox (BMLT).
     
@@ -2381,44 +2381,6 @@ class BMLTPlugin
         
         return $ret;
         }
-    
-    /************************************************************************************//**
-    *   \brief Sorting Callback                                                             *
-    *                                                                                       *
-    *   This will sort meetings by weekday, then by distance, so the first meeting of any   *
-    *   given weekday is the closest one, etc.                                              *
-    *                                                                                       *
-    *   \returns -1 if a < b, 1, otherwise.                                                 *
-    ****************************************************************************************/
-    function BMLTPlugin_sort_meetings_callback (    $in_a_meeting,  ///< These are meeting data arrays. The elements we'll be checking will be 'weekday_tinyint' and 'distance_in_XX'.
-                                                    $in_b_meeting
-                                                    )
-        {
-        $ret = 0;
-        
-        if ( $in_a_meeting['weekday_tinyint'] != $in_b_meeting['weekday_tinyint'] )
-            {
-            $ret = ($in_a_meeting['weekday_tinyint'] < $in_b_meeting['weekday_tinyint']) ? -1 : 1;
-            }
-        else
-            {
-            $dist_a = intval ( round (strtolower(($options['distance_units']) == 'mi') ? $in_a_meeting['distance_in_miles'] : $in_a_meeting['distance_in_km'], 1) * 10 );
-            $dist_b = intval ( round ((strtolower($options['distance_units']) == 'mi') ? $in_b_meeting['distance_in_miles'] : $in_b_meeting['distance_in_km'], 1) * 10 );
-
-            if ( $dist_a != $dist_b )
-                {
-                $ret = ($dist_a < $dist_b) ? -1 : 1;
-                }
-            else
-                {
-                $time_a = preg_replace ( '|:|', '', $in_a_meeting['start_time']);
-                $time_b = preg_replace ( '|:|', '', $in_b_meeting['start_time']);
-                $ret = ($time_a < $time_b) ? -1 : 1;
-                }
-            }
-        
-        return $ret;
-        }
 
     /************************************************************************************//**
     *   \brief Runs the lookup.                                                             *
@@ -2427,6 +2389,43 @@ class BMLTPlugin
     ****************************************************************************************/
     function BMLTPlugin_fast_mobile_lookup()
         {
+        /************************************************************************************//**
+        *   \brief Sorting Callback                                                             *
+        *                                                                                       *
+        *   This will sort meetings by weekday, then by distance, so the first meeting of any   *
+        *   given weekday is the closest one, etc.                                              *
+        *                                                                                       *
+        *   \returns -1 if a < b, 1, otherwise.                                                 *
+        ****************************************************************************************/
+        function mycmp (    $in_a_meeting,  ///< These are meeting data arrays. The elements we'll be checking will be 'weekday_tinyint' and 'distance_in_XX'.
+                            $in_b_meeting
+                        )
+            {
+            $ret = 0;
+            
+            if ( $in_a_meeting['weekday_tinyint'] != $in_b_meeting['weekday_tinyint'] )
+                {
+                $ret = ($in_a_meeting['weekday_tinyint'] < $in_b_meeting['weekday_tinyint']) ? -1 : 1;
+                }
+            else
+                {
+                $dist_a = intval ( round (strtolower(($options['distance_units']) == 'mi') ? $in_a_meeting['distance_in_miles'] : $in_a_meeting['distance_in_km'], 1) * 10 );
+                $dist_b = intval ( round ((strtolower($options['distance_units']) == 'mi') ? $in_b_meeting['distance_in_miles'] : $in_b_meeting['distance_in_km'], 1) * 10 );
+    
+                if ( $dist_a != $dist_b )
+                    {
+                    $ret = ($dist_a < $dist_b) ? -1 : 1;
+                    }
+                else
+                    {
+                    $time_a = preg_replace ( '|:|', '', $in_a_meeting['start_time']);
+                    $time_b = preg_replace ( '|:|', '', $in_b_meeting['start_time']);
+                    $ret = ($time_a < $time_b) ? -1 : 1;
+                    }
+                }
+            
+            return $ret;
+            }
         $ret = self::BMLTPlugin_select_doctype($this->my_http_vars);
         $ret .= $this->BMLTPlugin_fast_mobile_lookup_header_stuff();   // Add styles and/or JS, depending on the UA.
         $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] );
@@ -2549,7 +2548,7 @@ class BMLTPlugin
                                     
                                     $index = 1;
                                     $count = count ( $search_result['meetings'] );
-                                    usort ( $search_result['meetings'], 'BMLTPlugin_sort_meetings_callback' );
+                                    usort ( $search_result['meetings'], 'mycmp' );
                                     if ( isset ( $_REQUEST['access_card'] ) && intval ( $_REQUEST['access_card'] ) )
                                         {
                                         $index = intval ( $_REQUEST['access_card'] );
