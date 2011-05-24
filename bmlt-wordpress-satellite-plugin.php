@@ -3,15 +3,16 @@
 *   \file   bmlt-wordpress-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a WordPress plugin of a BMLT satellite client.                          *
-*   \version 2.1.15                                                                          *
 *                                                                                           *
 *   These need to be without the asterisks, as WP parses them.                              *
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.15
+Version: 2.1.16
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
+
+define ( 'BMLT_CURRENT_VERSION', '2.1.16' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -30,6 +31,13 @@ require_once ( dirname ( __FILE__ ).'/bmlt-cms-satellite-plugin.php' );
 
 class BMLTWPPlugin extends BMLTPlugin
 {
+    var $plugin_read_me_loc = 'http://plugins.trac.wordpress.org/browser/bmlt-wordpress-satellite-plugin/trunk/readme.txt?format=txt';
+    var $plugin_file_name = 'bmlt-wordpress-satellite-plugin/bmlt-wordpress-satellite-plugin.php';
+    var $plugin_update_message_1 = 'The WordPress BMLT Plugin has been updated. Here is a change list, so you can see what\'s been changed or fixed:';
+    var $plugin_update_message_2 = '= Latest Version =';
+    var $plugin_update_message_3 = 'Release Date:';
+    var $plugin_settings_name = 'Settings';
+
     /************************************************************************************//**
     *   \brief Constructor.                                                                 *
     ****************************************************************************************/
@@ -137,6 +145,7 @@ class BMLTWPPlugin extends BMLTPlugin
             add_filter ( 'the_content', array ( self::get_plugin_object(), 'content_filter')  );
             add_filter ( 'wp_head', array ( self::get_plugin_object(), 'standard_head' ) );
             add_filter ( 'admin_head', array ( self::get_plugin_object(), 'admin_head' ) );
+			add_filter ( 'plugin_action_links', array ( self::get_plugin_object(), 'filter_plugin_actions' ), 10, 2 );
             }
         else
             {
@@ -145,16 +154,17 @@ class BMLTWPPlugin extends BMLTPlugin
         
         if ( function_exists ( 'add_action' ) )
             {
+            add_action ( "in_plugin_update_message-".$this->plugin_file_name, array ( self::get_plugin_object(), 'in_plugin_update_message' ) );
             add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_ajax_handler' ) );
             add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
-            add_action ( 'wp', array ( self::get_plugin_object(), 'ajax_router' ) );
+            add_action ( 'init', array ( self::get_plugin_object(), 'ajax_router' ) );
             }
         else
             {
             echo "<!-- BMLTPlugin ERROR (set_callbacks)! No add_action()! -->";
             }
         }
-
+    
     /************************************************************************************//**
     *   \brief This gets the admin options from the database (allows CMS abstraction).      *
     *                                                                                       *
@@ -505,6 +515,99 @@ class BMLTWPPlugin extends BMLTPlugin
         $in_the_content = $this->display_old_search ( $in_the_content, $count );
         
         return $in_the_content;
+        }
+        
+    /************************************************************************************//**
+    *   \brief This was cribbed from the W3TC (TotalCache) plugin.                          *
+    *                                                                                       *
+    *   This function will display the current changelist in a plugin's update notification *
+    *   area, which is way kewl.                                                            *
+    ****************************************************************************************/
+    function in_plugin_update_message ( )
+        {
+        $data = bmlt_satellite_controller::call_curl ( $this->plugin_read_me_loc );
+        $ret = '';
+        
+        if ($data)
+            {
+            $matches = null;
+            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote ( BMLT_CURRENT_VERSION ) . '\s*=|$)~Uis';
+            
+            if ( preg_match ( $regexp, $data, $matches) )
+                {
+                $changelog = (array) preg_split ( '~[\r\n]+~', trim ( $matches[1] ) );
+                
+                $ret = '<div style="color: #c00;font-size: medium; margin-top:8px;margin-bottom:8px">' . $this->process_text ( $this->plugin_update_message_1 ) . '</div>';
+                $ret .= '<div style="font-weight: normal;">';
+                $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $this->plugin_update_message_2 ) . '</p>';
+                $ul = false;
+                $first = false;
+                
+                foreach ( $changelog as $index => $line )
+                    {
+                    if ( preg_match ( '~^\s*\*\s*~', $line) )
+                        {
+                        if ( !$ul )
+                            {
+                            $ret .= '<ul style="list-style: disc; margin-left: 20px;">';
+                            $ul = true;
+                            $first = true;
+                            }
+                        $line = preg_replace ('~^\s*\*\s*~', '', $this->process_text ( $line ) );
+                        if ( $first )
+                            {
+                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . $this->process_text ( $this->plugin_update_message_3 . ' ' . $line) . '</li>';
+                            $first = false;
+                            }
+                        else
+                            {
+                            $ret .= '<li>' . $this->process_text ( $line ) . '</li>';
+                            }
+                        }
+                    else
+                        {
+                        if ( $ul )
+                            {
+                            $ret .= '</ul><div style="clear: left;"></div>';
+                            $ul = false;
+                            }
+                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $line ) . '</p>';
+                        }
+                    }
+                
+                if ( $ul )
+                    {
+                    $ret .= '</ul>';
+                    }
+                
+                $ret .= '</div>';
+                }
+            }
+        
+        echo $ret;
+        }
+
+    /************************************************************************************//**
+    *   \brief This was cribbed from the W3TC (TotalCache) plugin.                          *
+    *                                                                                       *
+    *   This function adds a settings link to the plugin listing.                           *
+    ****************************************************************************************/
+    function filter_plugin_actions ( $links,
+                                    $file
+                                    )
+        {
+        static $this_plugin;
+        
+        if ( !$this_plugin && function_exists ( 'plugin_basename' ) )
+            {
+            if ( $file == plugin_basename ( __FILE__ ) )
+                {
+                $settings_link = '<a href="options-general.php?page=' . basename ( __FILE__ ) . '">' . $this->process_text ( $this->plugin_settings_name ) . '</a>';
+                array_unshift ( $links, $settings_link );
+                }
+            }
+
+        return $links;
         }
 };
 
