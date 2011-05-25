@@ -49,6 +49,7 @@ The styling, especially, has been affected. If you have customized your installa
 * Added the capability to display a changelist in the upgrade notice -very cool!
 * Added a settings link to the plugin listing.
 
+= 2.1.15 =
 * May 22, 2011
 * Fixed a very strange bug that seems to cause error 500s on some servers. Not sure why the fix worked, but it does. This only manifested when doing an "address only" search in mobile mode.
 
