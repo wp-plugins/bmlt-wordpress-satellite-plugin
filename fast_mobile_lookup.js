@@ -1,7 +1,7 @@
 /****************************************************************************************//**
 * \file fast_mobile_lookup.js																*
 * \brief Javascript functions for the fast mobile lookup map interface.						*
-* \version 1.0.5																			*
+* \version 1.0.6																			*
 * \license Public Domain -No restrictions at all.											*
 ********************************************************************************************/
 
@@ -449,6 +449,16 @@ function WhereAmI ( in_qualifier_day,	/**< A string. This determines whether to 
 				ret += '<span class="marker_div_location_province">, '+in_meeting_obj.location_province.toString()+'</span>';
 				};
 			ret += '</div>';
+			};
+		
+		if ( in_meeting_obj.location_info )
+			{
+			ret += '<div class="marker_div_location_info">'+in_meeting_obj.location_info.toString()+'</div>';
+			};
+		
+		if ( in_meeting_obj.comments )
+			{
+			ret += '<div class="marker_div_location_info">'+in_meeting_obj.comments.toString()+'</div>';
 			};
 		
 		ret += '<div class="marker_div_location_maplink"><a href="';
