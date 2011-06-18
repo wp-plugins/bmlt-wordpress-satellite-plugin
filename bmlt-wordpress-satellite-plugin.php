@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.17
+Version: 2.1.18
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '2.1.17' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '2.1.18' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -367,7 +367,7 @@ class BMLTWPPlugin extends BMLTPlugin
             $support_mobile = null;
             }
         
-        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id($in_content) );
+        $options = $this->getBMLTOptions_by_id ( $this->cms_get_page_settings_id( $page->post_content ) );
 
         if ( $support_mobile && is_array ( $mobile_options ) && count ( $mobile_options ) )
             {

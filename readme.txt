@@ -42,6 +42,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.18 =
+* June 16, 2011
+* Fixed an "invisible" bug in the standard header output, which could interfere with the correct settings being selected.
+
 = 2.1.17 =
 * June 14, 2011
 * Added the location text and comments to the meeting info displays in mobile mode.
