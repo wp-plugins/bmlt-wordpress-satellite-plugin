@@ -42,9 +42,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
-= 2.1.18 =
-* June 16, 2011
+= 2.1.19 =
+* June 20, 2011
 * Fixed an "invisible" bug in the standard header output, which could interfere with the correct settings being selected.
+* Changed the structure to use the new one that allows the shared projects to be "nested" more easily.
 
 = 2.1.17 =
 * June 14, 2011

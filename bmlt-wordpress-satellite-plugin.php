@@ -17,7 +17,7 @@ define ( 'BMLT_CURRENT_VERSION', '2.1.18' );    // This needs to be kept in sync
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 // Include the satellite driver class.
-require_once ( dirname ( __FILE__ ).'/bmlt-cms-satellite-plugin.php' );
+require_once ( dirname ( __FILE__ ).'/BMLT-Satellite-Base-Class/bmlt-cms-satellite-plugin.php' );
 
 /****************************************************************************************//**
 *   \class BMLTWPPlugin                                                                     *
@@ -88,11 +88,11 @@ class BMLTWPPlugin extends BMLTPlugin
             {
             if ( plugins_url() )
                 {
-                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/";
+                $url = plugins_url()."/bmlt-wordpress-satellite-plugin/BMLT-Satellite-Base-Class/";
                 }
             elseif ( defined ('WP_PLUGIN_URL' ) )
                 {
-                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+                $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/BMLT-Satellite-Base-Class/";
                 }
             else
                 {
@@ -101,7 +101,7 @@ class BMLTWPPlugin extends BMLTPlugin
             }
         elseif ( !function_exists ( 'plugins_url' ) && defined ('WP_PLUGIN_URL' ) )
             {
-            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/";
+            $url = WP_PLUGIN_URL."/bmlt-wordpress-satellite-plugin/BMLT-Satellite-Base-Class/";
             }
         else
             {
