@@ -537,9 +537,9 @@ class BMLTWPPlugin extends BMLTPlugin
                 {
                 $changelog = (array) preg_split ( '~[\r\n]+~', trim ( $matches[1] ) );
                 
-                $ret = '<div style="color: #c00;font-size: medium; margin-top:8px;margin-bottom:8px">' . $this->process_text ( $this->plugin_update_message_1 ) . '</div>';
+                $ret = '<div style="color: #c00;font-size: small; margin-top:8px;margin-bottom:8px">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_1 ) ) . '</div>';
                 $ret .= '<div style="font-weight: normal;">';
-                $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $this->plugin_update_message_2 ) . '</p>';
+                $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_2 ) ) . '</p>';
                 $ul = false;
                 $first = false;
                 
@@ -553,15 +553,15 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ul = true;
                             $first = true;
                             }
-                        $line = preg_replace ('~^\s*\*\s*~', '', $this->process_text ( $line ) );
+                        $line = preg_replace ('~^\s*\*\s*~', '', html_entity_decode ( $this->process_text ( $line ) ) );
                         if ( $first )
                             {
-                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . $this->process_text ( $this->plugin_update_message_3 . ' ' . $line) . '</li>';
+                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_3 . ' ' . $line) ) . '</li>';
                             $first = false;
                             }
                         else
                             {
-                            $ret .= '<li>' . $this->process_text ( $line ) . '</li>';
+                            $ret .= '<li>' . html_entity_decode ( $this->process_text ( $line ) ) . '</li>';
                             }
                         }
                     else
@@ -571,7 +571,7 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ret .= '</ul><div style="clear: left;"></div>';
                             $ul = false;
                             }
-                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $line ) . '</p>';
+                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . html_entity_decode ( $this->process_text ( $line ) ) . '</p>';
                         }
                     }
                 
