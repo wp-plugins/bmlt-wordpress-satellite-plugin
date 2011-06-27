@@ -551,15 +551,15 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ul = true;
                             $first = true;
                             }
-                        $line = preg_replace ('~^\s*\*\s*~', '', html_entity_decode ( $this->process_text ( $line ) ) );
+                        $line = preg_replace ( '~^\s*\*\s*~', '', $line );
                         if ( $first )
                             {
-                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_3 . ' ' . $line) ) . '</li>';
+                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_3 ) ) . ' ' . $line . '</li>';
                             $first = false;
                             }
                         else
                             {
-                            $ret .= '<li>' . html_entity_decode ( $this->process_text ( $line ) ) . '</li>';
+                            $ret .= '<li>' . $line . '</li>';
                             }
                         }
                     else
@@ -569,7 +569,7 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ret .= '</ul><div style="clear: left;"></div>';
                             $ul = false;
                             }
-                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . html_entity_decode ( $this->process_text ( $line ) ) . '</p>';
+                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . $line . '</p>';
                         }
                     }
                 
