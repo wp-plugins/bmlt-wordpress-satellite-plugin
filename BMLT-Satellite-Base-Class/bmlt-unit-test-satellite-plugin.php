@@ -3,7 +3,7 @@
 *   \file   bmlt-unit-test-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a standalone unit test plugin of a BMLT satellite client.               *
-*   \version 1.1.2                                                                          *
+*   \version 1.1.3                                                                          *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -49,11 +49,15 @@ class BMLTUTestPlugin extends BMLTPlugin
     function __construct ()
         {
         // This line is customized for the developer's test environment. If you are debugging on a local machine, you may want to change the first choice.
-        self::$default_rootserver = ('localhost' == strtolower($_SERVER['SERVER_NAME'])) ? 'http://localhost/magshare.org/public_html/projects/BMLT-Root-Server/main_server' : 'http://bmlt.magshare.net/trunk/main_server';
+        self::$default_rootserver = 'http://bmlt.magshare.net/trunk/main_server';
+        if ( 'localhost' == strtolower($_SERVER['SERVER_NAME']) )
+            {
+            self::$default_rootserver = 'http://localhost/magshare.org/public_html/projects/BMLT-Root-Server/main_server';
+            }
         self::$default_gkey = 'ABQIAAAABCC8PsaKPPEsC3k649kYPRTayKsye0hTYG-iMuljzAHNM4JcxhSlV55ZKpjgC9b-QsLtlkYPMO6omg'; ///< This is for MAGSHARE. Change this to your own.
-        self::$default_map_center_latitude = 41.37;
-        self::$default_map_center_longitude = -73.18;
-        self::$default_map_zoom = 8;
+        self::$default_map_center_latitude = 41.2;
+        self::$default_map_center_longitude = -73.4;
+        self::$default_map_zoom = 9;
         parent::__construct ();
         }
     
@@ -313,7 +317,6 @@ class BMLTUTestPlugin extends BMLTPlugin
         $this->ajax_router ( );
         $load_head = false;   // This is a throwback. It prevents the GM JS from being loaded if there is no directly specified settings ID.
         $head_content = "<!-- Added by the BMLT plugin 2.0. -->\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=EmulateIE7\" />\n<meta http-equiv=\"Content-Style-Type\" content=\"text/css\" />\n<meta http-equiv=\"Content-Script-Type\" content=\"text/javascript\" />\n";
-        $load_head = true;
         
         $support_mobile = $this->cms_get_page_settings_id ( $in_text, true );
         
@@ -345,12 +348,9 @@ class BMLTUTestPlugin extends BMLTPlugin
             die ( );
             }
         
-        if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
-            {
-            $load_head = false;
-            }
+        $load_server_header = $this->get_shortcode ( $in_text, 'bmlt');   // No GMAP API key or no "bmlt" shortcode, no BMLT window.
         
-        $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
+        $this->my_http_vars['gmap_key'] = $load_gmaps ? null : $options['gmaps_api_key'];
         
         $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
         
@@ -375,12 +375,12 @@ class BMLTUTestPlugin extends BMLTPlugin
             {
             $root_server = $root_server_root."/client_interface/xhtml/index.php";
             
-            if ( $load_head )
+            if ( $load_server_header )
                 {
                 $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
                 }
             
-            $additional_css = '.bmlt_container * {margin:0;padding:0 }';
+            $additional_css = '.bmlt_container * {margin:0;padding:0;text-align:center }';
 
             if ( $options['push_down_more_details'] )
                 {
@@ -410,7 +410,7 @@ class BMLTUTestPlugin extends BMLTPlugin
             }
         
         $head_content .= 'javascript.js"></script>';
-
+        
         return $head_content;
         }
         

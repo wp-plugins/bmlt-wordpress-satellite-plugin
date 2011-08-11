@@ -42,6 +42,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.21 =
+* August 8, 2011
+* This implements a powerful new shortcode: "bmlt_map"
+
 = 2.1.20 =
 * July 16, 2011
 * This removes a few warnings that could come up in really anal-retentive environments.
