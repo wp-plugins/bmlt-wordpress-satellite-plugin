@@ -2,7 +2,7 @@
 /****************************************************************************************//**
 * \file unit_test.php																		*
 * \brief A unit test harness for the BMLTPlugin class.						                *
-* \version 1.0.8																			*
+* \version 1.1.3																			*
     
     This file is part of the BMLT Common Satellite Base Class Project. The project GitHub
     page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class
@@ -36,6 +36,7 @@ require_once ( 'bmlt-unit-test-satellite-plugin.php' );
 
 /// This is an ID for a specific meeting (with some changes) for the meeting changes test.
 define ( 'U_TEST_MEETING_ID', 734 );
+define ( '_TIME_ZONE_', 'America/New_York' );
 
 /****************************************************************************************//**
 *	\brief Runs the unit tests.																*
@@ -69,7 +70,7 @@ function u_test()
         $ret .= '</script>';
         $ret .= '</head><body>';    // Open the page
         $ret .= '<div class="return_button"><a href="'.htmlspecialchars($_SERVER['PHP_SELF']).'">Return to Start</a></div>';
-        $ret .= '<div class="return_button"><a href="'.htmlspecialchars($_SERVER['PHP_SELF']).'?utest_string=clear_session">Clear Session</a></div>';
+        $ret .= '<div class="return_button"><a href="'.htmlspecialchars($_SERVER['PHP_SELF']).'?utest_string=clear_session">Clear Session And Create Second Default Settings</a></div>';
         $ret .= u_test_body();
         $ret .= '</body></html>';	// Wrap up the page.
 	    }
@@ -94,9 +95,27 @@ function u_test_operation()
         {
         $ret = 'admin';
         }
-    elseif ( strtolower ( $oper_text ) == 'clear_session' )
+    elseif ( strtolower ( $oper_text ) == 'clear_session' || (strtolower ( $oper_text ) == 'clear_session_start') )
         {
         $ret = 'clear_session';
+        
+        $seconds = $BMLTPluginOp->getBMLTOptions(-1);
+        
+        $seconds['setting_name'] = 'UKNA';
+        $seconds['root_server'] = 'http://www.ukna.org/BMLT/main_server';
+        $seconds['map_center_latitude'] = 53.067626642387374;
+        $seconds['map_center_longitude'] = -1.23046875;
+        $seconds['map_zoom'] = 5;
+        $seconds['id'] = '2';
+        $seconds['distance_units'] = 'km';
+        $seconds['theme'] = 'BlueAndWhite';
+        
+        $BMLTPluginOp->setBMLTOptions ( $seconds, 2 );
+        $firsts = $BMLTPluginOp->getBMLTOptions ( 1 );
+        $firsts['setting_name'] = 'GNYR';
+        $firsts['id'] = '1';
+        $seconds['theme'] = 'GNYR';
+        $BMLTPluginOp->setBMLTOptions ( $firsts, 1 );
         }
     elseif ( $BMLTPluginOp->get_shortcode('bmlt', $oper_text ) )
         {
@@ -147,6 +166,7 @@ function u_test_header()
         break;
         
         case 'clear_session':
+        case 'clear_session_start':
             session_start();
             session_unset();
             session_destroy();
@@ -195,7 +215,6 @@ function u_test_body()
 function u_test_form()
 {
     global $BMLTPluginOp;
-        
 	$ret = '<div class="return_button"><a href="http://'.$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'].'?utest_string=admin">Admin Page</a></div>';
     $ret .= '<div class="utest_input_form_container_div">';
         $ret .= '<form onsubmit="utest_onsubmit()" class="utest_input_form" method="get" action="'.htmlspecialchars ( $_SERVER['PHP_SELF'] ).'">';
@@ -206,13 +225,25 @@ function u_test_form()
                         $ret .= '<label for="preset">Preset Text:<select id="preset" onchange="utest_preset_text(this.value)">';
                         $ret .= '<option value="" disabled="disabled">Select A Preset String</option>';
                         $ret .= '<option value="[[bmlt]]">Standard BMLT (Brackets)</option>';
-                        $ret .= '<option value="<!--bmlt-->">Standard BMLT (Comment)</option>';
+                        $ret .= '<option value="&lt;!--bmlt--&gt;">Standard BMLT (Comment)</option>';
                         $ret .= '<option value="[[bmlt_mobile]]">BMLT Mobile (Brackets)</option>';
-                        $ret .= '<option value="<!--bmlt_mobile-->">BMLT Mobile (Comment)</option>';
-                        $ret .= '<option value="[[bmlt_simple(switcher=GetSearchResults&block_mode=1&meeting_key=location_city_subsection&meeting_key_value=Brooklyn&weekdays[]=7)]]">BMLT Simple (Brackets -Brooklyn, Saturday)</option>';
-                        $ret .= '<option value="<!--bmlt_simple(switcher=GetSearchResults&block_mode=1&meeting_key=location_city_subsection&meeting_key_value=Brooklyn&weekdays[]=1)-->">BMLT Simple (Comment -Brooklyn, Sunday)</option>';
+                        $ret .= '<option value="&lt;!--bmlt_mobile--&gt;">BMLT Mobile (Comment)</option>';
+                        $ret .= '<option value="[[BMLT_SIMPLE(switcher=GetSearchResults&block_mode=1&meeting_key=location_city_subsection&meeting_key_value=Brooklyn&weekdays[]=7)]]">BMLT Simple (Brackets -Brooklyn, Saturday)</option>';
+                        $ret .= '<option value="&lt;!--bmlt_simple(switcher=GetSearchResults&block_mode=1&meeting_key=location_city_subsection&meeting_key_value=Brooklyn&weekdays[]=1)--&gt;">BMLT Simple (Comment -Brooklyn, Sunday)</option>';
                         $ret .= '<option value="[[bmlt_simple(switcher=GetFormats)]]">BMLT Simple (Brackets -Formats)</option>';
-                        $ret .= '<option value="<!--bmlt_simple(switcher=GetFormats)-->">BMLT Simple (Comment -Formats)</option>';
+                        $ret .= '<option value="&lt;!--bmlt_simple(switcher=GetFormats)--&gt;">BMLT Simple (Comment -Formats)</option>';
+                        $ret .= '<option value="[[bmlt_changes(switcher=GetChanges&start_date='.date('Y-m-d',time()-(60 * 60 * 24 * 90)).')]]">BMLT Changes (Brackets -Last 90 days)</option>';
+                        $ret .= '<option value="&lt;!-- bmlt_changes(switcher=GetChanges&start_date='.date('Y-m-d',time()-(60 * 60 * 24 * 180)).'&end_date='.date('Y-m-d',time()-(60 * 60 * 24 * 90)).') --&gt;">BMLT Changes (Comments -Last 180 - 90 days)</option>';
+                        $ret .= '<option value="[[bmlt_changes(switcher=GetChanges&start_date='.date('Y-m-d',time()-(60 * 60 * 24 * 365)).'&service_body_id=1001)]]">BMLT Changes (Brackets -Last year in Suffolk Area Service)</option>';
+                        $ret .= '<option value="&lt;!--BMLT_CHANGES(switcher=GetChanges&start_date='.date('Y-m-d',time()-(60 * 60 * 24 * 90)).'&service_body_id=1)--&gt;">BMLT Changes (Comments -Last 90 days in Greater New York Regional Service)</option>';
+                        $ret .= '<option value="[[bmlt_map]]">BMLT Map -New Implementation (Brackets)</option>';
+                        $ret .= '<option value="&lt;!--bmlt_map--&gt;">BMLT Map -New Implementation (Comments)</option>';
+                        $ret .= '<option value="" disabled="disabled"></option>';
+                        $ret .= '<option value="" disabled="disabled">NOTE: All the following Require that the Session Clear Be Called First!</option>';
+                        $ret .= '<option value="" disabled="disabled"></option>';
+                        $ret .= '<option value="[[bmlt_map(2)]]">BMLT Map -New Implementation (Brackets -UKNA)</option>';
+                        $ret .= '<option value="&lt;!--bmlt_map(2)--&gt;">BMLT Map -New Implementation (Comments -UKNA)</option>';
+                        $ret .= '<option value="&lt;fieldset&gt;&lt;legend&gt;GNYR OPTIONS&lt;/legend&gt;[[bmlt_map(1)]]&lt;/fieldset&gt;&lt;fieldset&gt;&lt;legend&gt;UKNA OPTIONS&lt;/legend&gt;[[bmlt_map(2)]]&lt;/fieldset&gt;">BMLT Map -New Implementation (Brackets -and Double-setup)</option>';
                         $ret .= '</select>';
                     $ret .= '</div>';
                 $ret .= '</div>';
@@ -259,8 +290,6 @@ function u_test_render()
     
     $str = u_test_get_string();
     
-//die ( '<pre>'.htmlspecialchars ( print_r ( $str, true )).'</pre>' );
-    
     $ret .= $BMLTPluginOp->content_filter ( u_test_get_string() );
     
     $ret .= '</div>';
@@ -273,5 +302,7 @@ function u_test_render()
 /*******************************************************************************************/
 
 // This calls the unit test.
+date_default_timezone_set ( _TIME_ZONE_ );   // Just to stop warnings.
+
 echo u_test();
 ?>

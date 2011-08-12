@@ -3,30 +3,30 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 1.0.8                                                                          *
+*   \version 1.1.3                                                                          *
 *                                                                                           *
-    This file is part of the BMLT Common Satellite Base Class Project. The project GitHub
-    page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class
-    
-    This file is part of the Basic Meeting List Toolbox (BMLT).
-    
-    Find out more at: http://magshare.org/bmlt
-    
-    BMLT is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    BMLT is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    
-    You should have received a copy of the GNU General Public License
-    along with this code.  If not, see <http://www.gnu.org/licenses/>.
+*   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
+*   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
+*                                                                                           *
+*   This file is part of the Basic Meeting List Toolbox (BMLT).                             *
+*                                                                                           *
+*   Find out more at: http://magshare.org/bmlt                                              *
+*                                                                                           *
+*   BMLT is free software: you can redistribute it and/or modify                            *
+*   it under the terms of the GNU General Public License as published by                    *
+*   the Free Software Foundation, either version 3 of the License, or                       *
+*   (at your option) any later version.                                                     *
+*                                                                                           *
+*   BMLT is distributed in the hope that it will be useful,                                 *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of                          *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                           *
+*   GNU General Public License for more details.                                            *
+*                                                                                           *
+*   You should have received a copy of the GNU General Public License                       *
+*   along with this code.  If not, see <http://www.gnu.org/licenses/>.                      *
 ********************************************************************************************/
 
-// define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+//define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 // Include the satellite driver class.
 require_once ( dirname ( __FILE__ ).'/BMLT-Satellite-Driver/bmlt_satellite_controller.class.php' );
@@ -258,6 +258,14 @@ class BMLTPlugin
     static  $local_clear_search = 'Clear Search Results';                   ///< Used for the "Clear" item in the quick search popup.
     static  $local_menu_new_search_text = 'New Search';                     ///< For the new search menu in the old-style BMLT search.
     
+    /// These are for the change display
+    static  $local_change_label_date =  'Change Date:';                     ///< The date when the change was made.
+    static  $local_change_label_meeting_name =  'Meeting Name:';            ///< The name of the changed meeting.
+    static  $local_change_label_service_body_name =  'Service Body:';       ///< The name of the meeting's Service body.
+    static  $local_change_label_admin_name =  'Changed By:';                ///< The name of the Service Body Admin that made the change.
+    static  $local_change_label_description =  'Description:';              ///< The description of the change.
+    static  $local_change_date_format = 'F j Y, \a\t g:i A';                ///< The format in which the change date/time is displayed.
+    
     /// A simple message for most <noscript> elements. We have a different one for the older interactive search (below).
     static  $local_noscript = 'This will not work, because you do not have JavaScript active.';             ///< The string displayed in a <noscript> element.
                                     
@@ -276,6 +284,35 @@ class BMLTPlugin
     static  $local_options_success_time = 2000;                             ///< The number of milliseconds a success message is displayed.
     static  $local_options_failure_time = 5000;                             ///< The number of milliseconds a failure message is displayed.
                                     
+    /************************************************************************************//**
+    *                       STATIC DATA MEMBERS (NEW MAP LOCALIZABLE)                       *
+    ****************************************************************************************/
+                                    
+    static  $local_new_map_option_1_label = 'Search Options (Not Applied Unless This Section Is Open):';
+    static  $local_new_map_weekdays = 'Meetings Gather on These Weekdays:';
+    static  $local_new_map_all_weekdays = 'All';
+    static  $local_new_map_all_weekdays_title = 'Find meetings for every day.';
+    static  $local_new_map_weekdays_title = 'Find meetings that occur on ';
+    static  $local_new_map_formats = 'Meetings Have These Formats:';
+    static  $local_new_map_all_formats = 'All';
+    static  $local_new_map_all_formats_title = 'Find meetings for every format.';
+    static  $local_new_map_js_center_marker_current_radius_1 = 'The circle is about ';
+    static  $local_new_map_js_center_marker_current_radius_2_km = ' kilometers wide.';
+    static  $local_new_map_js_center_marker_current_radius_2_mi = ' miles wide.';
+    static  $local_new_map_js_diameter_choices = array ( 0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0 );
+    static  $local_new_map_js_new_search = 'New Search';
+    static  $local_new_map_option_loc_label = 'Enter A Location:';
+    static  $local_new_map_option_loc_popup_label_1 = 'Search for meetings within';
+    static  $local_new_map_option_loc_popup_label_2 = 'of the location.';
+    static  $local_new_map_option_loc_popup_km = 'Km';
+    static  $local_new_map_option_loc_popup_mi = 'Miles';
+    static  $local_new_map_option_loc_popup_auto = 'an automatically chosen distance';
+    static  $local_new_map_center_marker_distance_suffix = ' from the center marker.';
+    static  $local_new_map_center_marker_description = 'This is your chosen location.';
+    static  $local_new_map_text_entry_fieldset_label = 'Enter an Address, Postcode or Location';
+    static  $local_new_map_text_entry_default_text = 'Enter an Address, Postcode or Location';
+    static  $local_new_map_location_submit_button_text = 'Search for Meetings Near This Location';
+
     /************************************************************************************//**
     *                       STATIC DATA MEMBERS (MOBILE LOCALIZABLE)                        *
     ****************************************************************************************/
@@ -441,7 +478,7 @@ class BMLTPlugin
 
         foreach ( $in_array as $key => $value )
             {
-            if ( ($key != 'lang_enum') && isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') )    // We don't propagate switcher or the language.
+            if ( ($key != 'lang_enum') && isset ( $in_array['direct_simple'] ) || (!isset ( $in_array['direct_simple'] ) && $key != 'switcher') && ($key != 'redirect_ajax_json') )    // We don't propagate switcher or the language.
                 {
                 if ( isset ( $value ) && is_array ( $value ) && count ( $value ) )
                     {
@@ -449,12 +486,28 @@ class BMLTPlugin
                         {
                         if ( isset ( $val ) &&  is_array ( $val ) && count ( $val ) )
                             {
-                            $val = implode ( ',', $val );
+                            // This stupid, stupid, kludgy dance, is because Drupal 7
+                            // Doesn't seem to acknowledge the existence of the join() or
+                            // implode() functions, and puts out a notice.
+                            $val_ar = '';
+                            
+                            foreach ( $val as $v )
+                                {
+                                if ( $val_ar )
+                                    {
+                                    $val_ar .= ',';
+                                    }
+                                
+                                $val_ar .= $v;
+                                }
+                                
+                            $val = strval ( $val_ar );
                             }
                         elseif ( !isset ( $val ) )
                             {
                             $val = '';
                             }
+
                         $my_params .= '&'.urlencode ( $key ) ."[]=". urlencode ( $val );
                         }
                     $key = null;
@@ -502,7 +555,7 @@ class BMLTPlugin
         $code_regex_brackets = "\[\[\s?".preg_quote ( strtolower ( trim ( $in_code ) ) )."\s?(\(.*?\))?\s?\]\]";
         
         $matches = array();
-        
+      
         if ( preg_match ( '#'.$code_regex_html.'#i', $in_text_to_parse, $matches ) || preg_match ( '#'.$code_regex_brackets.'#i', $in_text_to_parse, $matches ) )
             {
             if ( !isset ( $matches[1] ) || !($ret = trim ( $matches[1], '()' )) ) // See if we have any parameters.
@@ -1524,7 +1577,7 @@ class BMLTPlugin
                     }
                 }
             
-            ob_end_clean(); // Just in case we are in an OB
+            if ( ob_get_level () ) ob_end_clean(); // Just in case we are in an OB
             die ( strVal ( $ret ) );
             }
         elseif ( isset ( $this->my_http_vars['BMLTPlugin_AJAX_Call'] ) || isset ( $this->my_http_vars['BMLTPlugin_Fetch_Langs_AJAX_Call'] ) )
@@ -1562,7 +1615,7 @@ class BMLTPlugin
                     }
                 }
             
-            ob_end_clean(); // Just in case we are in an OB
+            if ( ob_get_level () ) ob_end_clean(); // Just in case we are in an OB
             die ( $ret );
             }
         }
@@ -1581,7 +1634,7 @@ class BMLTPlugin
             {
             $options = $this->getBMLTOptions_by_id ( $this->my_http_vars['bmlt_settings_id'] ); // This is for security. We don't allow URIs to be directly specified. They must come from the settings.
             $uri = $options['root_server'].'/'.$this->my_http_vars['request'];
-            ob_end_clean(); // Just in case we are in an OB
+            if ( ob_get_level () ) ob_end_clean(); // Just in case we are in an OB
             die ( bmlt_satellite_controller::call_curl ( $uri ) );
             }
         else    // However, if it is a mobile call, we do the mobile thing, then drop out.
@@ -1590,7 +1643,7 @@ class BMLTPlugin
                 {
                 $ret = $this->BMLTPlugin_fast_mobile_lookup ();
                 
-                ob_end_clean(); // Just in case we are in an OB
+                if ( ob_get_level () )     ob_end_clean(); // Just in case we are in an OB
                 
                 $handler = null;
                 
@@ -1617,7 +1670,28 @@ class BMLTPlugin
                 if ( isset ( $this->my_http_vars['redirect_ajax'] ) && $this->my_http_vars['redirect_ajax'] )
                     {
                     $url = $options['root_server']."/client_interface/xhtml/index.php?switcher=RedirectAJAX$this->my_params";
-                    ob_end_clean(); // Just in case we are in an OB
+                    
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
+                        
+                    $ret = bmlt_satellite_controller::call_curl ( $url );
+                    
+                    $handler = null;
+                    
+                    if ( zlib_get_coding_type() === false )
+                        {
+                        $handler = "ob_gzhandler";
+                        }
+                    
+                    ob_start($handler);
+                        echo $ret;
+                    ob_end_flush();
+                    die ( );
+                    }
+                elseif ( isset ( $this->my_http_vars['redirect_ajax_json'] ) )
+                    {
+                    $url = $options['root_server']."/client_interface/json/index.php?".$this->my_http_vars['redirect_ajax_json'].$this->my_params;
+
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
                     $ret = bmlt_satellite_controller::call_curl ( $url );
                     
                     $handler = null;
@@ -1659,7 +1733,7 @@ class BMLTPlugin
                         $result = preg_replace ( '|\<a rel="external"|','<a rel="nofollow external" title="'.$this->process_text ( self::$local_gm_link_tooltip).'"', $result );
                         }
 
-                    ob_end_clean(); // Just in case we are in an OB
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
                     
                     $handler = null;
                     
@@ -1676,14 +1750,14 @@ class BMLTPlugin
                 elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'booklet') )
                     {
                     $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=booklet$this->my_params";
-                    ob_end_clean(); // Just in case we are in an OB
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
                     header ( "Location: $uri" );
                     die();
                     }
                 elseif ( isset ( $this->my_http_vars['result_type_advanced'] ) && ($this->my_http_vars['result_type_advanced'] == 'listprint') )
                     {
                     $uri =  $options['root_server']."/local_server/pdf_generator/?list_type=listprint$this->my_params";
-                    ob_end_clean(); // Just in case we are in an OB
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
                     header ( "Location: $uri" );
                     die();
                     }
@@ -1702,7 +1776,11 @@ class BMLTPlugin
         // Simple searches can be mixed in with other content.
         $in_the_content = $this->display_simple_search ( $in_the_content );
 
+        $in_the_content = $this->display_changes ( $in_the_content );
+
         $in_the_content = $this->display_old_search ( $in_the_content );
+        
+        $in_the_content = $this->display_new_map_search ( $in_the_content );
         
         return $in_the_content;
         }
@@ -1891,6 +1969,397 @@ class BMLTPlugin
             $in_content = self::replace_shortcode ( $in_content, 'bmlt_simple', $the_new_content );
             }
         return $in_content;
+        }
+        
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "new map" search                                                                    *
+    *                                                                                       *
+    *   \returns a string, containing the content.                                          *
+    ****************************************************************************************/
+    function display_new_map_search ($in_content      ///< This is the content to be filtered.
+                                    )
+        {
+        $options_id = $this->cms_get_page_settings_id( $in_content );
+
+        $in_content = str_replace ( '&#038;', '&', $in_content );   // This stupid kludge is because WordPress does an untoward substitution. Won't do anything unless WordPress has been naughty.
+        
+        $first = true;
+
+        while ( $params = self::get_shortcode ( $in_content, 'bmlt_map' ) )
+            {
+            if ( $params !== true && intval ( $params ) )
+                {
+                $options_id = intval ( $params );
+                }
+            
+            $options = $this->getBMLTOptions_by_id ( $options_id );
+            $uid = htmlspecialchars ( uniqid() );
+            
+            $the_new_content = '<noscript>'.$this->process_text ( self::$local_noscript ).'</noscript>';    // We let non-JS browsers know that this won't work for them.
+            
+            if ( $first )   // We only load this the first time.
+                {
+                $the_new_content .= $this->BMLTPlugin_map_search_global_javascript_stuff ( );
+                $first = false;
+                }
+
+            $the_new_content .= '<div class="bmlt_map_container_div bmlt_map_container_div_theme_'.htmlspecialchars ( $options['theme'] ).'" style="display:none" id="'.$uid.'">';  // This starts off hidden, and is revealed by JS.
+                $the_new_content .= '<div class="bmlt_map_container_div_header">';  // This allows a CSS "hook."
+                    $the_new_content .= $this->BMLTPlugin_map_search_location_options($options_id, $uid);   // This is the box of location search choices.
+                    $the_new_content .= $this->BMLTPlugin_map_search_search_options($options_id, $uid);     // This is the box of basic search choices.
+                    $the_new_content .= $this->BMLTPlugin_map_search_local_javascript_stuff ( $options_id, $uid );
+                $the_new_content .= '</div>';
+                $the_new_content .= '<div class="bmlt_search_map_div" id="'.$uid.'_bmlt_search_map_div"></div>';
+                $the_new_content .= '<div class="bmlt_search_map_new_search_div" id="'.$uid.'_bmlt_search_map_new_search_div" style="display:none"><a href="javascript:c_ms_'.$uid.'.newSearchExt();">'.$this->process_text ( self::$local_new_map_js_new_search ).'</a></div>';
+                $the_new_content .= '<script type="text/javascript">document.getElementById(\''.$uid.'\').style.display=\'block\';c_ms_'.$uid.' = new MapSearch ( \''.htmlspecialchars ( $uid ).'\',\''.htmlspecialchars ( $options_id ).'\', document.getElementById(\''.$uid.'_bmlt_search_map_div\'), {\'latitude\':'.$options['map_center_latitude'].',\'longitude\':'.$options['map_center_longitude'].',\'zoom\':'.$options['map_zoom'].'} )</script>';
+            $the_new_content .= '</div>';
+            
+            $in_content = self::replace_shortcode ( $in_content, 'bmlt_map', $the_new_content );
+            }
+            
+        return $in_content;
+        }
+
+    /************************************************************************************//**
+    *   \brief  This returns a div of location options to be applied to the map search.     *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_map_search_location_options(    $in_options_id, ///< The ID for the options to use for this implementation.
+                                                        $in_uid         ///< This is the UID of the enclosing div.
+                                                        )
+        {
+        $ret = '<div class="bmlt_map_container_div_location_options_div" id="'.$in_uid.'_location">';
+            $ret .= '<div class="bmlt_map_options_loc">';
+                $ret .= '<a class="bmlt_map_reveal_options" id="'.$in_uid.'_options_loc_a" href="javascript:var a=document.getElementById(\''.$in_uid.'_options_loc_a\');var b=document.getElementById(\''.$in_uid.'_options_loc\');if(b &amp;&amp; a){if(b.style.display==\'none\'){a.className=\'bmlt_map_hide_options\';b.style.display=\'block\';c_ms_'.$in_uid.'.openLocationSectionExt(document.getElementById(\''.$in_uid.'_location_text\'), document.getElementById(\''.$in_uid.'_location_submit\'))}else{a.className=\'bmlt_map_reveal_options\';b.style.display=\'none\'}}"><span>'.$this->process_text ( self::$local_new_map_option_loc_label ).'</span></a>';
+                $ret .= '<div class="bmlt_map_container_div_search_options_div" id="'.$in_uid.'_options_loc" style="display:none">';
+                $ret .= '<form action="#" method="get" onsubmit="c_ms_'.$in_uid.'.lookupLocationExt(document.getElementById(\''.$in_uid.'_location_text\'), document.getElementById(\''.$in_uid.'_location_submit\'));return false">';
+                    $ret .= '<fieldset class="bmlt_map_container_div_search_options_div_location_fieldset">';
+                        $ret .= '<div class="location_radius_popup_div">';
+                            $ret .= '<label for="">'.$this->process_text ( self::$local_new_map_option_loc_popup_label_1 ).'</label>';
+                            $ret .= '<select class="bmlt_map_location_radius_popup" id="'.$in_uid.'_radius_select" onchange="c_ms_'.$in_uid.'.changeRadiusExt(true)">';
+                                $ret .= '<option value="" selected="selected">'.$this->process_text ( self::$local_new_map_option_loc_popup_auto ).'</option>';
+                                $ret .= '<option value="" disabled="disabled"></option>';
+                                $options = $this->getBMLTOptions_by_id ( $in_options_id );
+                                foreach ( self::$local_new_map_js_diameter_choices as $radius )
+                                    {
+                                    $ret .= '<option value="'.($radius / 2).'">'.($radius / 2).' '.$this->process_text ( (strtolower ($options['distance_units']) == 'km') ? self::$local_new_map_option_loc_popup_km : self::$local_new_map_option_loc_popup_mi ).'</option>';
+                                    }
+                            $ret .= '</select>';
+                            $ret .= '<label for="">'.$this->process_text ( self::$local_new_map_option_loc_popup_label_2 ).'</label>';
+                        $ret .= '</div>';
+                        $ret .= '<fieldset class="location_text_entry_fieldset">';
+                            $ret .= '<legend>'.$this->process_text ( self::$local_new_map_text_entry_fieldset_label ).'</legend>';
+                            $def_text = $this->process_text ( self::$local_new_map_text_entry_default_text );
+                            $ret .= '<div class="location_text_input_div">';
+                                $ret .= '<input type="text" class="location_text_input_item_blurred" value="'.$def_text.'" id="'.$in_uid.'_location_text" onfocus="c_ms_'.$in_uid.'.focusLocationTextExt(this, document.getElementById(\''.$in_uid.'_location_submit\'), false)" onblur="c_ms_'.$in_uid.'.focusLocationTextExt(this, document.getElementById(\''.$in_uid.'_location_submit\'), true)" onkeyup="c_ms_'.$in_uid.'.enterTextIntoLocationTextExt(this, document.getElementById(\''.$in_uid.'_location_submit\'))" />';
+                            $ret .= '</div>';
+                            $ret .= '<div class="location_text_submit_div">';
+                                $ret .= '<input type="button" disabled="disabled" class="location_text_submit_button" value="'.$this->process_text ( self::$local_new_map_location_submit_button_text ).'" id="'.$in_uid.'_location_submit" onclick="c_ms_'.$in_uid.'.lookupLocationExt(document.getElementById(\''.$in_uid.'_location_text\'), this)" />';
+                            $ret .= '</div>';
+                        $ret .= '</fieldset>';
+                    $ret .= '</fieldset>';
+                $ret .= '</form>';
+            $ret .= '</div>';
+        $ret .= '</div>';
+        return $ret;
+        }
+    
+    /************************************************************************************//**
+    *   \brief  This returns a div of search options to be applied to the map search.       *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_map_search_search_options(  $in_options_id, ///< The ID for the options to use for this implementation.
+                                                    $in_uid         ///< This is the UID of the enclosing div.
+                                                    )
+        {
+        $ret = '<div class="bmlt_map_container_div_search_options_div" id="'.$in_uid.'_options">';
+            $ret .= '<div class="bmlt_map_options_1">';
+                $ret .= '<a class="bmlt_map_reveal_options" id="'.$in_uid.'_options_1_a" href="javascript:var a=document.getElementById(\''.$in_uid.'_options_1_a\');var b=document.getElementById(\''.$in_uid.'_options_1\');if(b &amp;&amp; a){if(b.style.display==\'none\'){a.className=\'bmlt_map_hide_options\';b.style.display=\'block\'}else{a.className=\'bmlt_map_reveal_options\';b.style.display=\'none\'}};c_ms_'.$in_uid.'.recalculateMapExt()"><span>'.$this->process_text ( self::$local_new_map_option_1_label ).'</span></a>';
+                $ret .= '<div class="bmlt_map_container_div_search_options_div" id="'.$in_uid.'_options_1" style="display:none">';
+                $ret .= '<form action="#" method="get" onsubmit="return false">';
+                    $ret .= '<fieldset class="bmlt_map_container_div_search_options_div_weekdays_fieldset">';
+                        $ret .= '<legend>'.$this->process_text ( self::$local_new_map_weekdays ).'</legend>';
+                        $ret .= '<div class="bmlt_map_container_div_search_options_weekday_checkbox_div"><input title="'.$this->process_text ( self::$local_new_map_all_weekdays_title ).'" type="checkbox" id="weekday_'.$in_uid.'_0" checked="checked" onchange="c_ms_'.$in_uid.'.recalculateMapExt(this)" />';
+                        $ret .= '<label title="'.$this->process_text ( self::$local_new_map_all_weekdays_title ).'" for="weekday_'.$in_uid.'_0">'.$this->process_text ( self::$local_new_map_all_weekdays ).'</label></div>';
+                        for ( $index = 1;  $index < count ( self::$local_weekdays ); $index++ )
+                            {
+                            $weekday = self::$local_weekdays[$index];
+                            $ret .= '<div class="bmlt_map_container_div_search_options_weekday_checkbox_div">';
+                                $ret .= '<input title="'.$this->process_text ( self::$local_new_map_weekdays_title.$weekday ).'." type="checkbox" id="weekday_'.$in_uid.'_'.htmlspecialchars ( $index ).'" onchange="c_ms_'.$in_uid.'.recalculateMapExt(this)" />';
+                                $ret .= '<label title="'.$this->process_text ( self::$local_new_map_weekdays_title.$weekday ).'." for="weekday_'.$in_uid.'_'.htmlspecialchars ( $index ).'">'.$this->process_text ( $weekday ).'</label>';
+                            $ret .= '</div>';
+                            }
+                    $ret .= '</fieldset>';
+                    $ret .= '<fieldset class="bmlt_map_container_div_search_options_div_formats_fieldset">';
+                        $ret .= '<legend>'.$this->process_text ( self::$local_new_map_formats ).'</legend>';
+                        $ret .= '<div class="bmlt_map_container_div_search_options_formats_checkbox_div">';
+                            $ret .= '<input title="'.$this->process_text ( self::$local_new_map_all_formats_title ).'" type="checkbox" id="formats_'.$in_uid.'_0" checked="checked" onchange="c_ms_'.$in_uid.'.recalculateMapExt(this)" />';
+                            $ret .= '<label title="'.$this->process_text ( self::$local_new_map_all_formats_title ).'" for="formats_'.$in_uid.'_0">'.$this->process_text ( self::$local_new_map_all_formats ).'</label>';
+                        $ret .= '</div>';
+                        $options = $this->getBMLTOptions_by_id ( $in_options_id );
+                        $this->my_driver->set_m_root_uri ( $options['root_server'] );
+                        $error = $this->my_driver->get_m_error_message();
+                        
+                        if ( $error )
+                            {
+                            }
+                        else
+                            {
+                            $formats = $this->my_driver->get_server_formats();
+    
+                            if ( !$this->my_driver->get_m_error_message() )
+                                {
+                                $index = 1;
+                                foreach ( $formats as $id => $format )
+                                    {
+                                    $ret .= '<div class="bmlt_map_container_div_search_options_formats_checkbox_div"><input type="checkbox" value="'.intval ( $id ).'" id="formats_'.$in_uid.'_'.$index.'" onchange="c_ms_'.$in_uid.'.recalculateMapExt(this)" title="'.$this->process_text ( '('.$format['name_string'] .') '.$format['description_string'] ).'" />';
+                                    $ret .= '<label title="'.$this->process_text ( '('.$format['name_string'] .') '.$format['description_string'] ).'" for="formats_'.$in_uid.'_'.$index.'">'.$this->process_text ( $format['key_string'] ).'</label></div>';
+                                    $index++;
+                                    }
+                                }
+                            }
+                    $ret .= '</fieldset>';
+                $ret .= '</form>';
+            $ret .= '</div>';
+        $ret .= '</div>';
+        return $ret;
+        }
+
+    /************************************************************************************//**
+    *   \brief  This returns the global JavaScript stuff for the new map search that only   *
+    *           only needs to be loaded once.                                               *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_map_search_global_javascript_stuff()
+        {
+        // Include the Google Maps API V3 files.
+        $ret = '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
+        $ret .= '<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry"></script>';       
+        // Declare the various globals and display strings. This is how we pass strings to the JavaScript, as opposed to the clunky way we do it in the root server.
+        $ret .= '<script type="text/javascript">';
+        $ret .= 'var c_g_cannot_determine_location = \''.$this->process_text ( self::$local_cannot_determine_location ).'\';';
+        $ret .= 'var c_g_no_meetings_found = \''.$this->process_text ( self::$local_mobile_fail_no_meetings ).'\';';
+        $ret .= 'var c_g_server_error = \''.$this->process_text ( self::$local_server_fail ).'\';';
+        $ret .= 'var c_g_address_lookup_fail = \''.$this->process_text ( self::$local_cant_find_address ).'\';';
+        $ret .= 'var c_g_center_marker_curent_radius_1 = \''.$this->process_text ( self::$local_new_map_js_center_marker_current_radius_1 ).'\';';
+        $ret .= 'var c_g_center_marker_curent_radius_2_km = \''.$this->process_text ( self::$local_new_map_js_center_marker_current_radius_2_km ).'\';';
+        $ret .= 'var c_g_center_marker_curent_radius_2_mi = \''.$this->process_text ( self::$local_new_map_js_center_marker_current_radius_2_mi ).'\';';
+        $ret .= 'var c_g_map_link_text = \''.$this->process_text ( self::$local_map_link ).'\';';
+        $ret .= 'var c_g_weekdays = [';
+        $ret .= "'".$this->process_text ( join ( "','", self::$local_weekdays ) )."'";
+        $ret .= '];';
+        $ret .= 'var c_g_diameter_choices = ['.join ( ",", self::$local_new_map_js_diameter_choices ).'];';
+        $ret .= 'var c_g_formats = \''.$this->process_text ( self::$local_formats ).'\';';
+        $ret .= 'var c_g_Noon = \''.$this->process_text ( self::$local_noon ).'\';';
+        $ret .= 'var c_g_Midnight = \''.$this->process_text ( self::$local_midnight ).'\';';
+        $ret .= 'var c_g_debug_mode = '.( defined ( 'DEBUG_MODE' ) ? 'true' : 'false' ).';';
+        $ret .= 'var c_g_distance_prompt = \''.$this->process_text ( self::$local_mobile_distance ).'\';';
+        $ret .= 'var c_g_distance_prompt_suffix = \''.$this->process_text ( self::$local_new_map_center_marker_distance_suffix ).'\';';
+        $ret .= 'var c_g_distance_center_marker_desc = \''.$this->process_text ( self::$local_new_map_center_marker_description ).'\';';
+        $ret .= 'var c_BMLTPlugin_files_uri = \''.htmlspecialchars ( $this->get_ajax_mobile_base_uri() ).'?\';';
+        $ret .= "var c_g_BMLTPlugin_images = '".htmlspecialchars ( $this->get_plugin_path()."/google_map_images" )."';";
+        $ret .= "var c_g_BMLTPlugin_default_location_text = '".$this->process_text ( self::$local_new_map_text_entry_default_text )."';";
+        $ret .= '</script>';
+       
+        $url = $this->get_plugin_path();
+        if ( defined ( '_DEBUG_MODE_' ) ) // In debug mode, we use unoptimized versions of these files for easier tracking.
+            {
+            $ret .= '<script src="'.htmlspecialchars ( $url ).'map_search.js" type="text/javascript"></script>';
+            }
+        else
+            {
+            $ret .= '<script src="'.htmlspecialchars ( $url ).'js_stripper.php?filename=map_search.js" type="text/javascript"></script>';
+            }
+
+        return $ret;
+        }
+
+    /************************************************************************************//**
+    *   \brief  This returns the JavaScript stuff that needs to be loaded into each of the  *
+    *           new map search instances.                                                   *
+    *                                                                                       *
+    *   \returns A string. The XHTML to be displayed.                                       *
+    ****************************************************************************************/
+    function BMLTPlugin_map_search_local_javascript_stuff(  $in_options_id, ///< The ID for the options to use for this implementation.
+                                                            $in_uid         ///< The unique ID for this instance
+                                                            )
+        {
+        $options = $this->getBMLTOptions_by_id ( $in_options_id );
+
+        // Declare the various globals and display strings. This is how we pass strings to the JavaScript, as opposed to the clunky way we do it in the root server.
+        $ret .= '<script type="text/javascript">';
+        $ret .= 'var c_ms_'.$in_uid.' = null;';
+        $ret .= 'var c_g_distance_units_are_km_'.$in_uid.' = '.((strtolower ($options['distance_units']) == 'km' ) ? 'true' : 'false').';';
+        $ret .= 'var c_g_distance_units_'.$in_uid.' = \''.((strtolower ($options['distance_units']) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';
+        $ret .= 'var c_g_BMLTPlugin_throbber_img_src_'.$in_uid." = '".htmlspecialchars ( $this->get_plugin_path().'themes/'.$options['theme'].'/images/Throbber.gif' )."';";
+        $ret .= 'var c_g_BMLTRoot_URI_JSON_SearchResults_'.$in_uid." = '".htmlspecialchars ( $this->get_ajax_base_uri() )."?redirect_ajax_json=".urlencode ( 'switcher=GetSearchResults' )."&bmlt_settings_id=$in_options_id';\n";
+        $ret .= '</script>';
+
+        return $ret;
+        }
+    
+    /************************************************************************************//**
+    *   \brief This is a function that filters the content, and replaces a portion with the *
+    *   "changes" dump.                                                                     *
+    *                                                                                       *
+    *   \returns a string, containing the content.                                          *
+    ****************************************************************************************/
+    function display_changes (  $in_content      ///< This is the content to be filtered.
+                                )
+        {
+        $options_id = $this->cms_get_page_settings_id( $in_content );
+        
+        $options = $this->getBMLTOptions_by_id ( $options_id );
+        $root_server_root = $options['root_server'];
+
+        $in_content = str_replace ( '&#038;', '&', $in_content );   // This stupid kludge is because WordPress does an untoward substitution. Won't do anything unless WordPress has been naughty.
+        while ( $params = self::get_shortcode ( $in_content, 'bmlt_changes' ) )
+            {
+            $param_array = explode ( '##-##', $params );    // You can specify a settings ID, by separating it from the URI parameters with a ##-##.
+            
+            $params = null;
+            
+            if ( is_array ( $param_array ) && (count ( $param_array ) > 1) )
+                {
+                $options = $this->getBMLTOptions_by_id ( $param_array[0] );
+                $params = $param_array[1];
+                }
+            else
+                {
+                $params = (count ($param_array) > 0) ? $param_array[0] : null;
+                }
+            
+            if ( $params && $options['root_server'] )
+                {
+                $params = explode ( '&', $params );
+                
+                $start_date = null;
+                $end_date = null;
+                $meeting_id = null;
+                $service_body_id = null;
+                $single_uri = null;
+                
+                foreach ( $params as $one_param )
+                    {
+                    list ( $key, $value ) = explode ( '=', $one_param, 2 );
+                    
+                    if ( $key && $value )
+                        {
+                        switch ( $key )
+                            {
+                            case 'start_date':
+                                $start_date = strtotime ( $value );
+                            break;
+                            
+                            case 'end_date':
+                                $end_date = strtotime ( $value );
+                            break;
+                            
+                            case 'meeting_id':
+                                $meeting_id = intval ( $value );
+                            break;
+                            
+                            case 'service_body_id':
+                                $service_body_id = intval ( $value );
+                            break;
+                            
+                            case 'single_uri':
+                                $single_uri = $value;
+                            break;
+                            }
+                        }
+                    }
+                $this->my_driver->set_m_root_uri ( $options['root_server'] );
+                $error = $this->my_driver->get_m_error_message();
+                
+                if ( $error )
+                    {
+                    if ( ob_get_level () )         ob_end_clean(); // Just in case we are in an OB
+                    echo "<!-- BMLTPlugin ERROR (display_changes)! Can't set the Satellite Driver root! ".htmlspecialchars ( $error )." -->";
+                    }
+                else
+                    {
+	                set_time_limit ( 120 ); // Change requests can take a loooong time...
+                    $changes = $this->my_driver->get_meeting_changes ( $start_date, $end_date, $meeting_id, $service_body_id );
+
+                    $error = $this->my_driver->get_m_error_message();
+                    
+                    if ( $error )
+                        {
+                        if ( ob_get_level () )             ob_end_clean(); // Just in case we are in an OB
+                        echo "<!-- BMLTPlugin ERROR (display_changes)! Error during get_meeting_changes Call! ".htmlspecialchars ( $error )." -->";
+                        }
+                    else
+                        {
+                        $the_new_content = '<div class="bmlt_change_record_div">';
+                        foreach ( $changes as $change )
+                            {
+                            $the_new_content .= self::setup_one_change ( $change, $single_uri );
+                            }
+                        
+                        $the_new_content .= '</div>';
+                        
+                        $in_content = self::replace_shortcode ( $in_content, 'bmlt_changes', $the_new_content );
+                        }
+                    }
+                }
+            }
+        return $in_content;
+        }
+
+    /************************************************************************************//**
+    *   \brief Returns the XHTML for one single change record.                              *
+    *                                                                                       *
+    *   \returns A string. The DOCTYPE to be displayed.                                     *
+    ****************************************************************************************/
+    static function setup_one_change (  $in_change_array,       ///< One change record
+                                        $in_single_uri = null   ///< If there was a specific single meeting URI, we pass it in here.
+                                        )
+        {
+        $ret = '<dl class="bmlt_change_record_dl" id="bmlt_change_dl_'.htmlspecialchars ( $in_change_array['change_type'] ).'_'.intval ( $in_change_array['date_int'] ).'_'.intval ( $in_change_array['meeting_id'] ).'">';
+            $ret .= '<dt class="bmlt_change_record_dt bmlt_change_record_dt_date">'.self::process_text ( self::$local_change_label_date ).'</dt>';
+                $ret .= '<dd class="bmlt_change_record_dd bmlt_change_record_dd_date">'.date ( self::$local_change_date_format, intval ( $in_change_array['date_int'] ) ).'</dd>';
+            
+            if ( isset ( $in_change_array['meeting_name'] ) && $in_change_array['meeting_name'] )
+                {
+                $ret .= '<dt class="bmlt_change_record_dt bmlt_change_record_dt_name">'.self::process_text ( self::$local_change_label_meeting_name ).'</dt>';
+                    $ret .= '<dd class="bmlt_change_record_dd bmlt_change_record_dd_name">';
+                    
+                    if ( isset ( $in_change_array['meeting_id'] ) && $in_change_array['meeting_id'] && isset ( $in_single_uri ) && $in_single_uri )
+                        {
+                        $ret .= '<a href="'.htmlspecialchars ( $in_single_uri ).$in_change_array['meeting_id'].'" rel="nofollow">';
+                            $ret .= self::process_text ( html_entity_decode ( $in_change_array['meeting_name'] ) );
+                        $ret .= '</a>';
+                        }
+                    else
+                        {
+                        $ret .= self::process_text ( html_entity_decode ( $in_change_array['meeting_name'] ) );
+                        }
+                    
+                    $ret .= '</dd>';
+                }
+            if ( isset ( $in_change_array['service_body_name'] ) && $in_change_array['service_body_name'] )
+                {
+                $ret .= '<dt class="bmlt_change_record_dt bmlt_change_record_dt_service_body_name">'.self::process_text ( self::$local_change_label_service_body_name ).'</dt>';
+                    $ret .= '<dd class="bmlt_change_record_dd bmlt_change_record_dd_service_body_name">'.self::process_text ( html_entity_decode ( $in_change_array['service_body_name'] ) ).'</dd>';
+                }
+            if ( isset ( $in_change_array['user_name'] ) && $in_change_array['user_name'] )
+                {
+                $ret .= '<dt class="bmlt_change_record_dt bmlt_change_record_dt_service_body_admin_name">'.self::process_text ( self::$local_change_label_admin_name ).'</dt>';
+                    $ret .= '<dd class="bmlt_change_record_dd bmlt_change_record_dd_service_body_admin_name">'.self::process_text ( html_entity_decode ( $in_change_array['user_name'] ) ).'</dd>';
+                }
+            if ( isset ( $in_change_array['details'] ) && $in_change_array['details'] )
+                {
+                $ret .= '<dt class="bmlt_change_record_dt bmlt_change_record_dt_description">'.self::process_text ( self::$local_change_label_description ).'</dt>';
+                    $ret .= '<dd class="bmlt_change_record_dd bmlt_change_record_dd_description">'.self::process_text ( html_entity_decode ( $in_change_array['details'] ) ).'</dd>';
+                }
+        $ret .= '</dl>';
+        
+        return $ret;
         }
 
     /************************************************************************************//**
@@ -2458,7 +2927,7 @@ class BMLTPlugin
             
             if ( $error )
                 {
-                ob_end_clean(); // Just in case we are in an OB
+                if ( ob_get_level () )     ob_end_clean(); // Just in case we are in an OB
                 die ( '<h1>ERROR (BMLTPlugin_fast_mobile_lookup: '.htmlspecialchars ( $error ).')</h1>' );
                 }
             
@@ -2940,7 +3409,7 @@ class BMLTPlugin
     protected function process_text (  $in_string  ///< The string to be processed.
                                     )
         {
-        return null;
+        return htmlspecialchars ( $in_string );
         }
         
     /************************************************************************************//**
@@ -3021,7 +3490,7 @@ class BMLTPlugin
                 }
             elseif( !$in_check_mobile ) // A mobile check ignores the rest.
                 {
-                if ( $params = self::get_shortcode ( $in_content, 'bmlt_simple') ) 
+                if ( ($params = self::get_shortcode ( $in_content, 'bmlt_simple')) || ($params = self::get_shortcode ( $in_content, 'bmlt_changes')) ) 
                     {
                     $param_array = explode ( '##-##', $params );
                     
@@ -3032,6 +3501,11 @@ class BMLTPlugin
                     }
         
                 if ($params = self::get_shortcode ( $in_content, 'bmlt') ) 
+                    {
+                    $my_option_id = ( $params !== true ) ? $params : $my_option_id;
+                    }
+        
+                if ($params = self::get_shortcode ( $in_content, 'bmlt_map') ) 
                     {
                     $my_option_id = ( $params !== true ) ? $params : $my_option_id;
                     }
