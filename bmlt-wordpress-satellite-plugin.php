@@ -385,7 +385,7 @@ class BMLTWPPlugin extends BMLTPlugin
             die ( );
             }
         
-        if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
+        if ( !$options['gmaps_api_key'] || !$this->get_shortcode ( $page->post_content, 'bmlt' ) )   // No GMAP API key, no BMLT window. We also only load the head for the "classic" BMLT.
             {
             $load_head = false;
             }
