@@ -600,12 +600,11 @@ function MapSearch (
 					};
 				};
 			
-			marker_html += '<div class="multi_day_info_div"><fieldset class="marker_fieldset">';
-			marker_html += '<legend>';
+			marker_html += '<div class="multi_day_info_div">';
 			
 			if ( included_weekdays.length > 1 )
 				{
-				marker_html += '<select id="sel_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'" onchange="marker_change_day(\'sel_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'\',\''+in_mtg_obj_array[0].id_bigint.toString()+'\')">';
+				marker_html += '<div id="wd_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'_div" class="bmlt_day_tabs"><ul class="wd_info_win_ul">';
 				
 				for ( var wd = 1; wd < 8; wd++ )
 					{
@@ -613,18 +612,18 @@ function MapSearch (
 						{
 						if ( included_weekdays[c] == wd )
 							{
-							marker_html += '<option value="'+included_weekdays[c]+'">'+c_g_weekdays[included_weekdays[c]]+'</option>';
-							}
-						}
+							marker_html += '<li id="'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'_'+wd.toString()+'_li" class="'+((c == 0) ? 'bmlt_selected_weekday_info' : 'bmlt_unselected_weekday_info')+'">';
+							marker_html += '<a class="bmlt_info_win_day_a" href="javascript:expose_weekday(document.getElementById(\'wd_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'_div\'),'+wd.toString()+',\''+in_mtg_obj_array[0].id_bigint.toString()+'\')">'+c_g_weekdays_short[included_weekdays[c]]+'</a></li>';
+							};
+						};
 					};
-				marker_html += '</select>';
+				marker_html += '</ul><div style="clear:both"></div></div>';
 				}
 			else
 				{
 				marker_html += '<strong>'+c_g_weekdays[included_weekdays[0]]+'</strong>';
 				};
 			
-			marker_html += '</legend>';
 			var	first = true;
 			for ( var wd = 1; wd < 8; wd++ )
 				{
@@ -640,7 +639,7 @@ function MapSearch (
 				
 				if ( meetings_html.length )
 					{
-					marker_internal_html += '<div class="marker_div_weekday marker_div_weekday_'+wd.toString()+'" style="display:';
+					marker_internal_html += '<div class="marker_div_weekday" id="marker_info_weekday_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'_'+wd.toString()+'_div" style="display:';
 					if ( first )
 						{
 						marker_internal_html += 'block'; 
@@ -651,7 +650,7 @@ function MapSearch (
 						marker_internal_html += 'none'; 
 						};
 						
-					marker_internal_html += '" id="sel_'+g_main_map.uid+'_'+in_mtg_obj_array[0].id_bigint.toString()+'_marker_'+in_mtg_obj_array[0].id_bigint.toString()+'_'+wd.toString()+'_id">';
+					marker_internal_html += '">';
 					for ( var c2 = 0; c2 < meetings_html.length; c2++ )
 						{
 						if ( c2 > 0 )
@@ -664,7 +663,7 @@ function MapSearch (
 					marker_html += marker_internal_html;
 					};
 				};
-			marker_html += '</fieldset></div>';
+			marker_html += '</div>';
 			}
 		else
 			{
@@ -674,6 +673,29 @@ function MapSearch (
 		
 		marker_html += '</div>';
 		var marker = createMarker ( main_point, g_icon_shadow, ((in_mtg_obj_array.length>1) ? g_icon_image_multi : g_icon_image_single), g_icon_shape, marker_html, false, in_mtg_obj_array[0].id_bigint );
+	};
+	
+	/************************************************************************************//**
+	*	\brief 
+	****************************************************************************************/
+	expose_weekday = function ( in_container,
+	                            in_wd,
+	                            in_id
+	                            )
+	{
+	    var elements = in_container.getElementsByClassName('marker_div_weekday');
+	    
+	    for ( var wd = 1; wd < 8; wd++ )
+	        {
+	        var li = document.getElementById(g_main_map.uid+'_'+in_id+'_'+wd.toString()+'_li');
+	        var elem = document.getElementById('marker_info_weekday_'+g_main_map.uid+'_'+in_id+'_'+wd.toString()+'_div');
+	        
+	        if ( elem && li )
+	            {
+	            elem.style.display = ( wd == in_wd ) ? 'block' : 'none';
+	            li.className = ( wd == in_wd ) ? 'bmlt_selected_weekday_info' : 'bmlt_unselected_weekday_info'
+	            };
+	        };
 	};
 	
 	/************************************************************************************//**
@@ -759,7 +781,7 @@ function MapSearch (
             ret += '<label for="'+g_main_id+'_bmlt_center_marker_select">';
                 ret += c_g_center_marker_curent_radius_1;
             ret += '</label>';
-            ret += '<select id="'+g_main_id+'_bmlt_center_marker_select" class="bmlt_center_marker_select" onchange="change_circle_diameter(false)">';
+            ret += '<select id="'+g_main_id+'_bmlt_center_marker_select" class="bmlt_center_marker_select" onclick="fix_popup_position(this)" onchange="change_circle_diameter(false)">';
 
                 var count = c_g_diameter_choices.length;
                 
@@ -1070,12 +1092,12 @@ function MapSearch (
 	                };
 	            };
 	        };
+	        
 	};
-
+	
     /****************************************************************************************//**
     *	\brief Function to Reveal and/hide day <div> elements in the marker info window.	    *
     ********************************************************************************************/
-    
     marker_change_day = function (  in_sel_id,
                                     in_id	///< The base ID of the element.
                                     )
@@ -1480,7 +1502,7 @@ function MapSearch (
     
         return ret;
     };
-    
+
 	/****************************************************************************************
 	*								MAIN FUNCTIONAL INTERFACE								*
 	****************************************************************************************/
