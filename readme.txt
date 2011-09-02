@@ -2,8 +2,8 @@
 Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
-Tested up to: 3.1.3
-Stable tag: 2.1.18
+Tested up to: 3.2.1
+Stable tag: 2.1.25
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -42,6 +42,35 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.25 =
+* September 2, 2011
+* Fixes an Internet Explorer JavaScript bug in the new map search.
+
+= 2.1.24 =
+* August 17, 2011
+* Improves some of the styles in the info windows in the new map search.
+
+= 2.1.23 =
+* August 16, 2011
+* Addresses a bug in Mozilla Firefox, that prevents the use of the popup menus in the multi-day (red) map icons.
+
+= 2.1.22 =
+* August 12, 2011
+* Fixes a couple of theme/style bugs.
+* Mitigates a very strange Firefox bug, where blank pages were being called when closing the location area.
+
+= 2.1.21 =
+* August 8, 2011
+* This implements a powerful new shortcode: "bmlt_map"
+
+= 2.1.20 =
+* July 16, 2011
+* This removes a few warnings that could come up in really anal-retentive environments.
+
+= 2.1.19 =
+* June 27, 2011
+* This adds the new "bmlt_changes" shortcode. This is the first fruit of the new structure.
+
 = 2.1.18 =
 * June 20, 2011
 * Fixed an "invisible" bug in the standard header output, which could interfere with the correct settings being selected.
