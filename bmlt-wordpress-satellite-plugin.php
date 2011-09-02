@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.18
+Version: 2.1.24
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '2.1.18' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '2.1.24' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -385,7 +385,7 @@ class BMLTWPPlugin extends BMLTPlugin
             die ( );
             }
         
-        if ( !$options['gmaps_api_key'] )   // No GMAP API key, no BMLT window.
+        if ( !$options['gmaps_api_key'] || !$this->get_shortcode ( $page->post_content, 'bmlt' ) )   // No GMAP API key, no BMLT window. We also only load the head for the "classic" BMLT.
             {
             $load_head = false;
             }
@@ -506,13 +506,11 @@ class BMLTWPPlugin extends BMLTPlugin
                             )
         {
         // Simple searches can be mixed in with other content.
-        $in_the_content = $this->display_simple_search ( $in_the_content );
+        $in_the_content = parent::content_filter ( $in_the_content );
 
         $count = 0;
 
         $in_the_content = $this->display_popup_search ( $in_the_content, $this->cms_get_post_meta ( get_the_ID(), 'bmlt_simple_searches' ), $count );
-        
-        $in_the_content = $this->display_old_search ( $in_the_content, $count );
         
         return $in_the_content;
         }
@@ -537,9 +535,9 @@ class BMLTWPPlugin extends BMLTPlugin
                 {
                 $changelog = (array) preg_split ( '~[\r\n]+~', trim ( $matches[1] ) );
                 
-                $ret = '<div style="color: #c00;font-size: medium; margin-top:8px;margin-bottom:8px">' . $this->process_text ( $this->plugin_update_message_1 ) . '</div>';
+                $ret = '<div style="color: #c00;font-size: small; margin-top:8px;margin-bottom:8px">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_1 ) ) . '</div>';
                 $ret .= '<div style="font-weight: normal;">';
-                $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $this->plugin_update_message_2 ) . '</p>';
+                $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_2 ) ) . '</p>';
                 $ul = false;
                 $first = false;
                 
@@ -553,15 +551,15 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ul = true;
                             $first = true;
                             }
-                        $line = preg_replace ('~^\s*\*\s*~', '', $this->process_text ( $line ) );
+                        $line = preg_replace ( '~^\s*\*\s*~', '', $line );
                         if ( $first )
                             {
-                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . $this->process_text ( $this->plugin_update_message_3 . ' ' . $line) . '</li>';
+                            $ret .= '<li style="list-style-type:none;margin-left: -1.5em; font-weight:bold">' . html_entity_decode ( $this->process_text ( $this->plugin_update_message_3 ) ) . ' ' . $line . '</li>';
                             $first = false;
                             }
                         else
                             {
-                            $ret .= '<li>' . $this->process_text ( $line ) . '</li>';
+                            $ret .= '<li>' . $line . '</li>';
                             }
                         }
                     else
@@ -571,7 +569,7 @@ class BMLTWPPlugin extends BMLTPlugin
                             $ret .= '</ul><div style="clear: left;"></div>';
                             $ul = false;
                             }
-                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:medium">' . $this->process_text ( $line ) . '</p>';
+                        $ret .= '<p style="margin: 5px 0; font-weight:bold; font-size:small">' . $line . '</p>';
                         }
                     }
                 
