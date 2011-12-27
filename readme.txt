@@ -2,7 +2,7 @@
 Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
-Tested up to: 3.2.1
+Tested up to: 3.3.1
 Stable tag: 2.1.25
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
@@ -42,6 +42,10 @@ The styling, especially, has been affected. If you have customized your installa
 18. The Distance Units Popup (Admin Screen)
 
 == Changelog ==
+= 2.1.26 =
+* TBD
+* Added the ability to localize the plugin.
+
 = 2.1.25 =
 * September 2, 2011
 * Fixes an Internet Explorer JavaScript bug in the new map search.

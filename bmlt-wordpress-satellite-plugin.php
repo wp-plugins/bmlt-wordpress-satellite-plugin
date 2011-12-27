@@ -8,13 +8,30 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.25
+Version: 2.1.26
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '2.1.25' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '2.1.26' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+
+global $bmlt_localization;  ///< Use this to control the localization.
+
+if ( function_exists ( 'get_option' ) )
+    {
+    $bmlt_localization = get_option ( 'BMLT_lang_base' );
+    }
+
+if ( !isset ( $bmlt_localization ) || !$bmlt_localization )
+    {
+    $bmlt_localization = 'en';  ///< This is the "seed" value for the plugin localization. The first time that you run a localized plugin, change this. It will be reverted to 'en' in the future, but that won't matter anymore.
+    }
+
+if ( function_exists ( 'update_option' ) )
+    {
+    update_option ( 'BMLT_lang_base', $bmlt_localization );
+    }
 
 // Include the satellite driver class.
 require_once ( dirname ( __FILE__ ).'/BMLT-Satellite-Base-Class/bmlt-cms-satellite-plugin.php' );

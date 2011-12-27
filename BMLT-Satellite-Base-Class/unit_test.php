@@ -2,7 +2,7 @@
 /****************************************************************************************//**
 * \file unit_test.php																		*
 * \brief A unit test harness for the BMLTPlugin class.						                *
-* \version 1.1.7																			*
+* \version 1.2  																			*
     
     This file is part of the BMLT Common Satellite Base Class Project. The project GitHub
     page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class
@@ -31,6 +31,10 @@
 * This code is used for testing the class by allowing a direct call of the file. It will be	*
 * disabled in actual implementation, so calls to the file will return nothing.				*
 ********************************************************************************************/
+
+global $bmlt_localization;  ///< Use this to control the localization.
+
+$bmlt_localization = 'en';
 
 require_once ( 'bmlt-unit-test-satellite-plugin.php' );
 

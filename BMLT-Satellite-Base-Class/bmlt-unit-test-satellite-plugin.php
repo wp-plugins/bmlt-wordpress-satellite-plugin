@@ -3,7 +3,7 @@
 *   \file   bmlt-unit-test-satellite-plugin.php                                             *
 *                                                                                           *
 *   \brief  This is a standalone unit test plugin of a BMLT satellite client.               *
-*   \version 1.1.7                                                                          *
+*   \version 1.2                                                                            *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -27,6 +27,10 @@
 ********************************************************************************************/
 
 define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+
+global $bmlt_localization;  ///< Use this to control the localization.
+
+$bmlt_localization = 'en';  ///< This is the code for the appropriate localization.
 
 // Include the satellite driver class.
 require_once ( dirname ( __FILE__ ).'/bmlt-cms-satellite-plugin.php' );
@@ -462,3 +466,4 @@ if ( !isset ( $BMLTPluginOp ) && class_exists ( "BMLTUTestPlugin" ) )
     {
     $BMLTPluginOp = new BMLTUTestPlugin();
     }
+?>
