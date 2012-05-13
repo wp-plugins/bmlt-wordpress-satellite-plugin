@@ -44,7 +44,7 @@ The styling, especially, has been affected. If you have customized your installa
 == Changelog ==
 = 2.1.29 =
 * May 13, 2012
-* Added some tests to try to prevent the multiple empty settings that can be created by attempted hacks.
+* Fixed an old bug, where empty settings would be accidentally created.
 
 = 2.1.28 =
 * April 26, 2012
