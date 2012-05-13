@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.27
+Version: 2.1.29
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '2.1.27' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '2.1.29' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -211,9 +211,14 @@ class BMLTWPPlugin extends BMLTPlugin
                                         $in_option_value  ///< the values to be set (associative array)
                                         )
         {
-        if ( function_exists ( 'update_option' ) )
+        // Added a test, to prevent the creation of multiple empty settings by low-rank users trying SQL injections.
+        if ( function_exists ( 'update_option' ) && current_user_can ( 'administrator' ) )
             {
             $ret = update_option ( $in_option_key, $in_option_value );
+            }
+        elseif ( !current_user_can ( 'administrator' ) ) 
+            {
+            echo "<!-- BMLTPlugin ERROR (cms_set_option)! Non-admin user attempting to set options! -->";
             }
         else
             {
@@ -227,9 +232,13 @@ class BMLTWPPlugin extends BMLTPlugin
     protected function cms_delete_option ( $in_option_key   ///< The name of the option
                                         )
         {
-        if ( function_exists ( 'delete_option' ) )
+        if ( function_exists ( 'delete_option' ) && current_user_can ( 'administrator' ) )
             {
             $ret = delete_option ( $in_option_key );
+            }
+        elseif ( !current_user_can ( 'administrator' ) ) 
+            {
+            echo "<!-- BMLTPlugin ERROR (cms_set_option)! Non-admin user attempting to delete options! -->";
             }
         else
             {
@@ -344,9 +353,13 @@ class BMLTWPPlugin extends BMLTPlugin
     ****************************************************************************************/
     function option_menu ( )
         {
-        if ( function_exists ( 'add_options_page' ) && (self::get_plugin_object() instanceof BMLTPlugin) )
+        if ( function_exists ( 'add_options_page' ) && (self::get_plugin_object() instanceof BMLTPlugin) && current_user_can ( 'administrator' ) )
             {
             add_options_page ( self::$local_options_title, self::$local_menu_string, 9, basename ( __FILE__ ), array ( self::get_plugin_object(), 'admin_page' ) );
+            }
+        elseif ( !current_user_can ( 'administrator' ) )
+            {
+            echo "<!-- BMLTPlugin ERROR (option_menu)! Non-admin attempting to access the options! -->";
             }
         elseif ( !function_exists ( 'add_options_page' ) )
             {
