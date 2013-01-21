@@ -8,13 +8,13 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 2.1.29
+Version: 3.0
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
 define ( 'BMLT_CURRENT_VERSION', '2.1.29' );    // This needs to be kept in synch with the version above.
 
-// define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
+define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
 global $bmlt_localization;  ///< Use this to control the localization.
 
@@ -427,18 +427,18 @@ class BMLTWPPlugin extends BMLTPlugin
             $head_content .= 'style_stripper.php?filename=';
             }
         
-        $head_content .= 'styles.css" />';
+        $head_content .= 'nouveau_map_styles.css" />';
 
         if ( $root_server_root )
             {
-            $root_server = $root_server_root."/client_interface/xhtml/index.php";
+//             $root_server = $root_server_root."/client_interface/xhtml/index.php";
+//             
+//             if ( $load_server_header )
+//                 {
+//                 $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
+//                 }
             
-            if ( $load_head )
-                {
-                $head_content .= bmlt_satellite_controller::call_curl ( "$root_server?switcher=GetHeaderXHTML".$this->my_params );
-                }
-            
-            $additional_css = '.bmlt_container * {margin:0;padding:0 }';
+            $additional_css = '.bmlt_container * {margin:0;padding:0;text-align:center }';
 
             if ( $options['push_down_more_details'] )
                 {

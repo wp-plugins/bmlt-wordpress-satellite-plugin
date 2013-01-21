@@ -2,7 +2,7 @@
 Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
-Tested up to: 3.3.1
+Tested up to: 3.5
 Stable tag: 2.1.29
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
@@ -22,26 +22,12 @@ The styling, especially, has been affected. If you have customized your installa
 
 == Screenshots ==
 
-1. Basic Map Search Screen
-2. Advanced Search Screen (Text Entry)
-3. Results Displayed As A List
-4. Results Displayed As A Map
-5. Info Window In Map Results
-6. Detailed Results For One Meeting
-7. Administration Screen
-8. Theme Selection Popup (GNYR is A Custom Theme)
-9. Settings Selection Popup
-10. Popup of Simple "Preset" Searches
-11. Preset Search In Progress
-12. Preset Search Results
-13. Display of Format Codes
-14. Mobile Smartphone Screen
-15. Mobile Smartphone Map Results
-16. Mobile Results for Basic (non-smartphone) Device
-17. The Language Selection Popup (Admin Screen)
-18. The Distance Units Popup (Admin Screen)
-
 == Changelog ==
+= 3.0 =
+* TBD
+* Implemented completely new default shortcode.
+* NOTE: DON'T UPGRADE UNTIL YOU ARE READY! This is a MAJOR change in styling and behavior.
+
 = 2.1.29 =
 * May 13, 2012
 * Fixed an old bug, where empty settings would be accidentally created.
