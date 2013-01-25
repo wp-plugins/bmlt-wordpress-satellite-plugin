@@ -2,7 +2,7 @@
 Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
-Tested up to: 3.5
+Tested up to: 3.5.1
 Stable tag: 2.1.29
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
@@ -21,6 +21,23 @@ The styling, especially, has been affected. If you have customized your installa
 <a href="http://magshare.org/blog/bmlt-administration/">Go to this Web page to get very detailed instructions on installing and configuring the plugin.</a>
 
 == Screenshots ==
+
+1. Basic Text Entry
+2. Text Entry With Extra Requirements
+3. Basic "One Click" Map
+4. Map With Extra Requirements
+5. Search Results
+6. Single Meeting Marker Selected
+7. Multiple Meeting Marker Selected.
+8. Single Meeting Details
+9. Quick Map Search.
+10. Quick Map Search Results.
+11. Special Preselected Search Capability (Only Available in WordPress).
+12. Special Preselected Search Results.
+13. Administration Screen, Showing Multiple Settings.
+14. Administration screen Map.
+15. Administration, Showing Multiple Themes.
+16. Administration Screen, Showing Choice of Initial Search Screens.
 
 == Changelog ==
 = 3.0 =
