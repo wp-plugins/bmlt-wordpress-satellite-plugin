@@ -43,7 +43,7 @@ Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3
 
 == Changelog ==
 = 3.0 =
-* TBD
+* January 26, 2013
 * Implemented completely new default shortcode.
 * NOTE: DON'T UPGRADE UNTIL YOU ARE READY! This is a MAJOR change in styling and behavior.
 
