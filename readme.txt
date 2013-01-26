@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
 Tested up to: 3.5.1
-Stable tag: 2.1.29
+Stable tag: 3.0
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -13,12 +13,14 @@ The <a href="http://magshare.org/bmlt">Basic Meeting List Toolbox (BMLT)</a> is 
 The "root server" is a standalone Web site, but "satellite servers" are set up to point to the "root." This is a "satellite," set up as a WordPress plugin.
 It is very easy to install and use. It has an administration panel that lets you choose a map center, designate the root, set up the map zoom, and whether or not older browsers are supported.
 
-<strong>CAUTION:</strong> Be extremely cautious in upgrading to the 2.0 version, as it represents a MAJOR departure from the 1.X versions!
+<strong>CAUTION:</strong> Be extremely cautious in upgrading to the 3.0 version, as it represents a MAJOR departure from the 2.X versions!
 The styling, especially, has been affected. If you have customized your installation, you'll probably need to redo it. We recommend that you create a custom "theme," by modifying one of the supplied themes.
+
+Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3 or greater.
 
 == Installation ==
 
-<a href="http://magshare.org/blog/bmlt-administration/">Go to this Web page to get very detailed instructions on installing and configuring the plugin.</a>
+<a href="http://bmlt.magshare.net/wordpress/">Go to this Web page to get very detailed instructions on installing and configuring the plugin.</a>
 
 == Screenshots ==
 
