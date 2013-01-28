@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 3.0
+Version: 3.0.1
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '3.0' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '3.0.1' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -54,6 +54,7 @@ class BMLTWPPlugin extends BMLTPlugin
     var $plugin_update_message_2 = '= Latest Version =';
     var $plugin_update_message_3 = 'Release Date:';
     var $plugin_settings_name = 'Settings';
+    var $plugin_is_main = true;
 
     /************************************************************************************//**
     *   \brief Constructor.                                                                 *
@@ -171,6 +172,7 @@ class BMLTWPPlugin extends BMLTPlugin
         
         if ( function_exists ( 'add_action' ) )
             {
+            add_action ( 'pre_get_posts', array ( self::get_plugin_object(), 'stop_filter_if_not_main' ) );
             add_action ( "in_plugin_update_message-".$this->plugin_file_name, array ( self::get_plugin_object(), 'in_plugin_update_message' ) );
             add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_ajax_handler' ) );
             add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
@@ -328,7 +330,15 @@ class BMLTWPPlugin extends BMLTPlugin
     /************************************************************************************//**
     *                               THE WORDPRESS CALLBACKS                                 *
     ****************************************************************************************/
-        
+    
+    /************************************************************************************//**
+    *   \brief Sets the flag if this is a singular post or page. Otherwise, we don't show.  *
+    ****************************************************************************************/
+    function stop_filter_if_not_main ()
+        {
+        $this->plugin_is_main = is_singular();
+        }
+    
     /************************************************************************************//**
     *   \brief Presents the admin page.                                                     *
     ****************************************************************************************/
@@ -522,12 +532,24 @@ class BMLTWPPlugin extends BMLTPlugin
     function content_filter ( $in_the_content   ///< The content in need of filtering.
                             )
         {
-        // Simple searches can be mixed in with other content.
-        $in_the_content = parent::content_filter ( $in_the_content );
+        if ( $this->plugin_is_main )
+            {
+            // Simple searches can be mixed in with other content.
+            $in_the_content = parent::content_filter ( $in_the_content );
 
-        $count = 0;
+            $count = 0;
 
-        $in_the_content = $this->display_popup_search ( $in_the_content, $this->cms_get_post_meta ( get_the_ID(), 'bmlt_simple_searches' ), $count );
+            $in_the_content = $this->display_popup_search ( $in_the_content, $this->cms_get_post_meta ( get_the_ID(), 'bmlt_simple_searches' ), $count );
+            }
+        else    // If we are not in a page in the main display, we remove the shortcodes.
+            {
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'bmlt', '' );
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'bmlt_map', '' );
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'bmlt_mobile', '' );
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'bmlt_simple', '' );
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'simple_search_list', '' );
+            $in_the_content = self::replace_shortcode ( $in_the_content, 'bmlt_changes', '' );
+            }
         
         return $in_the_content;
         }
