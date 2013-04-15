@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 3.0.1                                                                          *
+*   \version 3.0.3                                                                          *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -35,7 +35,7 @@ global $bmlt_localization;  ///< Use this to control the localization.
 
 $tmp_local = 'en';  ///< We will always fall back to English. It is possible that the plugin may not be localized to the desired language.
 
-if ( isset ( $bmlt_localization ) && $bmlt_localization && file_exists ( dirname ( __FILE__ )."lang/lang_".$bmlt_localization.".php" ) )
+if ( isset ( $bmlt_localization ) && $bmlt_localization && file_exists ( dirname ( __FILE__ )."/lang/lang_".$bmlt_localization.".php" ) )
     {
     $tmp_local = $bmlt_localization;
     }
@@ -210,6 +210,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
     static  $default_distance_units = 'mi';                                 ///< The default distance units are miles.
     static  $default_grace_period = 15;                                     ///< The default grace period for the mobile search (in minutes).
     static  $default_time_offset = 0;                                       ///< The default time offset from the main server (in hours).
+    static  $default_duration = '1:30';                                     ///< The default duration of meetings.
 
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
@@ -484,6 +485,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         'theme' => self::$default_theme,
                         'distance_units' => self::$default_distance_units,
                         'grace_period' => self::$default_grace_period,
+                        'default_duration' => self::$default_duration,
                         'time_offset' => self::$default_time_offset
                         );
         }
@@ -1193,22 +1195,51 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         $ret .= '<div class="BMLTPlugin_option_sheet_checkbox_div"><input class="BMLTPlugin_option_sheet_line_location_services_checkbox" onchange="BMLTPlugin_DirtifyOptionSheet()" id="'.htmlspecialchars ( $id ).'" type="checkbox"'.($options['bmlt_location_services'] == 1 ? ' checked="checked"' : '' ).'"></div>';
                         $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_selectLocation_checkbox_text ).'</label>';
                     $ret .= '</div>';
-//                     $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
-//                         $id = 'BMLTPlugin_option_sheet_grace_period_'.$in_options_index;
-//                         $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_grace_period_label ).'</label>';
-//                         $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
-//                             for ( $minute = 0; $minute < 60; $minute += 5 )
-//                                 {
-//                                 $ret .= '<option value="'.$minute.'"';
-//                                 if ( $minute == $options['grace_period'] )
-//                                     {
-//                                     $ret .= ' selected="selected"';
-//                                     }
-//                                 $ret .= '>'.$minute.'</option>';
-//                                 }
-//                         $ret .= '</select>';
-//                         $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_grace_period_disclaimer ).'</div>';
-//                     $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_grace_period_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_grace_period_label ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            for ( $minute = 0; $minute < 60; $minute += 5 )
+                                {
+                                $ret .= '<option value="'.$minute.'"';
+                                if ( $minute == $options['grace_period'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.$minute.'</option>';
+                                }
+                        $ret .= '</select>';
+                        $ret .= '<div class="BMLTPlugin_option_sheet_text_div">'.$this->process_text ( self::$local_options_grace_period_disclaimer ).'</div>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_duration';
+                        $ret .= '<label for="'.htmlspecialchars ( $id.'_hour_'.$in_options_index ).'">'.$this->process_text ( self::$local_options_mobile_default_duration_label ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id.'_hour_'.$in_options_index ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            $def = explode ( ':', $options['default_duration'] );
+                            $def[0] = intval ( $def[0] );
+                            $def[1] = intval ( $def[1] );
+                            for ( $hour = 0; $hour < 3; $hour++ )
+                                {
+                                $ret .= '<option value="'.$hour.'"';
+                                if ( intval ( $hour ) == $def[0] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.$hour.'</option>';
+                                }
+                        $ret .= '</select>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id.'_minute_'.$in_options_index ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            for ( $minute = 0; $minute < 60; $minute += 5 )
+                                {
+                                $ret .= '<option value="'.$minute.'"';
+                                if ( intval ( $minute ) == $def[1] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                                $ret .= '>'.$minute.'</option>';
+                                }
+                        $ret .= '</select>';
+                    $ret .= '</div>';
 //                     $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
 //                         $id = 'BMLTPlugin_option_sheet_time_offset_'.$in_options_index;
 //                         $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_time_offset_label ).'</label>';
@@ -1352,6 +1383,11 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i] ) )
                             {
                             $options['distance_units'] = $this->my_http_vars['BMLTPlugin_option_sheet_distance_units_'.$i];
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_hour_'.$i] ) && isset ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_minute_'.$i] ) )
+                            {
+                            $options['default_duration'] = sprintf ( '%d:%02d', intval ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_hour_'.$i] ), intval ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_minute_'.$i] ) );
                             }
                         
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_grace_period_'.$i] ) )
@@ -1815,6 +1851,8 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                 $the_new_content .= "var g_Nouveau_advanced_map_radius_value_auto ='".$this->process_text ( self::$local_nouveau_advanced_map_radius_value_auto )."';";
                 $the_new_content .= "var g_Nouveau_advanced_map_radius_value_array = [ ".self::$local_nouveau_advanced_map_radius_value_array." ];";
                 $the_new_content .= "var g_Nouveau_meeting_details_link_title = '".$this->process_text ( self::$local_nouveau_meeting_details_link_title )."';";
+                $the_new_content .= "var g_Nouveau_meeting_details_map_link_uri_format = '".htmlspecialchars ( self::$local_nouveau_meeting_details_map_link_uri_format )."';";
+                $the_new_content .= "var g_Nouveau_meeting_details_map_link_text = '".$this->process_text ( self::$local_nouveau_meeting_details_map_link_text )."';";
                 $the_new_content .= "var g_Nouveau_array_keys = {";
                     $first = true;
                     foreach ( self::$local_nouveau_prompt_array as $key => $value )
@@ -1837,10 +1875,15 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                 $the_new_content .= "var g_Nouveau_default_geo_width = -10;";
                 $the_new_content .= "var g_Nouveau_default_details_map_zoom = ".self::$default_details_map_zoom.';';
                 $the_new_content .= "var g_Nouveau_default_marker_aggregation_threshold_in_pixels = 8;";
-                $the_new_content .= "var g_Nouveau_default_duration = '".self::$local_nouveau_default_duration."';";
+                $the_new_content .= "var g_Nouveau_default_duration = '".$options['default_duration']."';";
 
                 $the_new_content .= "var g_Nouveau_single_formats_label = '".$this->process_text ( self::$local_nouveau_single_formats_label )."';";
                 $the_new_content .= "var g_Nouveau_single_service_body_label = '".$this->process_text ( self::$local_nouveau_single_service_body_label )."';";
+                
+                if ( isset ( $this->m_is_logged_in_user ) && $this->m_is_logged_in_user )
+                    {
+                    $the_new_content .= "var g_Nouveau_user_logged_in = 'true';";
+                    }
             
                 $the_new_content .= '</script>';
                 $first = false;

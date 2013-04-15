@@ -9,7 +9,7 @@
 *   little is done before execution time. A great deal of care has been taken to allow      *
 *   robust, complete CSS presentation management.                                           *
 *                                                                                           *
-*   \version 3.0                                                                            *
+*   \version 3.0.2                                                                          *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -189,6 +189,7 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
     var m_details_comments_div = null;          ///< The div that will show the meeting comments.
     var m_details_formats_div = null;           ///< The div that will list the meeting formats.
     var m_details_formats_contents_div = null;  ///< The div that will list the meeting formats.
+    var m_details_observer_only_div = null;     ///< The div that will list the items only visible to logged-in Observers.
     
     var m_search_results = null;                ///< If there are any search results, they are kept here (JSON object).
     var m_selected_search_results = null;       ///< This contains the number of meetings selected in the list.
@@ -2599,6 +2600,11 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
     ****************************************************************************************/
     this.closeSingle = function()
         {
+        if ( this.m_details_observer_only_div )
+            {
+            this.m_details_observer_only_div.innerHTML = '';
+            };
+        
         this.hideDetails();
         if ( this.m_single_meeting_id )
             {
@@ -3145,7 +3151,7 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
         
             var loc_text = this.constructAddressString ( in_meeting_object );
 
-            this.m_details_meeting_location_div.appendChild ( document.createTextNode( loc_text ) );
+            this.m_details_meeting_location_div.innerHTML = loc_text;
             
             if ( !this.m_details_map_container_div )
                 {
@@ -3159,6 +3165,61 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
                 this.m_details_map_div = document.createElement ( 'div' );
                 this.m_details_map_div.className = 'bmlt_nouveau_details_map_div';
                 this.m_details_map_container_div.appendChild ( this.m_details_map_div );
+                };
+            
+            // If the user is logged in, we will display all fields.
+            if ( g_Nouveau_user_logged_in && !this.m_details_observer_only_div || (this.m_details_observer_only_div.innerHTML == '') )
+                {
+                var has_hidden_fields = false;
+                
+                for ( var key in in_meeting_object )
+                    {
+                    if ( in_meeting_object.hasOwnProperty ( key ) )
+                        {
+                        var meeting_property = in_meeting_object[key].split ( '#@-@#' );
+                        
+                        // We only display the hidden ones.
+                        if ( meeting_property.length == 3 )
+                            {
+                            has_hidden_fields = true;
+                            if ( !this.m_details_observer_only_div )
+                                {
+                                this.m_details_observer_only_div = document.createElement ( 'div' );
+                                this.m_single_meeting_display_div.appendChild ( this.m_details_observer_only_div );
+                                };
+                            
+                            var prompt = meeting_property[1];
+                            var value = meeting_property[2];
+                            var line_container = document.createElement ( 'div' );
+                            line_container.className = 'bmlt_nouveau_details_hidden_element_line_div';
+                            var hidden_prompt = document.createElement ( 'div' );
+                            hidden_prompt.className = 'bmlt_nouveau_details_hidden_element_prompt_div';
+                            hidden_prompt.appendChild ( document.createTextNode ( prompt ) );
+                            var hidden_value = document.createElement ( 'div' );
+                            hidden_value.className = 'bmlt_nouveau_details_hidden_element_value_div';
+                            hidden_value.appendChild ( document.createTextNode ( value ) );
+                            
+                            line_container.appendChild ( hidden_prompt );
+                            line_container.appendChild ( hidden_value );
+                            var breaker_breaker = document.createElement ( 'div' );
+                            breaker_breaker.className = 'clear_both';
+                            line_container.appendChild ( breaker_breaker );
+                            this.m_details_observer_only_div.appendChild ( line_container );
+                            };
+                        };
+                    };
+                
+                if ( this.m_details_observer_only_div )
+                    {
+                    if ( has_hidden_fields )
+                        {
+                        this.m_details_observer_only_div.className = 'bmlt_nouveau_details_hidden_element_outer_container_div';
+                        }
+                    else
+                        {
+                        this.m_details_observer_only_div.className = 'item_hidden';
+                        };
+                    };
                 };
                 
             if ( !this.m_details_service_body_div )
@@ -3558,6 +3619,14 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
                 {
                 ret = g_Nouveau_location_sprintf_format_wtf;
                 };
+            };
+        
+        var longitude = in_meeting_object['longitude'];
+        var latitude = in_meeting_object['latitude'];
+        
+        if ( (ret != g_Nouveau_location_sprintf_format_wtf) && latitude && longitude )
+            {
+            ret += ' (<a class="bmlt_satellite_meeting_map_link" href="' + sprintf ( g_Nouveau_meeting_details_map_link_uri_format, parseFloat ( latitude ), parseFloat ( longitude ) ) + '">' + g_Nouveau_meeting_details_map_link_text + '</a>)';
             };
         
         return ret;
