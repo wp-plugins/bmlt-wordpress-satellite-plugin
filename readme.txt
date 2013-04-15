@@ -42,6 +42,9 @@ Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3
 16. Administration Screen, Showing Choice of Initial Search Screens.
 
 == Changelog ==
+= 3.0.3
+* Adds Swedish baseline localization (Still need to add localization detection).
+
 = 3.0.1 =
 * January 28, 2013
 * Fixed an issue that pooched some uses, and also turned off debug mode (oops).
