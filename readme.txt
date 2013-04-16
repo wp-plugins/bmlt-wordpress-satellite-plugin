@@ -42,10 +42,10 @@ Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3
 16. Administration Screen, Showing Choice of Initial Search Screens.
 
 == Changelog ==
-= 3.0.4
+= 3.0.4 =
 * Fixed a bug caused by work on the root server. This bug prevents the details window from appearing on the standard shortcode.
 
-= 3.0.3
+= 3.0.3 =
 * Adds Swedish baseline localization (Still need to add localization detection).
 
 = 3.0.1 =
