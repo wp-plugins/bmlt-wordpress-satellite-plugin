@@ -29,7 +29,7 @@ if ( !isset ( $bmlt_localization ) || !$bmlt_localization )
     
     if ( $language )
         {
-        $bmlt_localization = substr ( $language->getTag(), 0, 2 );
+        $bmlt_localization = substr ( $language, 0, 2 );
         }
     
     if ( !isset ( $bmlt_localization ) || !$bmlt_localization )
