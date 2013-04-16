@@ -42,10 +42,15 @@ Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3
 16. Administration Screen, Showing Choice of Initial Search Screens.
 
 == Changelog ==
-= 3.0.4
+= 3.0.5 =
+* April , 2013
+* There was a bug in the Swedish translation. Also, the language is now auto-detected from the blog.
+
+= 3.0.4 =
+* April 15, 2013
 * Fixed a bug caused by work on the root server. This bug prevents the details window from appearing on the standard shortcode.
 
-= 3.0.3
+= 3.0.3 =
 * Adds Swedish baseline localization (Still need to add localization detection).
 
 = 3.0.1 =

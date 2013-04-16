@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 3.0.4
+Version: 3.0.5
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '3.0.4' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '3.0.5' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -25,7 +25,17 @@ if ( function_exists ( 'get_option' ) )
 
 if ( !isset ( $bmlt_localization ) || !$bmlt_localization )
     {
-    $bmlt_localization = 'en';  ///< This is the "seed" value for the plugin localization. The first time that you run a localized plugin, change this. It will be reverted to 'en' in the future, but that won't matter anymore.
+    $language = get_locale();
+    
+    if ( $language )
+        {
+        $bmlt_localization = substr ( $language->getTag(), 0, 2 );
+        }
+    
+    if ( !isset ( $bmlt_localization ) || !$bmlt_localization )
+        {
+        $bmlt_localization = 'en';  ///< Last-ditch default value.
+        }
     }
 
 if ( function_exists ( 'update_option' ) )
