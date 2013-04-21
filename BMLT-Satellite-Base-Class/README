@@ -25,6 +25,10 @@ INSTALLATION
 
 CHANGELIST
 ----------
+= 3.0.7 =
+* April 21, 2013
+* Fixed localization issues with string searches.
+
 = 3.0.5 =
 * April 16, 2013
 * Fixed a bug in the Swedish translation.
