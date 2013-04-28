@@ -3,7 +3,7 @@
 *   \file   bmlt-cms-satellite-plugin.php                                                   *
 *                                                                                           *
 *   \brief  This is a generic CMS plugin class for a BMLT satellite client.                 *
-*   \version 3.0.5                                                                          *
+*   \version 3.0.8                                                                          *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -211,6 +211,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
     static  $default_grace_period = 15;                                     ///< The default grace period for the mobile search (in minutes).
     static  $default_time_offset = 0;                                       ///< The default time offset from the main server (in hours).
     static  $default_duration = '1:30';                                     ///< The default duration of meetings.
+    static  $default_military_time = false;                                 ///< If this is true, then time displays will be in military time.
 
     /************************************************************************************//**
     *                               STATIC DATA MEMBERS (MISC)                              *
@@ -486,7 +487,8 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         'distance_units' => self::$default_distance_units,
                         'grace_period' => self::$default_grace_period,
                         'default_duration' => self::$default_duration,
-                        'time_offset' => self::$default_time_offset
+                        'time_offset' => self::$default_time_offset,
+                        'military_time' => self::$default_military_time
                         );
         }
     
@@ -1196,6 +1198,24 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_selectLocation_checkbox_text ).'</label>';
                     $ret .= '</div>';
                     $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
+                        $id = 'BMLTPlugin_option_sheet_time_format_'.$in_options_index;
+                        $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_time_format_prompt ).'</label>';
+                        $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
+                            $ret .= '<option';
+                                if ( !$options['military_time'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                            $ret .= '>'.$this->process_text ( self::$local_options_time_format_ampm ).'</option>';
+                            $ret .= '<option';
+                                if ( $options['military_time'] )
+                                    {
+                                    $ret .= ' selected="selected"';
+                                    }
+                            $ret .= '>'.$this->process_text ( self::$local_options_time_format_military ).'</option>';
+                        $ret .= '</select>';
+                    $ret .= '</div>';
+                    $ret .= '<div class="BMLTPlugin_option_sheet_line_div">';
                         $id = 'BMLTPlugin_option_sheet_grace_period_'.$in_options_index;
                         $ret .= '<label for="'.htmlspecialchars ( $id ).'">'.$this->process_text ( self::$local_options_mobile_grace_period_label ).'</label>';
                         $ret .= '<select id="'.htmlspecialchars ( $id ).'" onchange="BMLTPlugin_DirtifyOptionSheet()">';
@@ -1388,6 +1408,11 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_hour_'.$i] ) && isset ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_minute_'.$i] ) )
                             {
                             $options['default_duration'] = sprintf ( '%d:%02d', intval ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_hour_'.$i] ), intval ( $this->my_http_vars['BMLTPlugin_option_sheet_duration_minute_'.$i] ) );
+                            }
+                        
+                        if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_time_format_'.$i] ) )
+                            {
+                            $options['military_time'] = (intval ( $this->my_http_vars['BMLTPlugin_option_sheet_time_format_'.$i] ) != 0);
                             }
                         
                         if ( isset ( $this->my_http_vars['BMLTPlugin_option_sheet_grace_period_'.$i] ) )
@@ -1866,7 +1891,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                         $the_new_content .= '"'.$this->process_text ( $value ).'"';
                         }
                 $the_new_content .= "};";
-            
+                $the_new_content .= 'var g_Nouveau_military_time = '.((isset ( $options['military_time'] ) && $options['military_time']) ? 'true' : 'false' ).';';
                 $the_new_content .= 'var g_Nouveau_array_header_text = new Array ( "'.join ( '","', self::$local_nouveau_table_header_array ).'");';
                 $the_new_content .= 'var g_Nouveau_weekday_long_array = new Array ( "'.join ( '","', self::$local_nouveau_weekday_long_array ).'");';
                 $the_new_content .= 'var g_Nouveau_weekday_short_array = new Array ( "'.join ( '","', self::$local_nouveau_weekday_short_array ).'");';
@@ -1983,7 +2008,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
                 $the_new_content .= '</div>';
                 $the_new_content .= '<div class="bmlt_search_map_div" id="'.$uid.'_bmlt_search_map_div"></div>';
                 $the_new_content .= '<div class="bmlt_search_map_new_search_div" id="'.$uid.'_bmlt_search_map_new_search_div" style="display:none"><a href="javascript:c_ms_'.$uid.'.newSearchExt();">'.$this->process_text ( self::$local_new_map_js_new_search ).'</a></div>';
-                $the_new_content .= '<script type="text/javascript">g_no_meetings_found="'.htmlspecialchars ( self::$local_cant_find_meetings_display ).'";document.getElementById(\''.$uid.'\').style.display=\'block\';c_ms_'.$uid.' = new MapSearch ( \''.htmlspecialchars ( $uid ).'\',\''.htmlspecialchars ( $options_id ).'\', document.getElementById(\''.$uid.'_bmlt_search_map_div\'), {\'latitude\':'.$options['map_center_latitude'].',\'longitude\':'.$options['map_center_longitude'].',\'zoom\':'.$options['map_zoom'].'} )</script>';
+                $the_new_content .= '<script type="text/javascript">var g_military_time = '.($options['military_time'] ? 'true' : 'false' ).';g_no_meetings_found="'.htmlspecialchars ( self::$local_cant_find_meetings_display ).'";document.getElementById(\''.$uid.'\').style.display=\'block\';c_ms_'.$uid.' = new MapSearch ( \''.htmlspecialchars ( $uid ).'\',\''.htmlspecialchars ( $options_id ).'\', document.getElementById(\''.$uid.'_bmlt_search_map_div\'), {\'latitude\':'.$options['map_center_latitude'].',\'longitude\':'.$options['map_center_longitude'].',\'zoom\':'.$options['map_zoom'].'} )</script>';
             $the_new_content .= '</div>';
             
             $in_content = self::replace_shortcode ( $in_content, 'bmlt_map', $the_new_content );
@@ -2474,6 +2499,7 @@ class BMLTPlugin extends BMLT_Localized_BaseClass
         list ( $h, $m ) = explode ( ':', date ( "G:i", time() + ($options['time_offset'] * 60 * 60) - ($options['grace_time'] * 60) ) );
         $ret .= 'var c_g_hour = '.intval ( $h ).';';
         $ret .= 'var c_g_min = '.intval ( $m ).';';
+        $ret .= 'var c_g_military_time = '.($options['military_time'] ? 'true' : 'false' ).';';
         $ret .= 'var c_g_distance_prompt = \''.$this->process_text ( self::$local_mobile_distance ).'\';';
         $ret .= 'var c_g_distance_units_are_km = '.((strtolower ($options['distance_units']) == 'km' ) ? 'true' : 'false').';';
         $ret .= 'var c_g_distance_units = \''.((strtolower ($options['distance_units']) == 'km' ) ? $this->process_text ( self::$local_mobile_kilometers ) : $this->process_text ( self::$local_mobile_miles ) ).'\';';

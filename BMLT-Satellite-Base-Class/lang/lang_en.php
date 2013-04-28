@@ -85,6 +85,10 @@ class BMLT_Localized_BaseClass
     static  $local_options_kilometers = 'Kilometers';                       ///< The string for kilometers.
     static  $local_options_selectLocation_checkbox_text = 'Only Display Location Services for Mobile Devices';  ///< The label for the location services checkbox.
     
+    static  $local_options_time_format_prompt = 'Time Format:';             ///< The label for the time format selection popup.
+    static  $local_options_time_format_ampm = 'Ante Meridian (HH:MM AM/PM)';    ///< Ante Meridian Format Option
+    static  $local_options_time_format_military = 'Military (HH:MM)';           ///< Military Time Format Option
+
     static  $local_no_root_server = 'You need to provide a root server URI in order for this to work.';    ///< Displayed if there was no root server provided.
 
     /// These are for the actual search displays

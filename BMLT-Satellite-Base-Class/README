@@ -18,16 +18,25 @@ It requires PHP 5.0 or above.
 
 This class uses the BMLT Satellite "Driver" Class, which is available on GitHub, here:
 
-    https://github.com/MAGSHARE/BMLT-Satellite-Driver
+    https://bitbucket.org/bmlt/bmlt-satellite-driver.git
 
 INSTALLATION
 ------------
 
 CHANGELIST
 ----------
+= 3.0.8 =
+* April 28, 2013
+* Added support for display of military time.
+
 = 3.0.7 =
 * April 21, 2013
-* Fixed localization issues with string searches.
+* The string search was being improperly handled. This has been fixed.
+* Moved the project to Bitbucket.
+
+= 3.0.6 =
+* April 18, 2013
+* Improved the curl call functionality.
 
 = 3.0.5 =
 * April 16, 2013

@@ -9,7 +9,7 @@
 *   little is done before execution time. A great deal of care has been taken to allow      *
 *   robust, complete CSS presentation management.                                           *
 *                                                                                           *
-*   \version 3.0.7                                                                          *
+*   \version 3.0.8                                                                          *
 *                                                                                           *
 *   This file is part of the BMLT Common Satellite Base Class Project. The project GitHub   *
 *   page is available here: https://github.com/MAGSHARE/BMLT-Common-CMS-Plugin-Class        *
@@ -1721,7 +1721,15 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
             var hours = (time[0] > 12) ? time[0] - 12 : time[0];
             var minutes = time[1];
             var a = ((time[0] > 12) || ((time[0] == 12) && (time[1] > 0))) ? g_Nouveau_pm : g_Nouveau_am;
-            st = sprintf ( g_Nouveau_time_sprintf_format, hours, time[1], a );
+            
+            if ( g_Nouveau_military_time )
+                {
+                st = sprintf ( "%d:%02d", parseInt ( time[0], 10 ), parseInt ( time[1], 10 ) );
+                }
+            else
+                {
+                st = sprintf ( g_Nouveau_time_sprintf_format, hours, time[1], a );
+                };
             };
         
         text_element.appendChild ( document.createTextNode( st ) );
@@ -3663,7 +3671,15 @@ function NouveauMapSearch ( in_unique_id,           ///< The UID of the containe
             var hours = (time[0] > 12) ? time[0] - 12 : time[0];
             var minutes = time[1];
             var a = ((time[0] > 12) || ((time[0] == 12) && (time[1] > 0))) ? g_Nouveau_pm : g_Nouveau_am;
-            time_string = sprintf ( g_Nouveau_time_sprintf_format, hours, time[1], a );
+            
+            if ( g_Nouveau_military_time )
+                {
+                time_string = sprintf ( "%d:%02d", parseInt ( time[0], 10 ), parseInt ( time[1], 10 ) );
+                }
+            else
+                {
+                time_string = sprintf ( g_Nouveau_time_sprintf_format, hours, time[1], a );
+                };
             };
         
         var duration_array = (in_meeting_object['duration_time'].toString()).split(':');

@@ -183,6 +183,8 @@ function BMLTPlugin_SaveOptions()
                 }
             }
         
+        url += '&BMLTPlugin_option_sheet_time_format_'+option_index+'='+parseInt(document.getElementById ( 'BMLTPlugin_option_sheet_time_format_'+option_index ).selectedIndex).toString();
+
         url += '&BMLTPlugin_option_sheet_duration_hour_'+option_index+'='+parseInt(document.getElementById ( 'BMLTPlugin_option_sheet_duration_hour_'+option_index ).value).toString();
 
         url += '&BMLTPlugin_option_sheet_duration_minute_'+option_index+'='+parseInt(document.getElementById ( 'BMLTPlugin_option_sheet_duration_minute_'+option_index ).value).toString();
