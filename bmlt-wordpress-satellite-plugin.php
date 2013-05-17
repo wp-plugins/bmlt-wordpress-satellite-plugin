@@ -8,11 +8,11 @@
 Plugin Name: BMLT WordPress Satellite
 Plugin URI: http://magshare.org/bmlt
 Description: This is a WordPress plugin satellite of the Basic Meeting List Toolbox.
-Version: 3.0.11
+Version: 3.0.12
 Install: Drop this directory into the "wp-content/plugins/" directory and activate it.
 ********************************************************************************************/
 
-define ( 'BMLT_CURRENT_VERSION', '3.0.11' );    // This needs to be kept in synch with the version above.
+define ( 'BMLT_CURRENT_VERSION', '3.0.12' );    // This needs to be kept in synch with the version above.
 
 // define ( '_DEBUG_MODE_', 1 ); //Uncomment for easier JavaScript debugging.
 
@@ -423,12 +423,10 @@ class BMLTWPPlugin extends BMLTPlugin
             die ( );
             }
         
-        if ( !$options['gmaps_api_key'] || !$this->get_shortcode ( $page->post_content, 'bmlt' ) )   // No GMAP API key, no BMLT window. We also only load the head for the "classic" BMLT.
+        if ( !$this->get_shortcode ( $page->post_content, 'bmlt' ) )
             {
             $load_head = false;
             }
-        
-        $this->my_http_vars['gmap_key'] = $options['gmaps_api_key'];
         
         $this->my_http_vars['start_view'] = $options['bmlt_initial_view'];
         

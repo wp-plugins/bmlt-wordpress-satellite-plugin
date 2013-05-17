@@ -3,7 +3,7 @@ Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
 Tested up to: 3.5.1
-Stable tag: 3.0.11
+Stable tag: 3.0.12
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
 
@@ -16,7 +16,7 @@ It is very easy to install and use. It has an administration panel that lets you
 <strong>CAUTION:</strong> Be extremely cautious in upgrading to the 3.0 version, as it represents a MAJOR departure from the 2.X versions!
 The styling, especially, has been affected. If you have customized your installation, you'll probably need to redo it. We recommend that you create a custom "theme," by modifying one of the supplied themes.
 
-Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3 or greater.
+Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3 or greater. After May 19, 2013, it will require version 2.0 or greater (1.10.3 will no longer work, due to Google forcefully deprecating their maps API).
 
 == Installation ==
 
@@ -42,6 +42,10 @@ Additionally, Version 3.0 of the plugin requires a root server version of 1.10.3
 16. Administration Screen, Showing Choice of Initial Search Screens.
 
 == Changelog ==
+= 3.0.12 =
+* May 16, 2013
+* Cleaned up some code to reduce notes and warnings.
+
 = 3.0.11 =
 * May 13, 2013
 * Reduced the number of times that the marker redraw is called in the standard [[bmlt]] shortcode handler.
