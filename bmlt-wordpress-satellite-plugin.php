@@ -186,7 +186,7 @@ class BMLTWPPlugin extends BMLTPlugin
             add_action ( "in_plugin_update_message-".$this->plugin_file_name, array ( self::get_plugin_object(), 'in_plugin_update_message' ) );
             add_action ( 'admin_init', array ( self::get_plugin_object(), 'admin_ajax_handler' ) );
             add_action ( 'admin_menu', array ( self::get_plugin_object(), 'option_menu' ) );
-            add_action ( 'init', array ( self::get_plugin_object(), 'ajax_router' ) );
+            add_action ( 'init', array ( self::get_plugin_object(), 'filter_init' ) );
             }
         else
             {
@@ -653,6 +653,15 @@ class BMLTWPPlugin extends BMLTPlugin
             }
 
         return $links;
+        }
+
+    /************************************************************************************//**
+    *   \brief This is called before anything else.                                         *
+    ****************************************************************************************/
+    function filter_init ()
+        {
+        ob_start(); // This prevents themes and plugins from screwing us over.
+        $this->ajax_router();
         }
 };
 
