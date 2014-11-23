@@ -2,7 +2,7 @@
 Contributors: magblogapi
 Tags: na, meeting list, meeting finder, maps, recovery, addiction, webservant
 Requires at least: 2.6
-Tested up to: 3.9.1
+Tested up to: 4.0.1
 Stable tag: 3.0.25
 
 This is a "satellite" plugin for the Basic Meeting List Toolbox (BMLT).
